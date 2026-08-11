@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Training Notes Archive</title></head><body>
+<script>window.__trainingArchiveParts=[];</script>
+<script src="archive-assets/part01.js"></script>
+<script src="archive-assets/part02.js"></script>
+<script src="archive-assets/part03.js"></script>
+<script src="archive-assets/part04.js"></script>
+<script src="archive-assets/part05.js"></script>
+<script src="archive-assets/part06.js"></script>
+<script src="archive-assets/part07.js"></script>
+<script>
+(async()=>{
+  try{
+    const encoded=window.__trainingArchiveParts.join('');
+    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const source=await new Response(stream).text();
+    document.open();document.write(source);document.close();
+  }catch(error){
+    document.body.innerHTML='<main style="font-family:system-ui;padding:2rem"><h1>Training Notes Archive</h1><p>The archive could not be opened in this browser.</p></main>';
+    console.error(error);
+  }
+})();
+</script>
+</body></html>
