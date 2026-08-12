@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Interactive Document Review | Unified Title & Escrow</title>
+<style>body{margin:0;font-family:Arial,sans-serif;background:#f4f7fa;color:#172536}.loading{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}.loading strong{color:#092947;font-size:20px}</style>
+</head>
+<body>
+<div class="loading" id="loading"><div><strong>Loading Interactive Document Review…</strong><br><span>Closing Disclosure + HUD-1</span></div></div>
+<script>
+(async()=>{
+  const parts=Array.from({length:8},(_,i)=>`interactive-parts/part-${String(i+1).padStart(2,'0')}.txt`);
+  try{
+    let src=(await Promise.all(parts.map(p=>fetch(p,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(p);return r.text()})))).join('');
+
+    const cd={
+      'assets/cd-page-1.webp':'https://files.consumerfinance.gov/eregulations/ER31DE13.050.png',
+      'assets/cd-page-2.webp':'https://files.consumerfinance.gov/eregulations/ER31DE13.051.png',
+      'assets/cd-page-3.webp':'https://files.consumerfinance.gov/eregulations/ER31DE13.052.png',
+      'assets/cd-page-4.webp':'https://files.consumerfinance.gov/eregulations/ER31DE13.053.png',
+      'assets/cd-page-5.webp':'https://files.consumerfinance.gov/eregulations/ER31DE13.054.png'
+    };
+    const hud={
+      'assets/hud1-page-1.webp':'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/HUD-1_Settlement_Statement_current_2016.pdf/page1-1280px-HUD-1_Settlement_Statement_current_2016.pdf.jpg',
+      'assets/hud1-page-2.webp':'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/HUD-1_Settlement_Statement_current_2016.pdf/page2-1280px-HUD-1_Settlement_Statement_current_2016.pdf.jpg',
+      'assets/hud1-page-3.webp':'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/HUD-1_Settlement_Statement_current_2016.pdf/page3-1280px-HUD-1_Settlement_Statement_current_2016.pdf.jpg'
+    };
+    for(const [from,to] of Object.entries({...cd,...hud})) src=src.split(from).join(to);
+
+    src=src.replace('<div class="start-choice-card">','<div class="start-choice-card"><a href="./" style="display:inline-block;margin-bottom:14px;color:#002e5d;font-weight:700;text-decoration:none">← Back to Training Archive</a>');
+    document.open();document.write(src);document.close();
+  }catch(err){
+    document.getElementById('loading').innerHTML='<div><strong>Unable to load Interactive Document Review.</strong><br>Please refresh the page.</div>';
+    console.error(err);
+  }
+})();
+</script>
+</body>
+</html>

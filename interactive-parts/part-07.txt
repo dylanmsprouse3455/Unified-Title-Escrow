@@ -1,0 +1,68 @@
+'Ready',
+    title: 'Use the HUD-1 as a visual system map',
+    html: '<p class="tutorial-text">The purpose is the same as the Closing Disclosure tool: connect what you see on the settlement form with the place in Qualia that controls it, so you can find information quickly while learning or working a file.</p>'
+  }
+];
+
+let activeTutorialSteps = cdTutorialSteps;
+let tutorialIndex = 0;
+const tutorialBackdrop = document.getElementById('tutorialBackdrop');
+const tutorialKicker = document.getElementById('tutorialKicker');
+const tutorialTitle = document.getElementById('tutorialTitle');
+const tutorialBody = document.getElementById('tutorialBody');
+const tutorialProgress = document.getElementById('tutorialProgress');
+const tutorialBack = document.getElementById('tutorialBack');
+const tutorialNext = document.getElementById('tutorialNext');
+const tutorialSkip = document.getElementById('tutorialSkip');
+const tutorialClose = document.getElementById('tutorialClose');
+
+function renderTutorialStep(){
+  const step = activeTutorialSteps[tutorialIndex];
+  tutorialKicker.textContent = step.kicker;
+  tutorialTitle.textContent = step.title;
+  tutorialBody.innerHTML = step.html;
+  tutorialProgress.innerHTML = activeTutorialSteps.map((_,i)=>'<span class="tutorial-dot'+(i===tutorialIndex?' active':'')+'"></span>').join('');
+  tutorialBack.style.visibility = tutorialIndex === 0 ? 'hidden' : 'visible';
+  tutorialNext.textContent = tutorialIndex === activeTutorialSteps.length - 1 ? 'Start learning' : 'Next';
+}
+
+function closeTutorial(){
+  tutorialBackdrop.hidden = true;
+}
+
+function openTutorial(type='cd'){
+  tutorialIndex = 0;
+  activeTutorialSteps = type === 'hud' ? hudTutorialSteps : cdTutorialSteps;
+  tutorialBackdrop.hidden = false;
+  renderTutorialStep();
+}
+
+tutorialBack.addEventListener('click', ()=>{
+  if(tutorialIndex > 0){
+    tutorialIndex--;
+    renderTutorialStep();
+  }
+});
+
+tutorialNext.addEventListener('click', ()=>{
+  if(tutorialIndex < activeTutorialSteps.length - 1){
+    tutorialIndex++;
+    renderTutorialStep();
+  } else {
+    closeTutorial();
+  }
+});
+
+tutorialSkip.addEventListener('click', closeTutorial);
+tutorialClose.addEventListener('click', closeTutorial);
+tutorialBackdrop.addEventListener('click', (e)=>{
+  if(e.target === tutorialBackdrop) closeTutorial();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && !tutorialBackdrop.hidden) closeTutorial();
+});
+
+
+
+
+const hudPageMaps = {"1": {"heading": "Page 1 — Qualia paths", "items": [{"id": "hud-a", "title": "A — Settlement Statement (HUD-1)", "desc": "AUTOMATIC HUD LANGUAGE\n\nThis identifies the settlement statement type. It is not impacted by data entered into Qualia.", "rect": [18.5, 4.7, 49.5, 5.0]}, {"id": "hud-b", "title": "B — Type of Loan + File / Loan Numbers", "desc": "LOAN TYPE\nDisclosures > Loan Terms > Loan Type\n\nFILE NO.\nTop-left corner of the order or Basic Info\n\nLOAN NO.\nGeneral > Loan > Loan ID #\n\nMORTGAGE INSURANCE CASE NO.\nGeneral > Loan > Mortgage Ins. Case #", "rect": [5.8, 11.3, 88.5, 7.2]}, {"id": "hud-c", "title": "C — Settlement Cost Notice", "desc": "AUTOMATIC HUD LANGUAGE\n\nThis settlement-cost disclaimer is consistent across orders and is not changed by data entered into Qualia.", "rect": [5.8, 18.4, 88.5, 3.3]}, {"id": "hud-d", "title": "D — Borrower", "desc": "GO TO\nGeneral > Contacts > Buyers\n\nShows borrower name(s) and the address of the first buyer.\n\nNames with On Loan or On Title enabled can appear. Turn both toggles off for a buyer/spouse whose name should not appear on the HUD-1.", "rect": [5.8, 21.7, 37.3, 6.9]}, {"id": "hud-e", "title": "E — Seller", "desc": "GO TO\nGeneral > Contacts > Sellers\n\nShows seller name(s) and address. The same On Loan / On Title display rules described for borrower contacts apply to sellers.", "rect": [43.1, 21.7, 29.5, 6.9]}, {"id": "hud-f", "title": "F — Lender", "desc": "GO TO\nGeneral > Contacts > Lenders\n\nShows the lender contact name and address. If multiple lender contacts are on the order, only the first lender appears.", "rect": [72.6, 21.7, 21.7, 6.9]}, {"id": "hud-g", "title": "G — Property Location", "desc": "GO TO\nGeneral > Properties\n\nShows the property address. If multiple properties are being sold, multiple property addresses can appear here.", "rect": [5.8, 28.6, 37.3, 6.0]}, {"id": "hud-h", "title": "H — Settlement Agent + Place of Settlement", "desc": "SETTLEMENT AGENT\nBasic Info > Settlement Agency\n\nPLACE OF SETTLEMENT\nBasic Info > Place of Closing\n\nThe selected settlement agency and the Place of Closing address populate this section.", "rect": [43.1, 28.6, 29.5, 6.0]}, {"id": "hud-i", "title": "I — Settlement / Funding / Disbursement Dates", "desc": "GO TO\nBasic Info\n\nSettlement Date, Funding Date, and Disbursement Date pull from the corresponding date fields in the upper-right area of Basic Info.", "rect": [72.6, 28.6, 21.7, 6.0]}, {"id": "hud-j100", "title": "J — 100: Gross Amount Due from Borrower", "desc": "BORROWER SIDE — SECTION 100\n\n101 — Sale Price comes from Basic Info.\n103 — Total borrower-paid charges from HUD charge Sections 700–1400 populate here.\n\nGeneral > Taxes & Prorations items marked Seller Owes Buyer can populate Lines 106–112 as adjustments for items paid by seller in advance.\n\n120 — Qualia totals all Section 100 dollar values as Gross Amount Due from Borrower.", "rect": [5.8, 37.4, 43.0, 20.5]}, {"id": "hud-j200", "title": "J — 200: Amount Paid by / for Borrower", "desc": "BORROWER SIDE — SECTION 200\n\n201 — Earnest money deposit comes from Earnest & Commissions.\n202 — Loan amount populates here.\n\nGeneral > Taxes & Prorations items marked Seller Owes Buyer can populate Section 200 as adjustments for items unpaid by seller.\n\nAdditional line items can be manually added from Charges.\n\n220 — Qualia totals all Section 200 dollar values.", "rect": [5.8, 57.9, 43.0, 27.4]}, {"id": "hud-j300", "title": "J — 300: Cash at Settlement to / from Borrower", "desc": "CALCULATED BY QUALIA\n\nThe 300 section compares the Gross Amount Due from Borrower (Line 120) with the Total Paid by / for Borrower (Line 220).\n\nIf more is due from the borrower, the From box is checked and Accounting shows an expected receipt.\n\nIf more was paid by / for the borrower, the To Borrower box is checked and Qualia creates a borrower proceeds disbursement for the difference.", "rect": [5.8, 85.3, 43.0, 7.3]}, {"id": "hud-k400", "title": "K — 400: Gross Amount Due to Seller", "desc": "SELLER SIDE — SECTION 400\n\n401 — Sale Price comes from Basic Info.\n\nGeneral > Taxes & Prorations items marked Seller Owes Buyer are listed on Lines 406–412 as adjustments paid in advance.\n\n420 — Qualia totals all Section 400 values as Gross Amount Due to Seller.", "rect": [51.2, 37.4, 43.0, 20.5]}, {"id": "hud-k500", "title": "K — 500: Reductions in Amount Due to Seller", "desc": "SELLER SIDE — SECTION 500\n\n502 — Total seller-paid charges from HUD charge Sections 700–1300 populate here.\n\nGeneral > Taxes & Prorations items marked Seller Owes Buyer can populate Lines 510–519 as adjustments for items unpaid by seller.\n\n520 — Qualia totals

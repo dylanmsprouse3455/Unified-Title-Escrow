@@ -1,0 +1,210 @@
+ all Section 500 dollar values as the Total Reduction Amount Due Seller.", "rect": [51.2, 57.9, 43.0, 27.4]}, {"id": "hud-k600", "title": "K — 600: Cash at Settlement to / from Seller", "desc": "CALCULATED BY QUALIA\n\nThe 600 section compares Gross Amount Due to Seller (Line 420) with Total Reduction Amount Due Seller (Line 520).\n\nIf the amount due to the seller is greater, the To box is checked and a proceeds disbursement is created in Proceeds > Seller.\n\nIf the reductions are greater, From Seller is checked and Accounting shows an expected receipt from the seller.", "rect": [51.2, 85.3, 43.0, 7.3]}]}, "2": {"heading": "Page 2 — not mapped yet", "items": []}, "3": {"heading": "Page 3 — not mapped yet", "items": []}};
+
+const hudImages = {"1": "assets/hud1-page-1.webp", "2": "assets/hud1-page-2.webp", "3": "assets/hud1-page-3.webp"};
+let currentHudPage = '1';
+
+function renderHUDPage(page){
+  currentHudPage = String(page);
+  const hudImg = document.getElementById('hudDocImg');
+  if(hudImg){
+    hudImg.style.display = '';
+    hudImg.src = hudImages[currentHudPage];
+    hudImg.alt = 'HUD-1 Settlement Statement page ' + currentHudPage;
+  }
+
+  document.querySelectorAll('.hud-pagebtn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === currentHudPage);
+  });
+
+  const hotspotWrap = document.getElementById('hudHotspots');
+  const side = document.getElementById('hudSideContent');
+  const quick = document.getElementById('hudQuick');
+
+  if(hotspotWrap) hotspotWrap.innerHTML = '';
+  if(side) side.innerHTML = '';
+
+  const map = hudPageMaps[currentHudPage];
+
+  if(quick){
+    if(currentHudPage === '1'){
+      quick.innerHTML = '<strong>Page 1 — Qualia map</strong><br>Click a section of the HUD-1 to see where the information comes from in Qualia.';
+    } else {
+      quick.innerHTML = '<strong>Page ' + currentHudPage + ' — HUD-1</strong><br>This page is loaded, but its Qualia section mapping has not been added yet.';
+    }
+  }
+
+  if(!map || !map.items || !map.items.length){
+    if(side){
+      side.innerHTML = '<div class="hud-info-card"><h3>' + (map ? map.heading : 'Not mapped yet') + '</h3><p>The HUD-1 page is available to view. Its clickable Qualia paths will be added from the corresponding Qualia HUD-1 guide.</p></div>';
+    }
+    return;
+  }
+
+  if(side){
+    const heading = document.createElement('h3');
+    heading.textContent = map.heading;
+    side.appendChild(heading);
+  }
+
+  map.items.forEach(item => {
+    const [x,y,w,h] = item.rect;
+
+    const spot = document.createElement('button');
+    spot.type = 'button';
+    spot.className = 'hud-hotspot';
+    spot.dataset.id = item.id;
+    spot.setAttribute('aria-label', item.title);
+    Object.assign(spot.style, {
+      left: x + '%',
+      top: y + '%',
+      width: w + '%',
+      height: h + '%'
+    });
+    spot.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showHUDDetails(item);
+    });
+    hotspotWrap.appendChild(spot);
+
+    const card = document.createElement('div');
+    card.className = 'hud-section-item';
+    card.dataset.id = item.id;
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.innerHTML = '<span class="hud-status">QUALIA PATH</span><div class="hud-item-title">' + item.title + '</div>';
+    card.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showHUDDetails(item);
+    });
+    card.addEventListener('keydown', (event) => {
+      if(event.key === 'Enter' || event.key === ' '){
+        event.preventDefault();
+        showHUDDetails(item);
+      }
+    });
+    side.appendChild(card);
+  });
+}
+
+function showHUDDetails(item){
+  document.querySelectorAll('.hud-hotspot').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === item.id);
+  });
+  document.querySelectorAll('.hud-section-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === item.id);
+  });
+
+  // Shared centered popup lives at body level so HUD-1 and CD both use it.
+  openDetailsPopup(item.title, item.desc, 'HUD-1 • QUALIA');
+}
+
+function activateHUDItem(item){
+  showHUDDetails(item);
+}
+
+document.querySelectorAll('.hud-pagebtn').forEach(btn => {
+  btn.addEventListener('click', () => renderHUDPage(btn.dataset.page));
+});
+
+
+const hudDocImgEl = document.getElementById('hudDocImg');
+if(hudDocImgEl){
+  hudDocImgEl.addEventListener('error', () => {
+    hudDocImgEl.style.display = 'none';
+    const wrap = hudDocImgEl.parentElement;
+    if(wrap && !wrap.querySelector('.hud-image-error')){
+      const msg = document.createElement('div');
+      msg.className = 'hud-image-error';
+      msg.style.padding = '24px';
+      msg.style.lineHeight = '1.5';
+      msg.innerHTML = '<strong>HUD-1 page image could not load.</strong><br>Please reopen this HTML file in Safari/Chrome.';
+      wrap.appendChild(msg);
+    }
+  });
+}
+
+
+function forceCloseDetailsPopup(){
+  const sheet = document.getElementById('iphoneSheet');
+  const backdrop = document.getElementById('iphoneBackdrop');
+  if(sheet) sheet.classList.remove('open');
+  if(backdrop){
+    backdrop.classList.remove('open');
+    backdrop.setAttribute('aria-hidden','true');
+  }
+}
+
+function forceCloseTutorial(){
+  if(typeof tutorialBackdrop !== 'undefined' && tutorialBackdrop){
+    tutorialBackdrop.hidden = true;
+  }
+}
+
+function clearTransientOverlays(){
+  forceCloseDetailsPopup();
+  forceCloseTutorial();
+}
+
+const startChoice = document.getElementById('startChoice');
+const cdApp = document.getElementById('cdApp');
+const hudShell = document.getElementById('hudShell');
+const chooseCD = document.getElementById('chooseCD');
+const chooseHUD = document.getElementById('chooseHUD');
+const hudBack = document.getElementById('hudBack');
+const hudViewTutorial = document.getElementById('hudViewTutorial');
+const cdSwitchForm = document.getElementById('cdSwitchForm');
+const cdViewTutorial = document.getElementById('cdViewTutorial');
+
+let cdTutorialSeen = false;
+let hudTutorialSeen = false;
+
+function showStartChoice(){
+  clearTransientOverlays();
+  startChoice.hidden = false;
+  cdApp.style.display = 'none';
+  hudShell.classList.remove('active');
+  window.scrollTo(0,0);
+}
+
+function openCDTool(){
+  clearTransientOverlays();
+  startChoice.hidden = true;
+  hudShell.classList.remove('active');
+  cdApp.style.display = '';
+
+  if(!cdTutorialSeen){
+    cdTutorialSeen = true;
+    openTutorial('cd');
+  }
+}
+
+function openHUDTool(){
+  clearTransientOverlays();
+  startChoice.hidden = true;
+  cdApp.style.display = 'none';
+  hudShell.classList.add('active');
+  renderHUDPage(currentHudPage || '1');
+  window.scrollTo(0,0);
+
+  if(!hudTutorialSeen){
+    hudTutorialSeen = true;
+    openTutorial('hud');
+  }
+}
+
+chooseCD.addEventListener('click', openCDTool);
+chooseHUD.addEventListener('click', openHUDTool);
+
+hudBack.addEventListener('click', showStartChoice);
+hudViewTutorial.addEventListener('click', () => openTutorial('hud'));
+cdSwitchForm.addEventListener('click', showStartChoice);
+cdViewTutorial.addEventListener('click', () => openTutorial('cd'));
+
+showStartChoice();
+
+renderPage(1);
+</script>
+</body>
+</html>

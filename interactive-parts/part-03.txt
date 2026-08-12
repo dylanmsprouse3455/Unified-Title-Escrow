@@ -1,0 +1,95 @@
+div>
+
+<div id="cdApp">
+<div class="form-toolbar">
+  <button id="cdSwitchForm" type="button">← Switch Form</button>
+  <button id="cdViewTutorial" type="button">View Tutorial</button>
+</div>
+<div class="govbar">An official-style interactive learning copy of the CFPB Closing Disclosure explainer.</div>
+<header class="sitehead"><div class="inner"><div class="brand">Closing Disclosure Explainer</div></div></header>
+<main class="main">
+  <h1>Closing Disclosure Explainer</h1>
+  <p class="lede">Use this tool to double-check that all the details about your loan are correct on your Closing Disclosure. Select areas of the sample form to highlight the matching explanation.</p>
+  <div class="instructions"><strong>How to use this tool:</strong> Choose a page, then tap a highlighted section of the Closing Disclosure. A centered box will show where that information comes from in Qualia.</div>
+
+  <div class="tool">
+    <section class="viewer">
+      <div class="pagebar"><strong>Viewing page:</strong>
+        <button class="pagebtn active" data-page="1">1</button>
+        <button class="pagebtn" data-page="2">2</button>
+        <button class="pagebtn" data-page="3">3</button>
+        <button class="pagebtn" data-page="4">4</button>
+        <button class="pagebtn" data-page="5">5</button>
+      </div>
+      <div id="docwrap" class="docwrap">
+        <img id="docimg" alt="Sample Closing Disclosure">
+        <div id="hotspots"></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>Sample Closing Disclosure</h2>
+      <div id="page1Quick" class="instructions" style="margin:0 0 18px">
+      <strong>Page 1 — Qualia map</strong><br>
+      To preview the CD in Qualia, click <strong>Closing Disclosure</strong> under <strong>Preview</strong> on the left rail.
+      The preview updates as order information is entered.
+    </div>
+    <div id="sidecontent"></div>
+    </aside>
+  </div>
+</main>
+<footer class="footer"><div style="max-width:1180px;margin:auto">Personal study copy. Sample Closing Disclosure images and explanatory concepts are based on the Consumer Financial Protection Bureau’s public Closing Disclosure explainer.</div></footer>
+</div>
+
+
+
+<div id="iphoneBackdrop" class="iphone-sheet-backdrop" aria-hidden="true">
+  <section id="iphoneSheet" class="iphone-sheet" role="dialog" aria-modal="true" aria-labelledby="iphoneSheetTitle">
+    <div class="iphone-sheet-handle"></div>
+    <button id="iphoneSheetClose" class="iphone-sheet-close" type="button" aria-label="Close details popup">×</button>
+    <div id="iphoneSheetBadge" class="sheet-badge">DETAILS</div>
+    <h3 id="iphoneSheetTitle">Details</h3>
+    <p id="iphoneSheetText"></p>
+  </section>
+</div>
+
+<section id="hudShell" class="hud-shell">
+  <div class="form-toolbar" style="padding-left:0;padding-right:0">
+    <button id="hudBack" type="button">← Switch Form</button>
+    <button id="hudViewTutorial" type="button">View Tutorial</button>
+  </div>
+
+  <div class="instructions" style="margin:0 0 20px">
+    <strong>HUD-1 Learning Area</strong><br>
+    This now includes the full 3-page HUD-1 form. Use the page buttons to move between pages.
+  </div>
+
+  <div class="hud-tool">
+    <section class="hud-viewer">
+      <div class="hud-pagebar">
+        <strong>Viewing page:</strong>
+        <button class="hud-pagebtn active" data-page="1">1</button>
+        <button class="hud-pagebtn" data-page="2">2</button>
+        <button class="hud-pagebtn" data-page="3">3</button>
+      </div>
+
+      <div class="hud-docwrap">
+        <img id="hudDocImg" alt="HUD-1 Settlement Statement page 1">
+        <div id="hudHotspots" class="hud-hotspots"></div>
+      </div>
+    </section>
+
+    <aside class="hud-side">
+      <h2>HUD-1 Settlement Statement</h2>
+      <div id="hudQuick" class="instructions" style="margin:0 0 16px">
+        <strong>Page 1 — Qualia map</strong><br>
+        To preview the HUD-1 in Qualia, click <strong>HUD-1</strong> under <strong>Preview</strong> on the left rail.
+      </div>
+      <div id="hudSideContent" class="hud-section-list"></div>
+    </aside>
+  </div>
+</section>
+
+<script>
+
+const pages = {"1": {"checkHeading": "Where this comes from in Qualia", "checks": [["closinginfo", "Closing Information", "DATE ISSUED\nDisclosures > Loan Terms > CD Issue Date\n\nCLOSING DATE\nBasic Info > Estimated Closing Date\n\nDISBURSEMENT DATE\nBasic Info > Disbursement Date\n\nSETTLEMENT AGENT\nBasic Info > Settlement Agency\n\nFILE #\nTop-left corner of the order, or Basic Info\n\nPROPERTY\nGeneral > Properties > Property Address\n\nSALE PRICE\nBasic Info > Purchase Price", [5, 10, 25, 15]], ["transactioninfo", "Transaction Information", "BORROWER(S)\nGeneral > Contacts > Buyers\nShows the names and addresses of all borrowers on the file.\n\nSELLER(S)\nGeneral > Contacts > Sellers\nShows the names and addresses of all sellers on the file.\n\nLENDER\nGeneral > Contacts > Lenders\nShows the primary lender. The lender address does not appear here. If multiple lender contacts exist, the CD lists only the first one.", [30, 10, 39, 15]], ["loaninformation", "Loan Information", "LOAN TERM\nGeneral > Loan > Terms & Dates\n\nPURPOSE\nAdmin > Workflows > Transaction Types\nThe available purpose choices are Purchase and Refinance.\n\nPRODUCT\nDisclosures > Loan Terms > Loan Product\n\nLOAN TYPE\nDisclosures > Loan Terms > Loan Type\n\nLOAN ID #\nGeneral > Loan > Loan ID #\n\nMIC #\nGeneral > Loan > Mortgage Ins. Case #", [69, 10, 25, 15]], ["loanterms", "Loan Terms", "GO TO\nDisclosures > Loan Terms\n\nThe Loan Terms section on the CD pulls from the Loan Term Table in Qualia.\n\nSelecting “Can increase” or “Yes” in the middle column makes additional options appear in the right column. Use the plus button to add a term, the red X to remove a term, and click the text to edit the term language.\n\nOn the CD, items marked “Can increase” display as “Yes,” and the term language is also shown.", [5, 26, 89, 28]], ["projectedpayments", "Projected Payments", "GO TO\nDisclosures > Projected Payments\n\nYou can add up to four payment periods and enter the year ranges.\n\nPrincipal & Interest calculates automatically from information entered in the Loan section. Mortgage Insurance and Estimated Escrow can be entered manually when needed.\n\nThe CD adds Principal & Interest + Mortgage Insurance + Estimated Escrow to calculate the Estimated Total Monthly Payment.\n\nUnder the Payments tab, use the Estimated Taxes, Insurance, and Assessments toggles. Turning on Property Taxes, Homeowner’s Insurance, or Other checks the corresponding box on the CD. Turning on Includes makes the In Escrow toggle available. If In Escrow is on, the CD displays YES in the In Escrow column.", [5, 54, 89, 29]], ["costsatclosing", "Costs at Closing", "GO TO\nDisclosures > Cash to Close\n\nTOTAL CLOSING COSTS\nThis is the sum of all buyer-paid charges in Sections A through H, minus lender credits.\n\nCASH TO CLOSE\nThe values used to calculate Cash to Close are found in Disclosures > Cash to Close.\n\nThe amount shown on Page 1 can be changed by overriding values in the Final column.\n\nTROUBLESHOOTING\nIf the Page 1 Cash to Close does no

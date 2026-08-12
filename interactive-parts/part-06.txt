@@ -1,0 +1,122 @@
+tElementById('docimg').src = images[page];
+  const hs = document.getElementById('hotspots');
+  hs.innerHTML='';
+  const side = document.getElementById('sidecontent');
+  side.innerHTML='';
+
+  const p = pages[page];
+  const quick=document.getElementById('page1Quick');
+  if(quick){
+    if(page===1){
+      quick.style.display='block';
+      quick.innerHTML='<strong>Page 1 — Qualia map</strong><br>To preview the CD in Qualia, click <strong>Closing Disclosure</strong> under <strong>Preview</strong> on the left rail. The preview updates as order information is entered.';
+    } else if(page===2){
+      quick.style.display='block';
+      quick.innerHTML='<strong>Page 2 — Closing Cost Details</strong><br>Page 2 pulls closing costs from charge Sections <strong>A through J</strong>. Sections A–D are <strong>Loan Costs</strong>; Sections E–J are <strong>Other Costs / Total Closing Costs</strong>.';
+    } else if(page===3){
+      quick.style.display='block';
+      quick.innerHTML='<strong>Page 3 — Cash to Close + Transaction Summaries</strong><br>The top table comes from <strong>Disclosures &gt; Cash to Close</strong>. The borrower and seller summaries pull from <strong>Charges &gt; Debits/Credits</strong> sections K/M and L/N.';
+    } else if(page===4){
+      quick.style.display='block';
+      quick.innerHTML='<strong>Page 4 — Loan Disclosures</strong><br>Most of Page 4 is controlled from <strong>Disclosures &gt; Loan Disclosures</strong>. The Security Interest address comes from <strong>General &gt; Properties</strong>, and escrow calculations can pull from <strong>Charges &gt; Section G</strong>.';
+    } else if(page===5){
+      quick.style.display='block';
+      quick.innerHTML='<strong>Page 5 — Calculations, Disclosures + Contacts</strong><br>Loan calculations come from <strong>Disclosures &gt; Loan Calculations</strong>. Most third-party contact details come from <strong>General &gt; Contacts</strong>. Settlement Agent details can also depend on <strong>Admin</strong> branch, Closing Disclosure preference, and user settings.';
+    } else {
+      quick.style.display='none';
+    }
+  }
+  const addSection=(heading, items, badge)=>{
+    if(!items || !items.length) return;
+    const h=document.createElement('h3'); h.textContent=heading; side.appendChild(h);
+    items.forEach(([id,title,desc,rect])=>{
+      const [x,y,w,hgt]=rect;
+      const spot=document.createElement('button');
+      spot.className='hotspot'; spot.type='button'; spot.dataset.id=id;
+      Object.assign(spot.style,{left:x+'%',top:y+'%',width:w+'%',height:hgt+'%'});
+      spot.setAttribute('aria-label', title);
+      spot.onclick=()=>{ activate(id,true); openDetailsPopup(title,desc,badge); };
+      hs.appendChild(spot);
+
+      const item=document.createElement('div');
+      item.className='item'; item.dataset.id=id;
+      item.innerHTML='<span class="badge">'+badge+'</span><div class="title">'+title+'</div><div class="desc">'+desc+'</div>';
+      item.onclick=()=>{ activate(id,false); openDetailsPopup(title,desc,badge); };
+      side.appendChild(item);
+    });
+  };
+  addSection(p.checkHeading || 'Details to check', p.checks, (page===1 || page===2 || page===3 || page===4 || page===5) ? 'QUALIA PATH' : 'Check');
+  if (p.defs && p.defs.length) addSection('Get definitions', p.defs, 'Definition');
+}
+
+function activate(id, fromImage){
+  currentId=id;
+  document.querySelectorAll('.hotspot').forEach(e=>e.classList.toggle('active',e.dataset.id===id));
+  document.querySelectorAll('.item').forEach(e=>e.classList.toggle('active',e.dataset.id===id));
+  const item=document.querySelector('.item[data-id="'+id+'"]');
+  /* Keep the current document position fixed on all devices.
+     Details are shown in the centered popup instead of scrolling. */
+}
+
+document.querySelectorAll('.pagebtn').forEach(b=>b.onclick=()=>renderPage(+b.dataset.page));
+
+document.getElementById('iphoneSheet').addEventListener('click', e => e.stopPropagation());
+document.getElementById('iphoneSheetClose').onclick = closeDetailsPopup;
+document.getElementById('iphoneBackdrop').onclick = (e) => {
+  if(e.target === document.getElementById('iphoneBackdrop')) closeDetailsPopup();
+};
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDetailsPopup(); });
+
+
+const cdTutorialSteps = [
+  {
+    kicker: 'Purpose',
+    title: 'Learn where the CD comes from in Qualia',
+    html: '<p class="tutorial-text">This tool turns the five-page Closing Disclosure into an interactive Qualia map. Instead of only showing what a field means, it shows <strong>where that information comes from inside the system</strong>.</p>'
+  },
+  {
+    kicker: 'Step 1',
+    title: 'Choose the CD page you want to study',
+    html: '<p class="tutorial-text">Use the page buttons above the document to move between Pages 1–5.</p><ul class="tutorial-list"><li>Page 1: loan summary and cash to close</li><li>Page 2: closing-cost sections A–J</li><li>Page 3: cash-to-close and transaction summaries</li><li>Page 4: loan disclosures and escrow</li><li>Page 5: calculations, disclosures, contacts, and signatures</li></ul>'
+  },
+  {
+    kicker: 'Step 2',
+    title: 'Tap or click a section on the document',
+    html: '<p class="tutorial-text">The document contains invisible clickable zones placed over the CD sections. Tap or click the area you want to learn about.</p>'
+  },
+  {
+    kicker: 'Step 3',
+    title: 'Read the Qualia path in the popup',
+    html: '<p class="tutorial-text">A centered window opens with the system path, such as <strong>Disclosures &gt; Cash to Close</strong> or <strong>General &gt; Contacts</strong>, plus a short explanation of how that CD section is populated.</p>'
+  },
+  {
+    kicker: 'Ready',
+    title: 'Use it as a visual reference while working in Qualia',
+    html: '<p class="tutorial-text">The goal is to help you connect what you see on the Closing Disclosure with the exact place in Qualia that controls it. You can come back to any page or section whenever you need a quick reference.</p>'
+  }
+];
+
+
+const hudTutorialSteps = [
+  {
+    kicker: 'Purpose',
+    title: 'Learn where the HUD-1 comes from in Qualia',
+    html: '<p class="tutorial-text">This tool turns the three-page HUD-1 Settlement Statement into an interactive Qualia learning guide. The goal is to connect each HUD-1 section with <strong>where that information comes from inside Qualia</strong>.</p>'
+  },
+  {
+    kicker: 'Step 1',
+    title: 'Choose the HUD-1 page you want to study',
+    html: '<p class="tutorial-text">Use the page buttons above the form to move between <strong>Pages 1, 2, and 3</strong> of the HUD-1.</p>'
+  },
+  {
+    kicker: 'Step 2',
+    title: 'Study the form section by section',
+    html: '<p class="tutorial-text">The HUD-1 form is displayed directly inside the learning tool so you can visually follow the same sections and line numbers you see in Qualia.</p>'
+  },
+  {
+    kicker: 'Step 3',
+    title: 'Use the Qualia paths as your reference',
+    html: '<p class="tutorial-text">Click a mapped section of the HUD-1 to open the related Qualia location and a short explanation of how that part of the form is populated.</p>'
+  },
+  {
+    kicker: 

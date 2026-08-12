@@ -1,0 +1,301 @@
+2px solid var(--navy);
+  padding-bottom:7px;
+  color:var(--navy);
+}
+.hud-section-item{
+  border:1px solid var(--border);
+  border-left:5px solid transparent;
+  border-radius:4px;
+  padding:12px 13px;
+  margin:9px 0;
+  background:#fff;
+  cursor:pointer;
+}
+.hud-section-item:hover{
+  border-left-color:var(--blue);
+  background:#fbfdff;
+}
+.hud-section-item.active{
+  border-left-color:var(--accent);
+  background:#fff8e6;
+}
+.hud-section-item .hud-item-title{
+  font-weight:700;
+  line-height:1.35;
+}
+.hud-status{
+  display:inline-block;
+  background:var(--navy);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:3px 6px;
+  border-radius:3px;
+  margin-bottom:6px;
+  letter-spacing:.04em;
+}
+
+.hud-side h2{
+  font-size:24px;
+  margin:0 0 14px;
+}
+.hud-info-card{
+  border:1px solid var(--border);
+  border-left:5px solid var(--navy);
+  border-radius:10px;
+  padding:16px 16px 14px;
+  background:#fff;
+  margin-bottom:14px;
+}
+.hud-info-card h3{
+  margin:0 0 10px;
+  color:var(--navy);
+  font-size:20px;
+}
+.hud-info-card p{
+  margin:0 0 10px;
+  line-height:1.55;
+  color:#333;
+}
+.hud-info-card p:last-child{margin-bottom:0}
+.hud-note{
+  font-size:14px;
+  color:#555;
+}
+@media(max-width:860px){
+  .hud-tool{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+  .hud-viewer{
+    position:static;
+  }
+  .hud-pagebar{
+    position:sticky;
+    top:0;
+    background:#fff;
+    padding:8px 0;
+    z-index:20;
+  }
+}
+
+.hud-shell{
+  display:none;
+  max-width:1180px;
+  margin:0 auto;
+  padding:28px 16px 60px;
+}
+.hud-shell.active{display:block}
+.hud-placeholder{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px;
+  background:#fbfdff;
+}
+.hud-placeholder h2{margin-top:0;color:var(--navy)}
+
+.form-toolbar{
+  max-width:1180px;
+  margin:0 auto;
+  padding:12px 16px 0;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.form-toolbar button{
+  border:1px solid var(--navy);
+  background:#fff;
+  color:var(--navy);
+  border-radius:8px;
+  padding:9px 13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.form-toolbar button:hover{background:#f7fafc}
+
+.hud-back-btn{
+  margin-bottom:18px;
+  border:1px solid var(--navy);
+  background:#fff;
+  color:var(--navy);
+  border-radius:8px;
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+@media(max-width:640px){
+  .start-choice-card{padding:24px 18px 20px}
+  .start-choice-title{font-size:27px}
+  .start-choice-grid{grid-template-columns:1fr}
+  .start-choice-option{padding:20px 18px}
+}
+
+.tutorial-backdrop{overscroll-behavior:contain;
+
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.62);
+  z-index:18000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.tutorial-backdrop[hidden]{display:none}
+.tutorial-card{
+  width:min(92vw,560px);
+  max-height:86vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.38);
+  padding:26px 24px 22px;
+  position:relative;
+}
+.tutorial-kicker{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--blue);
+  margin-bottom:8px;
+}
+.tutorial-title{
+  margin:0 42px 10px 0;
+  font-size:28px;
+  line-height:1.15;
+  color:#111;
+}
+.tutorial-text{
+  font-size:17px;
+  line-height:1.6;
+  color:#333;
+  margin:0;
+}
+.tutorial-list{
+  margin:14px 0 0;
+  padding-left:20px;
+  line-height:1.55;
+  color:#333;
+}
+.tutorial-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  border:0;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  background:#f1f3f5;
+  font-size:24px;
+  line-height:36px;
+  cursor:pointer;
+}
+.tutorial-progress{
+  display:flex;
+  gap:7px;
+  margin:20px 0 16px;
+}
+.tutorial-dot{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#d5d9dd;
+}
+.tutorial-dot.active{background:var(--navy)}
+.tutorial-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:18px;
+}
+.tutorial-actions-right{
+  display:flex;
+  gap:10px;
+}
+.tutorial-btn{
+  border:1px solid var(--navy);
+  border-radius:8px;
+  padding:10px 15px;
+  font-weight:700;
+  cursor:pointer;
+  background:#fff;
+  color:var(--navy);
+}
+.tutorial-btn.primary{
+  background:var(--navy);
+  color:#fff;
+}
+.tutorial-btn.skip{
+  border-color:transparent;
+  color:#555;
+  padding-left:0;
+  background:transparent;
+}
+@media(max-width:560px){
+  .iphone-sheet{
+    width:100%;
+    max-height:82vh;
+    border-radius:16px;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+  }
+  .tutorial-card{padding:24px 19px 20px}
+  .tutorial-title{font-size:24px}
+  .tutorial-text{font-size:16px}
+  .tutorial-actions{align-items:flex-end}
+  .tutorial-actions-right{flex-wrap:wrap;justify-content:flex-end}
+}
+
+@media(max-width:860px){
+  h1{font-size:31px}
+  .tool{grid-template-columns:1fr;gap:18px}
+  .viewer{position:static}
+  .side{padding-bottom:30px}
+  .pagebar{position:sticky;top:0;background:#fff;padding:8px 0;z-index:20}
+  .item .desc{display:block}
+}
+
+.back-training{position:fixed;left:12px;bottom:12px;z-index:25000;text-decoration:none;background:#092947;color:#fff;padding:9px 12px;border-radius:9px;font:700 13px/1.2 Arial,Helvetica,sans-serif;box-shadow:0 5px 16px #0003}.back-training:hover{background:#104a76}@media(max-width:560px){.back-training{left:10px;bottom:10px}}
+</style>
+</head>
+<body>
+<a class="back-training" href="index.html">← Training Wizard</a>
+
+<div id="startChoice" class="start-choice-backdrop" role="dialog" aria-modal="true" aria-labelledby="startChoiceTitle">
+  <div class="start-choice-card">
+    <div class="start-choice-kicker">Choose a learning tool</div>
+    <h1 id="startChoiceTitle" class="start-choice-title">What do you want to study?</h1>
+    <p class="start-choice-text">Choose the settlement form you want to work with.</p>
+
+    <div class="start-choice-grid">
+      <button id="chooseCD" class="start-choice-option" type="button">
+        <h3>Closing Disclosure</h3>
+        <p>Open the interactive 5-page CD guide with Qualia system paths and clickable sections.</p>
+      </button>
+
+      <button id="chooseHUD" class="start-choice-option" type="button">
+        <h3>HUD-1</h3>
+        <p>Open the 3-page HUD-1 learning area. Page 1 is already mapped with clickable Qualia paths.</p>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div id="tutorialBackdrop" class="tutorial-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+  <div class="tutorial-card">
+    <button id="tutorialClose" class="tutorial-close" type="button" aria-label="Skip tutorial">×</button>
+    <div class="tutorial-kicker" id="tutorialKicker">Tutorial</div>
+    <h2 class="tutorial-title" id="tutorialTitle">Welcome to the Closing Disclosure learning tool</h2>
+    <div id="tutorialBody"></div>
+    <div id="tutorialProgress" class="tutorial-progress" aria-hidden="true"></div>
+    <div class="tutorial-actions">
+      <button id="tutorialSkip" class="tutorial-btn skip" type="button">Skip tutorial</button>
+      <div class="tutorial-actions-right">
+        <button id="tutorialBack" class="tutorial-btn" type="button">Back</button>
+        <button id="tutorialNext" class="tutorial-btn primary" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+</

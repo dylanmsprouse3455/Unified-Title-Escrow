@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Interactive Document Review | Unified Title & Escrow</title>
+<style>
+:root {
+  --navy:#002e5d; --blue:#0072ce; --light:#eef5f9; --ink:#1b1b1b;
+  --muted:#5b616b; --border:#c9cfd4; --accent:#ffb000; --green:#2e8540;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{min-height:100%;overflow-x:hidden} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:white;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.govbar{background:#f5f5f5;border-bottom:1px solid #ddd;font-size:13px;padding:8px 16px}
+.sitehead{border-bottom:4px solid var(--navy);padding:16px}
+.sitehead .inner,.main{max-width:1180px;margin:auto}
+.brand{font-size:22px;font-weight:700;color:var(--navy)}
+h1{font-size:40px;line-height:1.1;margin:30px 0 14px;color:#111}
+.lede{font-size:18px;line-height:1.55;max-width:900px;color:#333}
+.instructions{background:var(--light);border-left:5px solid var(--blue);padding:16px 18px;margin:24px 0 28px}
+.tool{display:grid;grid-template-columns:minmax(0,690px) minmax(300px,1fr);gap:34px;align-items:start}
+.viewer{position:sticky;top:14px}
+.pagebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pagebar strong{margin-right:6px}
+.pagebtn{border:1px solid var(--navy);background:white;color:var(--navy);font-weight:700;border-radius:3px;padding:8px 12px;cursor:pointer}
+.pagebtn.active{background:var(--navy);color:white}
+.docwrap{position:relative;display:block;width:100%;max-width:705px;border:1px solid #aaa;box-shadow:0 3px 14px #0002;background:#fff}
+.docwrap img{width:100%;display:block}
+.hotspot{position:absolute;border:3px solid transparent;background:transparent;cursor:pointer;border-radius:2px}
+.hotspot:hover{border-color:#f9b000;background:#ffcc0033}
+.hotspot.active{border-color:#f9b000;background:#ffcc0040;box-shadow:0 0 0 2px #fff inset}
+.side h2{font-size:24px;margin:0 0 14px}
+.side h3{font-size:20px;margin:28px 0 10px;border-bottom:2px solid var(--navy);padding-bottom:7px;color:var(--navy)}
+.item{border:1px solid var(--border);border-left:5px solid transparent;border-radius:3px;padding:13px 14px;margin:10px 0;background:white;cursor:pointer}
+.item:hover{border-left-color:var(--blue);background:#fbfdff}
+.item.active{border-left-color:var(--accent);background:#fff8e6}
+.item .title{font-weight:700;line-height:1.35}
+.item .desc{display:none;margin-top:9px;line-height:1.5;color:#333}
+.item.active .desc{display:block}
+.badge{display:inline-block;background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:3px 6px;border-radius:3px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em}
+.footer{margin-top:50px;background:#f5f5f5;border-top:1px solid #ddd;padding:24px 16px;color:#444;font-size:13px}
+
+.iphone-sheet-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:20000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:#0007;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+  overscroll-behavior:contain;
+}
+.iphone-sheet-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.iphone-sheet{
+  position:relative;
+  z-index:20001;
+  width:min(100%, 500px);
+  max-height:min(78vh, 680px);
+  overflow:auto;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 18px 55px #0006;
+  opacity:0;
+  transform:scale(.97);
+  pointer-events:none;
+  transition:transform .18s ease, opacity .18s ease;
+  padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling:touch;
+}
+.iphone-sheet.open{
+  opacity:1;
+  transform:scale(1);
+  pointer-events:auto;
+}
+.iphone-sheet-handle{display:none}
+.iphone-sheet-close{
+  position:absolute;right:14px;top:12px;
+  border:0;background:#f0f0f2;border-radius:999px;
+  width:34px;height:34px;font-size:22px;line-height:34px;
+  cursor:pointer;
+}
+.iphone-sheet .sheet-badge{
+  display:inline-block;background:var(--navy);color:#fff;
+  font-size:11px;font-weight:700;padding:4px 7px;border-radius:4px;
+  margin:6px 0 10px;text-transform:uppercase;letter-spacing:.04em;
+}
+.iphone-sheet h3{margin:0 42px 10px 0;font-size:22px;line-height:1.25;color:#111}
+.iphone-sheet p{margin:0;font-size:16px;line-height:1.55;color:#333;white-space:pre-line}
+body.popup-details-mode .side .item .desc{display:none}
+body.popup-details-mode .side .item.active .desc{display:none}
+
+
+
+.start-choice-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:15000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.68);
+}
+.start-choice-backdrop[hidden]{display:none}
+.start-choice-card{
+  width:min(92vw,760px);
+  background:#fff;
+  border-radius:22px;
+  box-shadow:0 28px 80px rgba(0,0,0,.42);
+  padding:30px 26px 28px;
+}
+.start-choice-kicker{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--blue);
+  margin-bottom:8px;
+}
+.start-choice-title{
+  margin:0 0 10px;
+  font-size:32px;
+  line-height:1.15;
+}
+.start-choice-text{
+  margin:0 0 22px;
+  color:#444;
+  line-height:1.55;
+  font-size:16px;
+}
+.start-choice-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.start-choice-option{
+  border:2px solid #cfd6dc;
+  background:#fff;
+  border-radius:16px;
+  padding:24px 20px;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.start-choice-option:hover{
+  transform:translateY(-2px);
+  border-color:var(--navy);
+  box-shadow:0 10px 26px rgba(0,0,0,.10);
+}
+.start-choice-option h3{
+  margin:0 0 8px;
+  font-size:24px;
+  color:var(--navy);
+}
+.start-choice-option p{
+  margin:0;
+  color:#444;
+  line-height:1.5;
+}
+
+.hud-tool{
+  display:grid;
+  grid-template-columns:minmax(0,690px) minmax(300px,1fr);
+  gap:34px;
+  align-items:start;
+  margin-top:18px;
+}
+.hud-viewer{
+  position:sticky;
+  top:14px;
+}
+.hud-pagebar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.hud-pagebar strong{margin-right:6px}
+.hud-pagebtn{
+  border:1px solid var(--navy);
+  background:white;
+  color:var(--navy);
+  font-weight:700;
+  border-radius:3px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+.hud-pagebtn.active{
+  background:var(--navy);
+  color:white;
+}
+.hud-docwrap{
+  position:relative;
+  display:block;
+  width:100%;
+  max-width:705px;
+  border:1px solid #aaa;
+  box-shadow:0 3px 14px #0002;
+  background:#fff;
+}
+
+.hud-docwrap img{
+  width:100%;
+  display:block;
+}
+.hud-hotspots{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+}
+.hud-hotspot{
+  position:absolute;
+  z-index:21;
+  pointer-events:auto;
+  border:3px solid transparent;
+  background:transparent;
+  border-radius:3px;
+  cursor:pointer;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:pan-y pinch-zoom;
+}
+.hud-hotspot:hover{
+  border-color:#f9b000;
+  background:#ffcc0033;
+}
+.hud-hotspot.active{
+  border-color:#f9b000;
+  background:#ffcc0040;
+  box-shadow:0 0 0 2px #fff inset;
+}
+.hud-section-list h3{
+  font-size:20px;
+  margin:26px 0 10px;
+  border-bottom:
