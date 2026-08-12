@@ -29,8 +29,8 @@ fetch('./training-wizard.html',{cache:'no-store'})
       .interactive-tool-arrow{color:#c99e4b;font-size:1.4rem;font-weight:900}
       @media(max-width:760px){.interactive-tools-section{padding:17px}.interactive-tools-head{display:block}.interactive-tool-card{grid-template-columns:auto 1fr;align-items:start}.interactive-tool-meta{grid-column:1/-1;justify-content:space-between;padding-left:72px}.interactive-tool-icon{width:50px;height:50px}}
 
-      .live-note-page [id]{scroll-margin-top:100px}
-      .live-note-page .lt-quick{
+      .live-note-page [id],.closing-cram-page [id]{scroll-margin-top:100px}
+      .live-note-page .lt-quick,.closing-cram-page .cc-nav{
         position:fixed!important;
         right:16px;
         top:112px;
@@ -51,7 +51,7 @@ fetch('./training-wizard.html',{cache:'no-store'})
         transition:transform .2s ease,opacity .2s ease;
         -webkit-overflow-scrolling:touch;
       }
-      .live-note-page .lt-quick .live-nav-hide{
+      .live-note-page .lt-quick .live-nav-hide,.closing-cram-page .cc-nav .live-nav-hide{
         position:sticky;
         top:0;
         z-index:2;
@@ -72,8 +72,8 @@ fetch('./training-wizard.html',{cache:'no-store'})
         letter-spacing:.06em;
         text-transform:uppercase;
       }
-      .live-note-page .lt-quick .live-nav-hide b{color:#1769a4;font-size:.69rem}
-      .live-note-page .lt-quick a{
+      .live-note-page .lt-quick .live-nav-hide b,.closing-cram-page .cc-nav .live-nav-hide b{color:#1769a4;font-size:.69rem}
+      .live-note-page .lt-quick a,.closing-cram-page .cc-nav a{
         display:block;
         width:100%;
         border:1px solid #d5e0e8!important;
@@ -81,16 +81,17 @@ fetch('./training-wizard.html',{cache:'no-store'})
         background:#fff!important;
         color:#092947!important;
         padding:10px 11px!important;
+        text-align:left!important;
         transition:.15s ease;
       }
-      .live-note-page .lt-quick a:hover{border-color:#9bbbd0!important;background:#f5faff!important}
-      .live-note-page .lt-quick a.active{
+      .live-note-page .lt-quick a:hover,.closing-cram-page .cc-nav a:hover{border-color:#9bbbd0!important;background:#f5faff!important}
+      .live-note-page .lt-quick a.active,.closing-cram-page .cc-nav a.active{
         background:#092947!important;
         border-color:#092947!important;
         color:#fff!important;
         box-shadow:0 5px 13px rgba(9,41,71,.18);
       }
-      body.live-sections-hidden .live-note-page .lt-quick{transform:translateX(calc(100% + 34px));opacity:0;pointer-events:none}
+      body.live-sections-hidden .live-note-page .lt-quick,body.live-sections-hidden .closing-cram-page .cc-nav{transform:translateX(calc(100% + 34px));opacity:0;pointer-events:none}
       .live-nav-show{
         position:fixed;
         right:12px;
@@ -108,10 +109,10 @@ fetch('./training-wizard.html',{cache:'no-store'})
       }
       body.live-sections-available.live-sections-hidden .live-nav-show{display:block}
       @media(max-width:900px){
-        .live-note-page .lt-quick{right:10px;top:74px;width:min(84vw,300px);max-height:calc(100vh - 94px);box-shadow:0 18px 55px rgba(9,41,71,.3)}
+        .live-note-page .lt-quick,.closing-cram-page .cc-nav{right:10px;top:74px;width:min(84vw,300px);max-height:calc(100vh - 94px);box-shadow:0 18px 55px rgba(9,41,71,.3)}
         .live-nav-show{right:8px;top:74px;padding:9px 11px}
       }
-      @media print{.live-note-page .lt-quick,.live-nav-show{display:none!important}}
+      @media print{.live-note-page .lt-quick,.closing-cram-page .cc-nav,.live-nav-show{display:none!important}}
     </style>
     <script>
       setTimeout(()=>{
@@ -127,6 +128,7 @@ fetch('./training-wizard.html',{cache:'no-store'})
 
       const LIVE_NAV_STORE='ute-live-section-nav-hidden';
       let liveNavTick=false;
+      const getLiveSectionNav=()=>document.querySelector('.live-note-page .lt-quick, .closing-cram-page .cc-nav');
       function setLiveNavHidden(hidden,save=true){
         document.body.classList.toggle('live-sections-hidden',hidden);
         if(save){try{localStorage.setItem(LIVE_NAV_STORE,hidden?'1':'0')}catch(e){}}
@@ -134,7 +136,7 @@ fetch('./training-wizard.html',{cache:'no-store'})
         if(show)show.setAttribute('aria-expanded',hidden?'false':'true');
       }
       function updateLiveSectionHighlight(){
-        const nav=document.querySelector('.live-note-page .lt-quick');
+        const nav=getLiveSectionNav();
         if(!nav)return;
         const links=Array.from(nav.querySelectorAll('a[href^="#"]'));
         if(!links.length)return;
@@ -142,7 +144,8 @@ fetch('./training-wizard.html',{cache:'no-store'})
         let current=links[0];
         links.forEach(link=>{
           const target=document.querySelector(link.getAttribute('href'));
-          if(target && target.offsetTop<=marker)current=link;
+          const absoluteTop=target?target.getBoundingClientRect().top+window.scrollY:Infinity;
+          if(target && absoluteTop<=marker)current=link;
         });
         links.forEach(link=>link.classList.toggle('active',link===current));
         if(current){
@@ -153,10 +156,10 @@ fetch('./training-wizard.html',{cache:'no-store'})
         }
       }
       function enhanceLiveSectionNav(){
-        const nav=document.querySelector('.live-note-page .lt-quick');
+        const nav=getLiveSectionNav();
         const show=document.getElementById('liveNavShow');
         document.body.classList.toggle('live-sections-available',!!nav);
-        if(!nav){return}
+        if(!nav)return;
         if(nav.dataset.sideNavReady!=='1'){
           nav.dataset.sideNavReady='1';
           const hide=document.createElement('button');
