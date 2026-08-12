@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>State Document Library | Unified Title & Escrow</title>
+<style>
+:root{--navy:#092947;--blue:#1769a4;--ink:#203040;--muted:#687887;--line:#d7e0e7;--bg:#f4f7fa;--card:#fff;--pending:#8b1e1e;--pendingBg:#fff0f0}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.topbar{position:sticky;top:0;z-index:50;background:rgba(244,247,250,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}.topbar-inner{max-width:1120px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#fff;background:var(--navy);padding:9px 12px;border-radius:9px;font-weight:800;font-size:13px}.top-title{font-weight:900;color:var(--navy)}main{max-width:1120px;margin:auto;padding:34px 18px 70px}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}h1{margin:6px 0 10px;color:var(--navy);font:700 clamp(30px,5vw,48px)/1.05 Georgia,serif}.lede{max-width:820px;margin:0;color:var(--muted);font-size:16px;line-height:1.6}.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin:26px 0 18px}.search{width:100%;border:1px solid #b9c8d3;border-radius:12px;background:#fff;padding:13px 14px;font-size:16px;outline:none}.search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(23,105,164,.12)}.toolbtn{border:1px solid #b9c8d3;background:#fff;color:var(--navy);border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer}.stats{margin:0 0 18px;color:var(--muted);font-size:13px}.state-list{display:grid;gap:12px}.state{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(20,45,65,.05)}.state[open]{border-color:#a9c1d2}.state summary{list-style:none;cursor:pointer;padding:18px 20px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px}.state summary::-webkit-details-marker{display:none}.state-name{font:700 21px/1.2 Georgia,serif;color:var(--navy)}.count{font-size:12px;font-weight:900;color:var(--blue);background:#edf6fc;border-radius:999px;padding:6px 9px}.chev{font-size:20px;color:#9b7a37;transition:transform .15s}.state[open] .chev{transform:rotate(90deg)}.state-body{border-top:1px solid var(--line);padding:18px 20px 22px}.state-note{margin:0 0 16px;padding:12px 14px;border-left:4px solid #c99e4b;background:#fff9eb;border-radius:8px;color:#566270;line-height:1.5}.category{margin:20px 0 8px}.category:first-of-type{margin-top:0}.category h2{margin:0 0 10px;color:var(--navy);font-size:15px;text-transform:uppercase;letter-spacing:.06em}.doc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.doc{position:relative;width:100%;border:1px solid #d9dde1;background:#f0f1f2;color:#5d6670;border-radius:12px;padding:15px 15px 42px;text-align:left;cursor:pointer;min-height:88px;transition:.15s}.doc:hover,.doc:focus-visible{border-color:#b9bfc4;background:#e9ebed;transform:translateY(-1px);outline:none}.doc-name{font-weight:800;line-height:1.35}.coming{position:absolute;left:12px;bottom:11px;display:inline-flex;align-items:center;border:1px solid #e0a4a4;background:var(--pendingBg);color:var(--pending);border-radius:999px;padding:4px 7px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.empty{display:none;background:#fff;border:1px dashed #b7c3cc;border-radius:16px;padding:30px;text-align:center;color:var(--muted)}.modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:.15s}.modal-backdrop.open{opacity:1;pointer-events:auto}.modal{width:min(100%,500px);background:#fff;border-radius:18px;padding:23px;box-shadow:0 24px 70px rgba(0,0,0,.35)}.modal-label{display:inline-block;background:var(--pendingBg);color:var(--pending);border:1px solid #e0a4a4;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}.modal h2{margin:12px 38px 8px 0;color:var(--navy);font:700 24px/1.2 Georgia,serif}.modal p{margin:0;color:var(--muted);line-height:1.55}.close{position:absolute;margin-left:-42px;margin-top:-8px;border:0;width:34px;height:34px;border-radius:999px;background:#eef1f3;font-size:22px;cursor:pointer}.source-note{margin-top:24px;color:#7a8792;font-size:12px;line-height:1.5}@media(max-width:720px){main{padding:26px 14px 60px}.topbar-inner{padding:10px 12px}.top-title{font-size:13px}.toolbar{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}.toolbtn{padding:10px 8px}.state summary,.state-body{padding-left:15px;padding-right:15px}.doc-grid{grid-template-columns:1fr}.state-name{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><a class="back" href="index.html">← Training Wizard</a><div class="top-title">State Document Library</div></div></div>
+<main>
+  <div class="eyebrow">Interactive Tools</div>
+  <h1>State Document Library</h1>
+  <p class="lede">A home for state, county, city, and government real-estate forms. Open a state to browse the documents currently listed for it. Document detail pages will be added as the library is built out.</p>
+  <div class="toolbar">
+    <input id="search" class="search" type="search" placeholder="Search a state or document…" autocomplete="off">
+    <button id="expandAll" class="toolbtn" type="button">Expand all</button>
+    <button id="collapseAll" class="toolbtn" type="button">Collapse all</button>
+  </div>
+  <div id="stats" class="stats"></div>
+  <div id="stateList" class="state-list"></div>
+  <div id="empty" class="empty">No states or documents match that search.</div>
+  <p class="source-note">This page is a working index. The document names are organized from the supplied state-document list. Individual document explanations and references are intentionally marked Coming Soon for later expansion.</p>
+</main>
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="position:relative">
+    <button id="modalClose" class="close" type="button" aria-label="Close">×</button>
+    <span class="modal-label">Coming Soon</span>
+    <h2 id="modalTitle">Document</h2>
+    <p id="modalText">A detailed reference page for this document will be added later.</p>
+  </div>
+</div>
+<script type="text/plain" id="catalogSource">
+## Alabama
+**Regulated & Government Forms**
+- ADOR Affidavit of Seller Gains
+- ADOR Affidavit of Seller Residence
+- ADOR Nonresident Exemption from Tax Withholding
+- ADOR Seller Certification of Exemption
+- ADOR WNR — Withholding on Sales Payment Voucher
+- ADOR WNR-V Instructions
+- Real Estate Sales Validation Form
+**State-Specific Documents**
+- Broker Lien Affidavit
+- Broker Lien Waiver
+- Broker Lien Waiver (Leasehold)
+- Indemnity of Debts and Liens Affidavit
+- Judgment and Tax Lien Affidavit
+- Survey Waiver
+- Tax Proration
+- Warranty Bill of Sale
+- Warranty Deed for Corporations
+- Warranty Deed (Tenants in Common)
+
+## Alaska
+Standard forms, including General Warranty Deed, Quitclaim Deed, and Special Warranty Deed, are pre-loaded for Alaska. No additional state-specific documents are available.
+
+## Arizona
+**Regulated & Government Forms**
+- Affidavit of Property Value — PDF, non-customizable
+- Homestead Exemption Request Questionnaire
+**State-Specific Documents**
+- Notice of Recording of Partial Release of Judgment
+- Notice of Subordination of Judgment
+- Notice to Judgment Creditor
+- Partial Release of Judgment
+- Deed of Trust and Assignment of Rents
+- Notice of Right to Earn Interest
+
+## Arkansas
+Standard forms, including General Warranty Deed, Quitclaim Deed, and Special Warranty Deed, are pre-loaded for Arkansas. No additional state-specific documents are available.
+
+## California
+**Regulated & Government Forms**
+- Preliminary Change of Ownership Report (blank and standard versions)
+- SB2 Fee Exemption Cover Sheet
+- Nonresident Withholding Waiver Request 588
+- County Transfer Tax Affidavit
+- HCD manufactured home form series (HCD 475.x, 476.x, 481.x, 484.x, 488.x, 491.x) — covering title transfers, assignments, liens, corrections, and ownership changes for manufactured structures
+**State-Specific Documents**
+- Assignment of Deed of Trust
+- Assignment of Deed of Trust and Request for Special Notice
+- Assignment of Lease
+- Bill of Sale
+- Certificate of Trust (Buyer or Borrower)
+- Certificate of Trust (Seller)
+- Claim of Lien
+- Covenant Not to Compete
+- Full Reconveyance
+- Grant Deed
+- Grant Deed Community Property with Right of Survivorship
+- Corporation Grant Deed
+- Joint Tenancy Grant Deed
+- Partnership Grant Deed
+- Homestead Declaration
+- Interspousal Deed (Borrower)
+- Interspousal Deed (Seller)
+- Long Form Deed of Trust and Assignment of Rents
+- Short Form Deed of Trust and Assignment of Rents
+- Notice of Cessation
+- Notice of Completion
+- Notice of Termination
+- Open Order Sheet
+- Partial Reconveyance
+- Release of Mechanic's Lien
+- Request for Beneficiary Demand
+- Request for Beneficiary Statement
+- Request for Full Reconveyance
+- Request for Notice
+- Request for Partial Reconveyance
+- Revocation of Power of Attorney (Borrower and Seller)
+- Statement of Identity
+- Subescrow Statement
+- Substitution of Trustee
+- Substitution of Trustee and Full Reconveyance
+- Instruction to Suspend and Close Equity Line of Credit
+- Affidavit of Death of Joint Tenant
+- Affidavit of Death of Spouse
+- Affidavit of Death of Trustee
+- Affidavit of Change of Trustee (Buyer or Borrower)
+- Affidavit of Change of Trustee (Seller)
+- Affidavit of Uninsured Deed
+**County-Specific Documents**
+- Fresno — Documentary Transfer Tax Declaration
+- San Diego — Manufactured Home Tax Clearance Request Form
+- Sacramento — Deed of Trust and Assignment of Rents (variant)
+
+## Colorado
+**Regulated & Government Forms**
+- DR 1079 — Withholding certificate for foreign sellers
+- DR 1083 — Withholding from real property transactions
+- Real Property Transfer Declaration (TD-1000)
+**State-Specific Documents**
+- Bill of Sale
+- Bill of Sale — Personal Property Agreement
+- Closing Instructions
+- Final Affidavit and Agreement
+- Manufactured Home Contract suite: Addendum to Contract, Amend & Extend, Lot Lease, Counterproposal
+- Partial Release from Deed of Trust
+- Personal Representative's Deed
+- Power of Attorney — Limited (Buyer)
+- Power of Attorney — Limited (Seller)
+- RE Tax-Assessment Agreement
+- Satisfaction of Deed of Trust
+- Statement of Authority
+- Utility Agreement
+- Well Permit Change in Owner Name Form
+
+## Connecticut
+**Regulated & Government Forms**
+- Real Estate Conveyance Tax Return
+- OP-236 Schedule A — Grantors
+- OP-236 Schedule A — Grantees
+**State-Specific Documents**
+- Contract — Fairfield County Bar Association
+- Contract — Greater Bridgeport Bar Association
+- Power of Attorney (Durable)
+- Power of Attorney
+- Smoke Alarms and Carbon Monoxide Alarms Affidavit
+- Undertaking and Indemnity for Mortgage Payoff — Fairfield
+- UCC-1 Financing Statement
+- Warranty Deed
+
+## Washington, D.C.
+**Regulated & Government Forms**
+- ROD-5 — Transfer of Economic Interest Tax Return
+- ROD-6 — Economic Interest Deed
+- ROD-11 — Reduced Recordation Tax for First Time Homebuyers
+- ROD-19 — Parental Affidavit
+- ROD-20 — Spousal Affidavit
+- ROD-21 — Security Affidavit (editable and standard versions)
+- ROD-24 — Re-Recording Certification
+- ROD-34 — Economic Interest Deed (Cooperative Only)
+- ROD-35 — Economic Interest Tax Return (Cooperative Only)
+- FP-7C — Real Property Recordation and Transfer Tax Form
+- FP-7CA — Addendum (editable and standard versions)
+- FP-100 — Homestead Deduction Application
+- FP-105 — Cancelation of Homestead Deduction (Senior/Disabled)
+- ASD-100 — Homestead Deduction
+- ASD-105 — Cancellation of Benefits Form
+**State-Specific Documents**
+- 2nd Deed of Trust
+- Application for Lower Income Exemption
+- Certificate of Satisfaction
+- Corporate Deed
+- Deed of Appointment of Substitute Trustee
+- Document Intake Sheet
+- Individual Deed
+- Notice Concerning RE Taxes
+- Release Affidavit for Lost Note
+- Release Affidavit to Accompany Promissory Note
+- Release by Successor Trustee
+- Special POA (Borrower and Seller)
+- Tax Certificate Request
+- Water and Sewer Final Bill Request
+
+## Delaware
+**Regulated & Government Forms**
+- Form RTT-TAX — Realty Transfer Tax Return and Affidavit of Gain and Value (standard + blank versions)
+- Form REW-EST — Real Estate Tax Return, Declaration of Estimated Income Tax (standard + blank versions)
+- RTT-SCH — First Time Home Buyer's Credit
+- Form 5405 — Claim for Refund of Realty Transfer Taxes by First Time Home Buyer
+**State-Specific Documents**
+- Agent's Affidavit and Certification
+- Affidavit — Judgment
+- Affidavit of Exemption (New Castle and Wilmington)
+- Bill of Sale — Mobile Home
+- Deed
+- First Work Affidavit
+- Mortgage Satisfaction
+- Owner's Affidavit — Individual (Sale and Refinance)
+- Owner's Affidavit — Corporate (Sale and Refinance)
+- Owner's Affidavit — General Partnership (Sale and Refinance)
+- Owner's Affidavit — LLC (Sale and Refinance)
+- Owner's Affidavit — Limited Partnership (Sale and Refinance)
+- Owner's Affidavit — Trust (Sale)
+- Owner's Affidavit — Executor
+- Owner's Affidavit — Photographer's Affidavit
+- Owner's No Survey Affidavit
+- Partial Release v1 and v2
+- Payoff 15 Day Letter
+- POA (Buyer)
+- POA (Seller)
+- POA — Mobile Home (Buyer and Seller)
+- Purchaser's Affidavit
+- Recorder's Receipt
+- Request for Bringdown
+- Request for Lien Certificate Letter
+- Spousal Affidavit
+- Subordination Agreement
+- Supreme Court Letter
+- Survey Affidavit
+- Title Affidavit — Mobile Home
+- Water Account Status — Wilmington
+**County & City-Specific Documents**
+- Dover — FTHB Affidavit (Buyer & Seller), First Time Buyer Affidavit, Tax Abatement
+- Kent — First Time Buyer Affidavit, Land Management Routing Form, Property Owner Info
+- New Castle — Affidavit of Exemption, Realty Transfer Tax
+- Sussex — First Time Buyer Affidavit, Realty Transfer Tax
+- Wilmington — First Time Buyer Affidavit, Affidavit of Exemption, Water Account Status
+
+## Florida
+**Regulated & Government Forms**
+- F-706 Estate Tax Return
+- Application for Certificate of Motor Vehicle Title
+- Application for Certificate of Title With or Without Registration
+- Application for Duplicate or Lost in Transit or Reassignment for a Motor Vehicle or Mobile Home
+- Application for Retirement of a Mobile Home Certificate of Title
+- Title Commitment Privacy Notice
+**State-Specific Documents**
+- Affidavit — Attorney in Fact (Durable POA) — Borrower and Seller
+- Affidavit As To Debts, Liens, and Possession
+- Bill of Sale
+- Borrower's Affidavit (Gap)
+- Claim of Lien
+- Closing Affidavit (Buyer)
+- Closing Affidavit (Seller)
+- Closing Agreement and Acknowledgements
+- Continuous Marriage Affidavit
+- Contractor's Affidavit to Lender
+- Contractor's Final Payment Affidavit
+- Death Certificate Affidavit
+- Foreign Interest Affidavit (Entity)
+- Foreign Interest Affidavit (Individual)
+- Hold Harmless Agreement
+- Insurance Premium Disclosure
+- Limited Liability Company Affidavit
+- Mortgage Payoff Certification
+- Mortgage Release 2nd Request (with Statute)
+- No Lien, Possession and Gap Affidavit
+- Non-Identity Affidavit
+- Affidavit of Non-Homestead
+- Non-Homestead Statutory Warranty Deed
+- Quitclaim Deed for a Non-Homestead
+- Notice of Commencement
+- Notice of Termination (without Contractor's Final Payment Affidavit)
+- Notice of Termination (with Contractor's Final Payment Affidavit)
+- Notice Re: FIRPTA
+- Notice to Purchaser
+- Notice to Purchaser-Mortgagor-Owner
+- Owner's Affidavit
+- Partial Release of Lien
+- Partial Release of Mortgage
+- Payoff Request — Institutional Loan
+- Payoff Request — Institutional Loan with Authorization
+- Payoff Request — Private Loan
+- Personal Representative's Deed
+- Premium Calculation Worksheet
+- Satisfaction of Judgment (Corporation)
+- Satisfaction of Judgment (Individual)
+- Satisfaction of Lien
+- Satisfaction of Mortgage
+- Search Request
+- Specific Power of Attorney (Borrower)
+- Specific Power of Attorney (Seller)
+- Tax Proration Agreement
+- Tax Proration Agreement with Escrow Holdback
+- Trust Certification Affidavit (Borrower)
+- Trust Certification Affidavit (Seller)
+- Trustee Deed
+- UCC-1
+- Warranty Deed — Corporate Grantor
+- Warranty Deed with Homesteaded Spouse
+- Notice of Possible Eligibility for Lower Reissue Rate
+- Notice: Florida Now Restricts the Sale of Property to Foreign Principals
+**County-Specific Documents**
+- Escambia County — Abutting Roadway Disclosure
+
+## Georgia
+Rather than Deeds of Trust, Georgia uses Security Deeds, which are already available in Qualia.
+**Regulated & Government Forms**
+- F511 — Agreement of Closing Attorney to Serve as Holder of Earnest Money
+- T-234 — Mobile [Manufactured] Home Certificate of Permanent Location
+- T-234A — Certificate of Permanent Location for a Manufactured Home
+**State-Specific Documents**
+- Affidavit of Descent
+- Affidavit of Seller's Exemption
+- Affidavit of Seller's Gain
+- Affidavit of Seller's Residence
+- Affidavit Regarding Liens
+- Cancellation Order
+- Executor's Deed
+- General Power of Attorney (Borrower and Seller)
+- Interim Waiver and Release Upon Payment
+- Partial Satisfaction Order
+- Release Affidavit by Attorney
+- Scrivener's Affidavit by Attorney (Deed version)
+- Scrivener's Affidavit by Attorney (Security Deed version)
+- Security Deed Cover Page Requirements
+- Special Warranty Deed
+- Waiver and Release Upon Payment
+
+## Hawaii
+**Regulated & Government Forms**
+- N-288 — Withholding Tax Return for Dispositions
+- N-288A — Statement of Withholdings on Dispositions
+- N-288B — Application for Withholding Certificate for Dispositions
+- N-288C — Application for Tentative Refund of Withholding on Dispositions
+- N-289 — Certificate for Exemption from Withholding
+- P-64A — Exemption from Conveyance Tax (with instruction sheet)
+- P-64B — Exemption from Conveyance Tax (with instruction sheet)
+- Conveyance Tax Certificate
+
+## Idaho
+Standard forms, including General Warranty Deed, Quitclaim Deed, and Special Warranty Deed, are pre-loaded for Idaho. No additional state-specific documents are available.
+
+## Illinois
+**Regulated & Government Forms**
+- PTAX-203 — Real Estate Transfer Declaration — PDF, non-customizable
+- Real Estate Transfer Tax Declaration
+- Disclosure Statement — Controlled Business Arrangement (DS-1)
+**State-Specific Documents**
+- Invoice
+- Quitclaim Deed
+- Satisfaction of Mortgage or Deed of Trust
+- Partial Satisfaction of Mortgage
+- Tax Proration Agreement
+- Title Opinion
+- Warranty Deed
+**County-Specific Documents**
+- Cook County — Statement by Grantor and Grantee
+
+## Indiana
+**Regulated & Government Forms**
+- Sales Disclosure Form
+- Claim for Homestead Property Tax Deduction
+- Claim for Homestead Standard Deduction
+- Application for Property Tax Exemption
+- Change of Ownership or Use of Exempt Property
+- Affidavit of Transfer to Real Estate
+- Property Tax Benefits Form
+**State-Specific Documents**
+- Partial Release of Mortgage
+- Satisfaction of Mortgage
+- Statement of Mortgage or Contract Indebtedness
+
+## Iowa
+**Regulated & Government Forms**
+- Declaration of Value + Declaration of Value Instructions
+- Groundwater Hazard Statement — required at transfer, unique to Iowa
+- Time of Transfer Inspection Report Form
+**State-Specific Documents**
+- Affidavit of Disclaimer
+- Affidavit of Identity Third Party
+- Affidavit of Possession
+- Affidavit of Surviving Joint Tenant for Change of Title to Real Estate
+- Affidavit of Surviving Spouse
+- Application for Homestead Tax Credit Eligibility
+- Commercial Closing Checklist — Buyer & Seller
+- Commercial Closing Checklist — Buyer & Seller with QI
+- Commercial Closing Checklist — Loan Purchase with 1031 QI
+- Commercial Closing Checklist — Refinance
+- Commercial Disbursing Agreement — Loan Proceeds
+- Commercial Disbursing Agreement — Master
+- Commercial Premium Sheet
+- Corrected Quit Claim Deed (with and without cover)
+- Corrected Warranty Deed with Cover
+- Court Officer Deed with Cover
+- Individual Trustee Affidavit (Borrower and Seller)
+- Property Settlement Release
+- Purchaser Affidavit
+- Quit Claim Deed — Less than $500 (with and without cover)
+- Support Affidavit
+- Tax Proration Agreement
+- Trustee Warranty Deed
+- Warranty Deed in Fulfillment
+- Warranty Deed in Partial Fulfillment
+- Warranty Deed with Cover
+
+## Kansas
+**Regulated & Government Forms**
+- Real Estate Sales Validation Questionnaire
+- Mortgage Registration Affidavit — Kansas has a mortgage registration tax
+- Mortgage Cap Affidavit
+- Mobile Home Title Elimination Application
+**State-Specific Documents**
+- Partial Release of Mortgage
+- Satisfaction of Mortgage
+
+## Kentucky
+Kentucky is an attorney-driven closing state.
+**State-Specific Documents**
+- Title Opinion Letter
+- Search Cover Form
+- General Warranty Deed With Survivorship
+- Special Warranty Deed With Survivorship
+- Quitclaim Deed With Survivorship
+- Short Form Deed
+- Loan Specific Power of Attorney (Borrower)
+- Special Power of Attorney (Buyer or Borrower)
+- Special Power of Attorney (Seller)
+- Quitclaim Deed for Divorce
+- Legal Description for Mortgages
+
+## Louisiana
+Louisiana operates under a civil law system (French and Spanish influence). Document terminology is unique to this state. The forms below replace the standard instruments used elsewhere.
+**State-Specific Documents**
+- Cash Sale Deed (standard, As Is, and Minerals Reserved versions)
+- Credit Sale Deed
+- Assumption Deed
+- Act of Correction by Notary (Sale)
+- Act of Correction by Notary (Note)
+- Act of Correction by Parties
+- Interspousal Donation Inter Vivos (Borrowers)
+- Interspousal Donation Inter Vivos (Sellers)
+- Cancellation Mortgage
+- Affidavit to Cancel Mortgage
+- Affidavit to Immobilize Manufactured Home
+- Borrower Affidavit and Indemnity
+- Directions for Partial Release of Multiple Indebtedness Mortgage
+- Final Title Opinion
+- Good Funds Letter
+- Payment and Shortfall Affidavit
+- Payoff Authorization
+- Payoff Cover Letter to Lender
+- Payoff Letter to Seller
+- Request for Cancellation
+- Request for No Work Affidavit
+- Seller Owner Affidavit and Indemnity
+
+## Maine
+**Regulated & Government Forms**
+- Form REW-2, REW-3, REW-4, REW-5
+- Real Estate Withholding Return (Individuals) — year-specific 2021–2026
+- Real Estate Withholding Return (Corporations) — year-specific 2021–2026
+- Real Estate Withholding Return (Trusts & Estates) — year-specific 2021–2026
+- RETTD Form
+- Notification to Seller(s) of Withholding Tax Requirement
+**State-Specific Documents**
+- Certification of Smoke and Carbon Monoxide Alarms
+- Borrower Right to Select Own Attorney
+- Notice About Property Taxes
+- Waiver of Lien — Real Estate License
+
+## Maryland
+Maryland has one of the most extensive county-specific document libraries of any state.
+**Regulated & Government Forms**
+- MW506AE — Application for Certificate of Exemption (standard), 2025 and 2026 versions
+- MW506AE — Application for Certificate of Exemption with Relocation Package, 2025 and 2026 versions
+- MW506NRS — Return of Income Tax Withholding
+- MW506R — Application for Tentative Refund of Withholding, 2025 and 2026 versions
+- MW508NRS — Monthly Reconciliation Return
+- Agricultural Transfer Tax Statement
+- Agricultural Declaration of Intent
+- Agricultural Use Assessment Application
+- Ground Rent Redemption Deed
+- Ground Rent Opinion Letter
+- Notice of Right to Redeem Ground Rent
+**State-Specific Documents**
+- 2nd Deed of Trust
+- 60 Day Release Follow Up
+- Acknowledgement of Receipt of Commitment
+- Affidavit As To Total Payment (Allocation Collection)
+- Affidavit As To Total Payment (Section 10-912 B2)
+- Affidavit in Lieu of Lender
+- Affidavit of Intent
+- Affidavit to Use Electronic Signature
+- Certificate of Partial Satisfaction or Partial Release
+- Certificate of Satisfaction
+- Certification of Exemption from Withholding
+- Certification of Power of Attorney (Real Property Only)
+- Commercial Loan Affidavit with Compliance Agreement
+- Consent to Jurisdiction and Waiver of Jury Trial
+- Deed Corporate
+- Deed of Subordination
+- Deed of Trust
+- Domestic Partners Affidavit
+- Domestic Partnership Affidavit (Transfer To or From Partner)
+- Escrow Agreement
+- Financing Statement
+- First Time Home Buyer Affidavit
+- Individual Deed (standard and Refinance versions)
+- Intake Sheet (standard, editable, addendum, addendum editable)
+- Leasehold Assignment Deed
+- Life Estate Deed
+- Limited Power of Attorney (Real Property Only)
+- Lien Release for Municipalities
+- Mortgage Fraud Certification Affidavit
+- No Consideration Deed Affidavit
+- ORT Owner's Affidavit — Residential and Commercial Property
+- Optional Semi-Annual Tax Notice to Borrower
+- Order of Satisfaction
+- Owner Occupant Affidavit
+- Owner's Affidavit of Survey
+- Partial Release of Mortgage
+- Partnership Deed
+- Personal Representative Deed
+- Refinance Affidavit
+- Release Intent
+- Release of Mortgage
+- Release of Third Party Lender Agreement
+- Removal of Trustees and Appointment of Substitute Trustees
+- Request for Notice of Sale
+- Secondary Mortgage Commercial Loan Disclosure
+- Special Warranty Deed (HUD)
+- Statement of Continuation
+- Statutory Notice
+- Statutory Notice and Acknowledgement (TI)
+- Statutory Power of Attorney
+- Statutory Release Affidavit
+- Survey Approval Form
+- Tax Certification Sheet
+- Tax Recordation Tax Indemnification Letter (Deed of Trust)
+- Tax Recordation Tax Indemnification Letter (Indemnity Deed of Trust)
+- Trustees Deed
+- Water Escrow Agreement
+**County & City-Specific Documents**
+- Anne Arundel — Application for Lien Certificate, Utility Transfer Form
+- Baltimore City — Alarm Registration Statement, Certification of Owner Occupied Status, Intake Sheet, Property Registration Statement, Registration Statement of Vacant Lots, Tenant Affidavit
+- Baltimore County — Application for Lien Certificate, Affidavit of Primary Residence
+- Calvert — Department of Public Works Water and Sewer
+- Carroll — Application for Lien Certificate
+- Charles — Application for Lien Certificate
+- Cumberland (City) — Application Certification of Tax Liens
+- Frederick County/City — Property Transfer Request, Refinance Affidavit, Affidavit of Partial Debt
+- Garrett — Deed Conveying Improved Property
+- Harford — Application for Lien Certificate, Settlement Request for Final Bill
+- Howard — Application for Lien Certificate, Document Tracking Sheet, Domestic Partnership Affidavit, Refinance Affidavit, Reverse Mortgage Affidavit
+- Montgomery — Tax Recordation Exemption Affidavit
+- Mount Airy — Fire Code Certification
+- Prince George's — Finance Affidavit, Homeowner's Certification of Principal Residence, Limitation of Debt Secured Affidavit, No Consideration Deed Affidavit, Affidavit of Purchase Money Deed of Trust
+- Salisbury (City) — Property Affidavit
+- St. Mary's — Residential Affidavit
+- Washington County — Tax Property Article TP 13-207 Affidavit
+- WSSC — Settlement or Moving Form
+
+## Massachusetts
+**Regulated & Government Forms**
+- Title Five (V) Certification and Indemnification — septic system compliance
+- UFFI Certificate — urea-formaldehyde foam insulation
+**State-Specific Documents**
+- Attorney's Certification of Title
+- Carbon Monoxide Indemnification & Certification
+- Chain of Title Affidavit
+- Homeowner's Homestead Affidavit
+- Homestead Declaration (Natural Persons)
+- Homestead Declaration (Trustee Owned)
+- Homestead Declaration (Elderly or Disabled)
+- Homestead Declaration (Elderly or Disabled, Trustee Owned)
+- Homestead Disclosure
+- Lead Paint Agreement
+- Affidavit Regarding Estate Taxes
+- Release of Declaration of Homestead
+- Limited Power of Attorney (Seller)
+- Discharge or Satisfaction of Mortgage
+- Notice Regarding Real Estate Taxes
+- Partial Release of Mortgage
+- Affidavit Regarding Power of Attorney (Buyer and Seller)
+- Power of Attorney Certification (Seller)
+- MA Owners Affidavit
+- Payoff Letter
+- Post Closing Adjustments
+- Real Estate Taxes and Utilities Agreement
+- Waiver of Right to Increase First Mortgage
+- Affidavit Relative to Homestead
+- Transferor's Certification
+- Non-MA Owners Affidavit
+
+## Michigan
+**Regulated & Government Forms**
+- Principal Residence Exemption (PRE) Affidavit — standard version
+- Principal Residence Exemption (PRE) Affidavit — Active Duty Military version
+- Property Transfer Affidavit
+- Property Transfer Affidavit and Homestead Exemption Receipt
+- Real Estate Transfer Tax Valuation Affidavit
+- Application for State Real Estate Transfer Tax (SRETT) Refund
+- Request to Rescind Principal Residence Exemption (PRE)
+- Request to Rescind Disabled Veterans Exemption
+- Affidavit for Agricultural Property Form 3676
+- Application to Purchase Minerals and Allied Rights
+**State-Specific Documents**
+- Agent's Acknowledgement
+- Amendment to Purchase Agreement
+- Bill of Sale
+- Certificate of Trust
+- Certification as to the Validity of Power of Attorney and Agent's Authority
+- Commitment Change Letter
+- Conditional Rescission of Primary Residence Exemption
+- Construction Lien Escrow Instructions
+- Deed Escrow Agreement
+- Discharge of Mortgage (standard and Corporation)
+- Earnest Money Deposit Escrow Agreement
+- Escrow Agreement (Borrower and Seller)
+- Escrow Release
+- First Lien Letter to Lender (standard and with Assessments)
+- Affidavit of Affixture of Mobile Home
+- Affidavit of Missing Mobile Home Title
+- HOA Dues Request
+- Land Contract
+- Memorandum of Land Contract
+- Limited Power of Attorney (Buyer and Seller)
+- Notice of Commencement
+- Termination of Notice of Commencement
+- Occupancy Escrow
+- Package Cover Letter
+- Partial Release of Mortgaged Premises by Corporation
+- Payoff Agreement
+- Payoff Letter Request
+- Payoff Notice
+- Payoff Remittance (with Receipt and with Request)
+- Payoff Update Request
+- Private Road Disclosure
+- Real Property Statement
+- Statutory Power of Attorney
+- Tax Lien Affidavit
+- Tax Proration Agreement
+- Taxes Remittance
+- Trustee's Deed
+- Use and Occupancy Letter
+- Water Escrow Agreement
+
+## Minnesota
+Minnesota uses a numbered form system (MN Form XX.X.X). All standard real estate instruments are available as numbered forms with year dates, organized by grantor/grantee entity type.
+**Regulated & Government Forms**
+- Clearance Certificate for Public or Medical Assistance Claim (Form 10.8.9)
+- Well Disclosure Certificate — MN Department of Public Health
+- FIRPTA Q&A, Closer's Instructions, Certificate of Foreign Seller Without U.S. ITIN
+- Non-Foreign Status Certifications — 7 variants by citizenship and entity type
+**State-Specific Documents**
+- Warranty Deeds (Form 10.1.x) — 8 variants by entity type
+- Limited Warranty Deeds (Form 10.2.x) — 8 variants including Except Assessments versions
+- Quitclaim Deeds (Form 10.3.x) — 6 variants including divorce/dissolution
+- Personal Representative Deeds (Form 10.5.x) — 6 variants by entity type
+- Contract for Deed suite (Forms 30.1.x–30.5.x) — Contract, Addendum, Assignment, Cancellation, Transfer Statement
+- Mortgage Satisfactions (Forms 20.5.x) — 5 variants
+- Partial Releases of Mortgage (Forms 20.6.x) — 5 variants
+- Mechanic's Lien series (Forms 40.3.x–40.5.x) — releases, satisfactions, waivers, service affidavits
+- Transfer on Death Deeds — married and unmarried grantor versions
+- Certificate of Full Release of Mortgage by Title Insurance Company (Forms 20.7.x)
+- Conservator's Deed (Form 10.6.1)
+- Individual Trustee Deed (Form 10.4.1)
+- Notice of Cancellation of Contract for Deed (Form 30.4.1)
+- Notice of Lis Pendens (Forms 40.6.1 and 40.6.2)
+- Discharge Notice of Lis Pendens
+- Severance of Joint Tenancy
+- Statement of Severed Minerals Interests
+- Statutory Short Form Power of Attorney (Borrower and Seller)
+- Application for Homestead (Form CR-H)
+**County-Specific Documents**
+- Carver — Sewage Disclosure
+- Kandiyohi — Property Transfer Septic Disclosure
+- McLeod — Property Transfer Septic Disclosure
+- Stearns — Environmental Services Certificate
+- Wright — Point of Sale Certificate
+
+## Mississippi
+**State-Specific Documents**
+- Warranty Deed
+- Quitclaim Deed
+- Subordination Agreement
+- Authority to Cancel
+- Notice to Borrowers and Waiver of Right to Purchase Title Insurance Protection
+
+## Missouri
+**Regulated & Government Forms**
+- T-1 Disclosure
+**State-Specific Documents**
+- Invoice
+- Warranty Deed
+**County-Specific**
+- Jackson County — Real Property Certificate of Value
+- St. Charles County — Real Property Certificate of Value
+- St. Louis County — Real Property Certificate of Value
+- St. Louis City — Real Property Certificate of Value
+
+## Montana
+**Regulated & Government Forms**
+- Realty Transfer Certificate
+- Water Right Ownership Update Form
+**State-Specific Documents**
+- Corporate Deed
+- Full Reconveyance
+- Satisfaction of Mortgage
+- Request for Reconveyance
+- Limited Power of Attorney (Buyer and Seller)
+
+## Nebraska
+**Regulated & Government Forms**
+- Real Estate Transfer Statement
+**State-Specific Documents**
+- Deed of Reconveyance
+- Release of Mortgage
+- Warranty Deed
+
+## New Hampshire
+**Regulated & Government Forms**
+- CD-57-P
+- CD-57-S
+- CD-57-HC-P
+- CD-57-HC-S
+- PA-34
+**State-Specific Documents**
+- Survey Affidavit — Expanded Policies
+- Survey Affidavit — Standard Policies
+- Manufactured Housing Affidavit
+- Certification of Nonforeign Status
+- Compliance Agreement
+- Mechanics Lien and Parties in Possession Affidavit
+- Notice of Availability (standard and standard versions)
+- Plot Plan Request
+- Post Closing Adjustments Agreement
+- Request for Title Examination
+- Seller's Agreement
+- Disclosure of Finance Charges
+
+## New Jersey
+**Regulated & Government Forms**
+- GIT REP-1 — Nonresident Seller's Tax Declaration
+- GIT REP-2 — Nonresident Seller's Tax Prepayment
+- GIT REP-3 — Seller's Residency Certification
+- GIT REP-4 — Waiver of Seller's Filing Requirement
+- GIT REP-4A — Waiver and Payment for Corrected Deed
+- RTF-1 — Affidavit of Consideration for Use by Seller
+- RTF-1EE — Affidavit of Consideration for Graduated Percent Fee
+- RTF-3 — Claim for Refund, Realty Transfer Fee
+**State-Specific Documents**
+- Acknowledgement of Right to Counsel
+- Affidavit of Title (Borrower and Seller)
+- Attorney Checklist
+- Certification of Purchaser RE: Age Restriction
+- Confirmation of Title Order
+- Corporate Resolution (Borrower and Seller)
+- County Search Request
+- Deed
+- Discharge of Mortgage
+- Disclaimer Re: Right to Counsel
+- Estate Indemnity Bond
+- Estate Questionnaire
+- Exhibit A — Legal Description
+- Flood Search Order Request
+- Important Notice and Disclosure
+- Notice of Real Estate Settlement
+- Partial Release of Mortgage
+- Payoff Demand Request With Authorization
+- Power of Attorney (Borrower and Seller)
+- Recording Letter — Notice of Settlement
+- Recording Request Cover
+- Recording Request Letter
+- Report of Title
+- Rundown Request
+- Rundown Results
+- Subordination of Mortgage
+- Survey Affidavit
+- Survey Affidavit — No Survey
+- Survey Request
+- Survey Waiver Form
+- Tax Payment Letter
+- Welcome Letter to Borrower — Refi
+**County Recording Cover Sheets — All 21 NJ Counties**
+- Atlantic, Bergen, Burlington, Camden, Cape May
+- Cumberland, Essex, Gloucester, Hudson, Hunterdon
+- Mercer, Middlesex, Monmouth, Morris, Ocean
+- Passaic, Salem, Somerset, Sussex, Union, Warren
+
+## New Mexico
+**State-Specific Documents**
+- Notice to Purchaser Insured
+- Warranty Deed
+- Quitclaim Deed
+
+## Nevada
+**Regulated & Government Forms**
+- Declaration of Value
+- Real Property Transfer Tax — Exemption form
+- Application for Property Tax Exemption
+- Application for Property Tax Exemption for Low-Income Housing
+- Affidavit for Renewal for Property Tax Exemption
+- Homestead Exemption Request Questionnaire
+**State-Specific Documents**
+- Declaration of Homestead
+- Notice of Recording of Partial Release of Judgment
+- Notice of Subordination of Judgment
+- Notice to Judgment Creditor
+- Partial Release of Judgment
+- Notice of Right to Earn Interest
+
+## New York
+**Regulated & Government Forms**
+- TP-584 — Combined Real Estate Transfer Tax Return
+- TP-584-NYC — Combined Real Estate Transfer Tax Return (New York City)
+- TP-584 Addendum — Buyer and Seller
+- RP 5217 — Real Property Transfer Report
+- RP 953 — Status of Escrow Account
+- Nonresident Real Property Estimated Income Tax Payment Form
+- TIRSA Application for the Issuance of a Recorded Document
+- Real Property Transfer Tax Return — City of Peekskill
+- Real Property Transfer Tax Return — City of Yonkers
+- Real Property Transfer Tax Return Instructions — City of Mount Vernon
+- Transfer Tax — Community Preservation Fund (Town of Red Hook)
+**State-Specific Documents**
+- Administrators Deed
+- Affidavit (Mortgagee)
+- Affidavit in Lieu of Registration
+- Affidavit of Title
+- Assignee Affidavit
+- Bargain and Sale Deed
+- Bargain and Sale without Covenant Deed
+- Covenant and Warranty Deed
+- Executor's Deed
+- Exemption Affidavit
+- Extension Agreement Affidavit
+- Good Faith Estimate
+- Governmental Contacts List (NYC)
+- Judgment Affidavit
+- Mortgage Schedule
+- Multiple Exception
+- NY Invoice 2 (standard, CASH, and REFI versions)
+- No Judgment Affidavit
+- Privacy Notice
+- Property Transfer Report
+- Quitclaim Deed
+- Real Estate Transfer Tax Claim for Refund
+- Survey Affidavit
+- Tax Search — Property Taxes
+- Title Invoice
+- Title Order Confirmation
+- Title Order Confirmation Cover Page
+- Title Report Cover Letter
+**County Recording Cover Sheets**
+- Orange County
+- Putnam County
+- Suffolk County
+- Westchester County
+
+## North Carolina
+North Carolina is an attorney-driven closing state.
+**Regulated & Government Forms**
+- NCLTA Forms 1, 2, 3, 5, 6, 7 — North Carolina Land Title Association standard forms
+- 2-T Offer to Purchase and Contract — NC Bar Association
+- 1099NRS — Nonresident withholding
+**State-Specific Documents**
+- Certificate of Satisfaction
+- Custom Preliminary Opinion Report
+- Deed of Trust
+- Final Title Opinion
+- General Warranty Deed
+- Invoice
+- Judgment Affidavit
+- Limited Power of Attorney (Individual Buyer)
+- Non-Warranty Deed — NC-specific deed type
+- Owner Affidavit and Indemnity Agreement
+- Owner Affidavit and Indemnity Agreement MLA (NCLTA 5)
+- Owner Affidavit, Indemnity and Lien Subordination Agreement (NCLTA 3)
+- Owner and Contractor Affidavit, Waiver of Liens and Indemnity Agreement
+- Preliminary Opinion on Title
+- Promissory Note
+- Release Deed — NC-specific deed type
+- Special Warranty Deed
+- Borrower's Title Insurance Company Selection Form
+- Agreement and Indemnification Regarding Encroachments
+**County-Specific Documents**
+- Onslow County — Tax Certification Request Form
+
+## North Dakota
+Standard forms, including General Warranty Deed, Quitclaim Deed, and Special Warranty Deed, are pre-loaded for North Dakota. No additional state-specific documents are available.
+
+## Ohio
+**Regulated & Government Forms**
+- DTE 100 — Real Property Conveyance Fee Statement
+- DTE 100EX — Conveyance Fee Exemption Form — PDF, non-customizable
+- OLTA-1 — Ohio Disclosure Form
+- Preliminary Judicial Report
+- Final Judicial Report
+- Conditions and Stipulations of the Preliminary Judicial Report
+- Endorsement to the Preliminary Judicial Report
+**State-Specific Documents**
+- Affidavit as to Liens and Encumbrances
+- Affidavit of No Improvements
+- Authenticator Certificate
+- Disclosure Re: Closing
+- General Warranty Deed
+- Lien Affidavit (Borrower and Seller)
+- Lien Search
+- Limited Warranty Deed
+- Notice Re: Residential Loan of $75,000 or Less
+- Notice of Availability and Offer of Closing Protection Coverage
+- Notice of Availability of Owner's Title Insurance
+- Payoff Request — Attorney General
+- Property Lien Search Invoice Request Form
+- Request for Lien Verification and Payoffs
+- Revolving Credit Loan Affidavit
+- Short Form Mortgage
+- Standard Acceptance of Escrow
+**County-Specific Documents**
+- Cuyahoga — Residential Rental Property Disclosure Form
+- Cuyahoga — Sale Verification Questionnaire
+
+## Oklahoma
+**State-Specific Documents**
+- Affidavit for Title or Ownership of Land — Individual
+- Affidavit for Title or Ownership of Land — Exempt Business or Trust
+- Affidavit for Title or Ownership of Land — Non-exempt Business or Trust
+- General Warranty Deed
+- Special Warranty Deed
+
+## Oregon
+**Regulated & Government Forms**
+- Form OR-18-WC — Withholding (with instruction sheet)
+- Form OR-18-WC-V — Withholding voucher (with instruction sheet)
+**State-Specific Documents**
+- Access Easement
+- Estate by the Entirety Deed
+- Affidavit of Death of Joint Tenant
+- Affidavit of Transfer of Interest by Inheritance Without Probate
+- Affidavit in Support of Change to a Manufactured Home
+- Affidavit to Establish Ownership of a Manufactured Structure
+- Manufactured Home Ownership Application
+- Application for Recording Manufactured Home as Real Property
+- Application to Remove Manufactured Home from County Deed Records
+- Manufactured Home Affidavit of Repossession
+- Manufactured Home Affidavit of Transfer by Probate or Small Estate
+- Manufactured Structure Security Interest Change
+- Mechanic's Lien
+- Notice of Intent to Record Release of Trust Deed
+- Notice of Right to a Lien
+- Notice to Owner of Filing of a Construction Lien
+- Partial Release of Mortgage
+- Release of Mortgage
+- Release of Trust Deed
+- Request for Full Reconveyance
+- Request for Partial Reconveyance
+- Special Warranty Deed
+- Statutory Bargain and Sale Deed
+- Property Tax Exemption Applications: agricultural workforce housing, riparian lands, student housing, nonprofit/elderly, fire damage proration, conservation easement, ORS 307.112, ORS 307.166
+
+## Pennsylvania
+Pennsylvania has one of the largest municipality-specific document libraries; forms exist for many individual townships and boroughs.
+**Regulated & Government Forms**
+- Realty Transfer Tax Statement of Value — PDF, non-customizable
+- Real Estate Transfer Tax Certification — Philadelphia
+- Coal Deed — unique to PA, coal rights are separately titled
+- Coal Deed (Special Warranty)
+- Coal Deed (Executors or Trustees)
+- PGW Balance Letter — Philadelphia Gas Works
+- PGW Account Payoff Inquiry Form
+- Smoke Detector Certification — Philadelphia
+- Recording Affidavit and Recording List — Philadelphia
+- Water Certification Request
+- Water and Sewer Certification Request
+- Tax Lien Certificate Request — Carbon County
+- Tax Lien Certificate Request — Lehigh County
+- Tax Lien Certificate Request — Northampton County
+**State-Specific Documents**
+- Application for Certification Statement
+- Assignment of Bond and Mortgage
+- Bill Certification and Payoff Request Form
+- Bond and Warrant
+- Closing Fee Notice
+- Corporate Lien Search Certificate Request
+- Deed (Executors or Trustees)
+- Deed (Special Warranty)
+- Domestic Relations Request
+- Excavator's Affidavit
+- General Warranty Deed
+- Indenture Mortgage
+- Mortgage Assignment
+- Notice of Additional Charge
+- Notice of Arrears Request Form
+- Notice to Record Mortgage Satisfaction Piece
+- Photographer's Affidavit
+- Power of Attorney (Seller)
+- Power of Attorney Notice (Borrower and Seller)
+- Power of Attorney for Borrower (Purchase or Refinance)
+- Receipts (Allegheny County)
+- Record Owner and Lien Certificate
+- Release Judgment
+- Release of Mechanic's Liens
+- Release of Mortgage (Partial)
+- Resolution for Corporate Buyer
+- Satisfaction of Judgment
+- Satisfaction Piece
+- Settlement Officer Satisfaction
+- Sheriff Deed
+- Specific Warranty Deed
+- Stipulation Against Liens
+- Stipulation Against Liens (Before Contract)
+- Subordination Agreement (Corporation, Individual, Lien, Mortgage)
+- Tax Certificate Request
+- Tax Fax to Lender
+- Waiver of Liens
+- Water Payoff Request (Philadelphia)
+**Municipal Real Estate Registration Forms**
+- Boroughs: Doylestown, Narberth, New Britain, Newtown, Royersford, West Conshohocken
+- Townships: Buckingham, Cheltenham, Doylestown, East Norriton, Lower Merion, Montgomery, Plymouth, Plumstead, Upper Merion, West Rockhill, Wrightstown
+- Cities: Chester (Property Registration), Coatesville (Deed Registration)
+- Other: Conshohocken Real Estate Certification, Durham Deed Registration Application
+
+## Rhode Island
+**Regulated & Government Forms**
+- Certificate of Withholding
+- Remittance of Withholding
+- Non-Resident Election of Gain for Closing
+- Seller Residency Affidavit
+**State-Specific Documents**
+- Acknowledgement of Discharge of Lien
+- Declaration of Homestead
+- Subordination of Homestead
+- Release of Declaration of Homestead
+- Partial Release of Mortgage
+- Request for Certificate
+- Satisfaction of Mortgage
+- Smoke Detector Law Affidavit
+- Warranty Deed (Corporation and Individual)
+
+## South Carolina
+**Regulated & Government Forms**
+- DMV 400 — Title and Registration Application, required for manufactured homes
+- Nonresident Real Estate Withholding (I-290)
+- Nonresident Seller Withholding Affidavit
+- DOI Financial Interest Disclosure
+**State-Specific Documents**
+- Back Title Request Form
+- Durable Power of Attorney (Buyer and Seller)
+- General Warranty Deed
+- Indemnity Agreement
+- Insured Closing Letter Request
+- Limited (Special) Warranty Deed
+- Manufactured Housing Affidavit
+- Mortgage
+- Notice to Borrower
+- Owner Affidavit
+- Owner Affidavit as to Matters of Prior Survey
+- Owner's Affidavit and Indemnity
+- Promissory Note
+- Seller Affidavit
+- Supplemental Affidavit for Expanded Coverage
+- Transferor Affidavit (Tax Lien Inapplicable)
+
+## South Dakota
+Standard forms, including General Warranty Deed, Quitclaim Deed, and Special Warranty Deed, are pre-loaded for South Dakota. No additional state-specific documents are available.
+
+## Tennessee
+**Regulated & Government Forms**
+- Residential Property Disclosure — PDF, non-customizable
+**State-Specific Documents**
+- Lead-Based Paint Affidavit
+- Residential Property Disclaimer Statement
+- Partial Release of Deed of Trust
+- Release of Deed of Trust
+- Special Warranty Deed
+- Warranty Deed (Corp)
+- Warranty Deed (Individual)
+
+## Texas
+**Regulated & Government Forms**
+- T-47 — Residential Real Property Affidavit
+- T-47.1 — Residential Real Property Declaration In Lieu Of Affidavit
+- T-56 — Owner's Policy Rejection Form
+- T-6 — Certificate of Title (USA)
+- T-64 — Texas Disclosure
+- T-9 — Certificate of Title for Easements (USA)
+- T-00 Comptroller County Codes — PDF, non-customizable
+- T-00 Verification of Services Rendered — PDF, non-customizable
+- Policy Guaranty Fee Remittance Form
+**State-Specific Documents**
+- Affidavit as to Debts and Liens
+- Mandatory Complaint Notice
+- Marital Status Affidavit
+- Not Same Person Affidavit
+- Notice to Purchasers of Real Property
+- PID Notice
+- Premium Calculation Worksheet
+- Tax Proration Agreement
+- Tax Proration Agreement with Disclosures
+- Title Company Disclosure for Residential Closings
+- Title Report
+- Waiver of Inspection and Disclosure to Owner
+
+## Utah
+**State-Specific Documents**
+- Affidavit and Agreement (Purchaser or Borrower)
+- Affidavit and Agreement (Seller)
+- Affidavit and Final Release
+- Affidavit and Indemnification (Status of Tenancy)
+- Affidavit of Successor Trustee Upon Death of Trustee
+- Affidavit of Survivorship and Termination of Joint Tenancy
+- Authorization to Release Information
+- Bill of Sale
+- Escrow Instructions
+- Financial Disclosure Authorization
+- Indemnification Agreement
+- Note Secured by Deed of Trust
+- Party Wall Agreement
+- Seller Carry-Back Financing
+- Special Warranty Deed
+- Subordination Agreement (General Contractor)
+- Subordination Agreement (Owner)
+- Trust Deed
+
+## Vermont
+**Regulated & Government Forms**
+- Withholding Tax Return for Transfer of Real Property — PDF, non-customizable
+- Property Transfer Tax Return — PDF, non-customizable
+- Smoke & CO Alarm Compliance Form — PDF, non-customizable
+**State-Specific Documents**
+- Satisfaction of Mortgage
+- Partial Release from Mortgage
+- Quitclaim Deed (Individual)
+- Warranty Deed (Corporation)
+- Warranty Deed (Individual)
+
+## Virginia
+**Regulated & Government Forms**
+- Form R-5
+- Form R-5E
+- Form R-5P
+- Virginia Land Title Record Cover Sheet
+**State-Specific Documents**
+- Affidavit — Manufactured Home
+- Affidavit of Marriage
+- Affidavit of Street Address
+- Certificate of Partial Satisfaction
+- Certificate of Satisfaction
+- Certificate of Satisfaction By Settlement Agent
+- Certification of Trust
+- Credit Line Affidavit
+- Deed (Corporation)
+- Deed (Individual)
+- Deed of Appointment of Substitute Trustee
+- Deed of Release
+- Disbursement Letter
+- Draft Deed of Trust
+- Judgment Affidavit
+- Non-Termination of POA Affidavit (Borrower and Seller)
+- Notice To Policyholders
+- Owner's Affidavit
+- Owner's Condo Affidavit
+- Pre-Recording Disbursement Letter
+- Second Deed of Trust
+- Second Note
+- Settlement Agent Release Affidavit
+- Settlement Agent Release Intent
+- Settlement Agent Release Notice
+- Special POA — Refi
+- Specific POA (Borrower and Seller)
+- State Corporation Commission Certificate Request
+- Subordination Deed
+- Survey Affidavit (No Survey Available)
+- Trustee Deed
+
+## Washington
+Washington uses two form systems: LPO (Limited Practice Officer) numbered forms for standard instruments (available in purchase (i) and refinance (r) versions) and the TD-420 series for vehicle-titled manufactured homes.
+**Regulated & Government Forms**
+- Real Estate Excise Tax (REET) Affidavit — standard, mobile home, multi-property, supplemental, and controlling interest versions, plus instructions
+- Consumer Use Tax Return
+- Foreclosure Prevention Fee Disclosure
+- Contracted Plate Search (CPS) Application — Form RPD-224-002
+**State-Specific Documents**
+- LPO Cover Sheet (01-05)
+- LPO Statutory Warranty Deed (10-05)
+- LPO Statutory Warranty Deed Fulfillment (11-05)
+- LPO Quit Claim Deed (12-05)
+- LPO Bargain and Sale Deed (15-05)
+- LPO Short Form Deed of Trust (20-05)
+- LPO Deed of Trust (22-05)
+- LPO Deed of Trust with Due on Sale (22A-05)
+- LPO Request for Full Reconveyance (23-05)
+- LPO Request for Partial Reconveyance (24-05)
+- LPO Promissory Note (28A-05)
+- LPO Request for Notice (29-05)
+- LPO Real Estate Contract Residential Short (44-05)
+- LPO Real Estate Contract Long Form (45-05)
+- LPO Mortgage Statutory Form (50-05)
+- LPO Satisfaction of Mortgage (51-05)
+- LPO Partial Release of Mortgage (52-05)
+- LPO Release of Lien (60-05)
+- LPO Partial Release of Lien (61-05)
+- LPO Satisfaction of Judgment (62-05)
+- LPO Partial Release of Judgment (63-05)
+- LPO Waiver of Lien (64-05)
+- LPO Partial Waiver of Lien (65-05)
+- LPO Special Power of Attorney Purchase (71-05)
+- LPO Special Power of Attorney Sale (70-05)
+- LPO Personal Property Security Agreement (73-08)
+- LPO Personal Representative Deed (74-16)
+- LPO Appointment of Successor Trustee (75-22)
+- LPO Assignment of Deed of Trust (21-05)
+- LPO Subordination Agreement (35-05)
+**Manufactured Home/Vehicle Title Forms (TD-420 Series)**
+- TD-420-001 / 001A — Vehicle Title Application (standard + additional owners)
+- TD-420-040 — Affidavit of Loss and Release of Interest
+- TD-420-041 — Affidavit of Inheritance and Litigation
+- TD-420-043 — Certificate of Fact
+- TD-420-045 — Gross Weight License Affidavit
+- TD-420-047 — Vehicle Vessel Owner Name Update Affidavit
+- TD-420-050 — Release of Interest and Power of Attorney
+- TD-420-054 — Vehicle Ownership Bond
+- TD-420-062 — Vehicle Report of Sale
+- TD-420-065 — Vehicle Vessel Bill of Sale
+- TD-420-728 — Mobile Home Notice Affidavit
+- TD-420-729 — Manufactured Home Application
+
+## West Virginia
+**Regulated & Government Forms**
+- NRSR — Non-Resident Withholding Form
+- NRER — Non-Resident Application for Early Refund
+- NRAE — Non-Resident Application for Exemption
+- TSD 389 — Non-Resident Withholding Requirements
+- Certificate of Exemption from Withholding
+**State-Specific Documents**
+- Deed
+- Partial Release from Deed of Trust
+- Release of Deed of Trust
+- Sales Listing Form
+
+## Wisconsin
+**State-Specific Documents**
+- Wisconsin State Bar (SB) forms (2003): Warranty Deed SB-2, Quit Claim Deed SB-3, Guardian Deed SB-4, Personal Representative's Deed SB-5, Special Warranty Deed SB-6, Trustee's Deed SB-7, Condominium Deed SB-8, Land Contract SB-11, Condominium Land Contract SB-14, Assignment of Land Contract SB-15
+- Marital Property Statement — Wisconsin is a marital property state
+- Mining Registration
+- Statement of Mineral Claim
+- Termination of Decedent Interest
+- Prime Contractor Claim of Lien
+- Prime Contractor Intention to File
+- Builder or Contractor Affidavit
+- Full Satisfaction of Claim for Lien
+- Judgment Satisfaction
+- Correction Instrument
+- Assignment of Mortgage
+- Bill of Sale
+- Partial Release from Mortgage
+- Satisfaction of Mortgage
+- Affidavit as to Broker Lien Rights
+- General Warranty Deed
+- Warranty Deed (Corporation and Individual)
+
+## Wyoming
+**Regulated & Government Forms**
+- Statement of Consideration — required for recording
+**State-Specific Documents**
+- General Warranty Deed
+- Quitclaim Deed
+</script>
+<script>
+const strip=s=>s.replace(/\\?\*\*/g,'').replace(/^\*|\*$/g,'').replace(/&nbsp;/g,' ').trim();
+const raw=document.getElementById('catalogSource').textContent.split(/\r?\n/);
+const states=[];let state=null,category=null;
+function getCategory(name){let c=state.categories.find(x=>x.name===name);if(!c){c={name,docs:[]};state.categories.push(c)}return c}
+for(const line of raw){const t=line.trim();if(!t)continue;if(t.startsWith('## ')){state={name:strip(t.slice(3)),notes:[],categories:[]};states.push(state);category=null;continue}if(!state)continue;if(/^\\?\*\*.*\\?\*\*$/.test(t)){category=strip(t);continue}if(t.startsWith('- ')){const name=strip(t.slice(2));getCategory(category||'Documents').docs.push(name);continue}state.notes.push(strip(t))}
+const list=document.getElementById('stateList'),empty=document.getElementById('empty'),stats=document.getElementById('stats');
+function card(doc,stateName){const b=document.createElement('button');b.className='doc';b.type='button';b.dataset.search=(stateName+' '+doc).toLowerCase();b.innerHTML='<div class="doc-name"></div><span class="coming">Coming Soon</span>';b.querySelector('.doc-name').textContent=doc;b.addEventListener('click',()=>openModal(doc,stateName));return b}
+function render(){list.innerHTML='';let total=0;for(const s of states){const d=document.createElement('details');d.className='state';d.dataset.search=(s.name+' '+s.notes.join(' ')+' '+s.categories.map(c=>c.name+' '+c.docs.join(' ')).join(' ')).toLowerCase();const docs=s.categories.reduce((n,c)=>n+c.docs.length,0);total+=docs;const sum=document.createElement('summary');sum.innerHTML='<span class="state-name"></span><span class="count">'+docs+' documents</span><span class="chev">›</span>';sum.querySelector('.state-name').textContent=s.name;d.appendChild(sum);const body=document.createElement('div');body.className='state-body';s.notes.forEach(n=>{const p=document.createElement('p');p.className='state-note';p.textContent=n;body.appendChild(p)});s.categories.forEach(c=>{const sec=document.createElement('section');sec.className='category';const h=document.createElement('h2');h.textContent=c.name;sec.appendChild(h);const g=document.createElement('div');g.className='doc-grid';c.docs.forEach(x=>g.appendChild(card(x,s.name)));sec.appendChild(g);body.appendChild(sec)});d.appendChild(body);list.appendChild(d)}stats.textContent=states.length+' state / district entries • '+total+' document listings • details coming soon'}
+render();
+const search=document.getElementById('search');search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();let shown=0;document.querySelectorAll('.state').forEach(s=>{const ok=!q||s.dataset.search.includes(q);s.style.display=ok?'':'none';if(ok){shown++;if(q)s.open=true;if(q){s.querySelectorAll('.doc').forEach(b=>{b.style.display=b.dataset.search.includes(q)||s.querySelector('.state-name').textContent.toLowerCase().includes(q)?'':'none'});s.querySelectorAll('.category').forEach(c=>{const visible=[...c.querySelectorAll('.doc')].some(b=>b.style.display!=='none');c.style.display=visible?'':'none'})}else{s.querySelectorAll('.doc,.category').forEach(x=>x.style.display='')}}});empty.style.display=shown?'none':'block'});
+document.getElementById('expandAll').onclick=()=>document.querySelectorAll('.state').forEach(x=>{if(x.style.display!=='none')x.open=true});document.getElementById('collapseAll').onclick=()=>document.querySelectorAll('.state').forEach(x=>x.open=false);
+const modalBackdrop=document.getElementById('modalBackdrop'),modalTitle=document.getElementById('modalTitle'),modalText=document.getElementById('modalText');function openModal(doc,state){modalTitle.textContent=doc;modalText.textContent='This '+state+' document has a place in the library, but its detailed explanation, purpose, Qualia path, and reference material have not been added yet.';modalBackdrop.classList.add('open');modalBackdrop.setAttribute('aria-hidden','false')}function closeModal(){modalBackdrop.classList.remove('open');modalBackdrop.setAttribute('aria-hidden','true')}document.getElementById('modalClose').onclick=closeModal;modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>
