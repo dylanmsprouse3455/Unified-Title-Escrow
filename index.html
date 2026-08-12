@@ -28,6 +28,90 @@ fetch('./training-wizard.html',{cache:'no-store'})
       .interactive-tool-pill{padding:7px 10px;border-radius:999px;background:#eaf5fc;color:#1769a4;font-size:.72rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
       .interactive-tool-arrow{color:#c99e4b;font-size:1.4rem;font-weight:900}
       @media(max-width:760px){.interactive-tools-section{padding:17px}.interactive-tools-head{display:block}.interactive-tool-card{grid-template-columns:auto 1fr;align-items:start}.interactive-tool-meta{grid-column:1/-1;justify-content:space-between;padding-left:72px}.interactive-tool-icon{width:50px;height:50px}}
+
+      .live-note-page [id]{scroll-margin-top:100px}
+      .live-note-page .lt-quick{
+        position:fixed!important;
+        right:16px;
+        top:112px;
+        z-index:170;
+        display:flex!important;
+        flex-direction:column;
+        grid-template-columns:none!important;
+        gap:7px!important;
+        width:232px;
+        max-height:calc(100vh - 138px);
+        overflow-y:auto;
+        margin:0!important;
+        padding:12px!important;
+        background:rgba(255,255,255,.98);
+        border:1px solid #cbd8e2;
+        border-radius:16px;
+        box-shadow:0 16px 42px rgba(9,41,71,.18);
+        transition:transform .2s ease,opacity .2s ease;
+        -webkit-overflow-scrolling:touch;
+      }
+      .live-note-page .lt-quick .live-nav-hide{
+        position:sticky;
+        top:0;
+        z-index:2;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        width:100%;
+        border:0;
+        border-bottom:1px solid #dce5eb;
+        background:#fff;
+        color:#092947;
+        padding:4px 2px 10px;
+        margin:0 0 2px;
+        cursor:pointer;
+        font-size:.72rem;
+        font-weight:900;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+      }
+      .live-note-page .lt-quick .live-nav-hide b{color:#1769a4;font-size:.69rem}
+      .live-note-page .lt-quick a{
+        display:block;
+        width:100%;
+        border:1px solid #d5e0e8!important;
+        border-radius:10px!important;
+        background:#fff!important;
+        color:#092947!important;
+        padding:10px 11px!important;
+        transition:.15s ease;
+      }
+      .live-note-page .lt-quick a:hover{border-color:#9bbbd0!important;background:#f5faff!important}
+      .live-note-page .lt-quick a.active{
+        background:#092947!important;
+        border-color:#092947!important;
+        color:#fff!important;
+        box-shadow:0 5px 13px rgba(9,41,71,.18);
+      }
+      body.live-sections-hidden .live-note-page .lt-quick{transform:translateX(calc(100% + 34px));opacity:0;pointer-events:none}
+      .live-nav-show{
+        position:fixed;
+        right:12px;
+        top:112px;
+        z-index:175;
+        display:none;
+        border:1px solid #092947;
+        border-radius:12px 0 0 12px;
+        background:#092947;
+        color:#fff;
+        padding:10px 12px;
+        box-shadow:0 8px 24px rgba(9,41,71,.22);
+        font-weight:900;
+        cursor:pointer;
+      }
+      body.live-sections-available.live-sections-hidden .live-nav-show{display:block}
+      @media(max-width:900px){
+        .live-note-page .lt-quick{right:10px;top:74px;width:min(84vw,300px);max-height:calc(100vh - 94px);box-shadow:0 18px 55px rgba(9,41,71,.3)}
+        .live-nav-show{right:8px;top:74px;padding:9px 11px}
+      }
+      @media print{.live-note-page .lt-quick,.live-nav-show{display:none!important}}
     </style>
     <script>
       setTimeout(()=>{
@@ -40,6 +124,83 @@ fetch('./training-wizard.html',{cache:'no-store'})
           grid.insertAdjacentElement('afterend',section);
         }
       },0);
+
+      const LIVE_NAV_STORE='ute-live-section-nav-hidden';
+      let liveNavTick=false;
+      function setLiveNavHidden(hidden,save=true){
+        document.body.classList.toggle('live-sections-hidden',hidden);
+        if(save){try{localStorage.setItem(LIVE_NAV_STORE,hidden?'1':'0')}catch(e){}}
+        const show=document.getElementById('liveNavShow');
+        if(show)show.setAttribute('aria-expanded',hidden?'false':'true');
+      }
+      function updateLiveSectionHighlight(){
+        const nav=document.querySelector('.live-note-page .lt-quick');
+        if(!nav)return;
+        const links=Array.from(nav.querySelectorAll('a[href^="#"]'));
+        if(!links.length)return;
+        const marker=window.scrollY+Math.min(window.innerHeight*.34,260);
+        let current=links[0];
+        links.forEach(link=>{
+          const target=document.querySelector(link.getAttribute('href'));
+          if(target && target.offsetTop<=marker)current=link;
+        });
+        links.forEach(link=>link.classList.toggle('active',link===current));
+        if(current){
+          const top=current.offsetTop;
+          const bottom=top+current.offsetHeight;
+          if(top<nav.scrollTop+42)nav.scrollTop=Math.max(0,top-42);
+          else if(bottom>nav.scrollTop+nav.clientHeight)nav.scrollTop=bottom-nav.clientHeight+18;
+        }
+      }
+      function enhanceLiveSectionNav(){
+        const nav=document.querySelector('.live-note-page .lt-quick');
+        const show=document.getElementById('liveNavShow');
+        document.body.classList.toggle('live-sections-available',!!nav);
+        if(!nav){return}
+        if(nav.dataset.sideNavReady!=='1'){
+          nav.dataset.sideNavReady='1';
+          const hide=document.createElement('button');
+          hide.type='button';
+          hide.className='live-nav-hide';
+          hide.innerHTML='<span>On this page</span><b>Hide</b>';
+          hide.addEventListener('click',()=>setLiveNavHidden(true));
+          nav.prepend(hide);
+          nav.querySelectorAll('a[href^="#"]').forEach(link=>{
+            link.addEventListener('click',event=>{
+              const target=document.querySelector(link.getAttribute('href'));
+              if(!target)return;
+              event.preventDefault();
+              target.scrollIntoView({behavior:'smooth',block:'start'});
+              try{history.replaceState(null,'',link.getAttribute('href'))}catch(e){}
+            });
+          });
+          let stored=null;
+          try{stored=localStorage.getItem(LIVE_NAV_STORE)}catch(e){}
+          if(stored===null)setLiveNavHidden(window.innerWidth<900,false);
+          else setLiveNavHidden(stored==='1',false);
+        }
+        if(show)show.hidden=false;
+        updateLiveSectionHighlight();
+      }
+      if(!document.getElementById('liveNavShow')){
+        const show=document.createElement('button');
+        show.id='liveNavShow';
+        show.className='live-nav-show';
+        show.type='button';
+        show.textContent='Sections';
+        show.setAttribute('aria-label','Show section navigation');
+        show.addEventListener('click',()=>setLiveNavHidden(false));
+        document.body.appendChild(show);
+      }
+      window.addEventListener('scroll',()=>{
+        if(liveNavTick)return;
+        liveNavTick=true;
+        requestAnimationFrame(()=>{liveNavTick=false;updateLiveSectionHighlight()});
+      },{passive:true});
+      window.addEventListener('resize',updateLiveSectionHighlight,{passive:true});
+      const liveNavObserver=new MutationObserver(()=>requestAnimationFrame(enhanceLiveSectionNav));
+      liveNavObserver.observe(document.body,{childList:true,subtree:true});
+      setTimeout(enhanceLiveSectionNav,0);
     <\/script>`;
     src=src.replace('</body>',inject+'</body>');
     document.open();document.write(src);document.close();
