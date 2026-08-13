@@ -112,6 +112,31 @@ fetch('./training-wizard.html',{cache:'no-store'})
         .live-note-page .lt-quick,.closing-cram-page .cc-nav{right:10px;top:74px;width:min(84vw,300px);max-height:calc(100vh - 94px);box-shadow:0 18px 55px rgba(9,41,71,.3)}
         .live-nav-show{right:8px;top:74px;padding:9px 11px}
       }
+
+      /* Closing Timeline: prevent checklist grid styles from squeezing timeline text */
+      .timeline-stage .checklist-list{width:100%;margin:0;padding:0}
+      .timeline-stage .checklist-list li{
+        display:block!important;
+        grid-template-columns:none!important;
+        position:relative;
+        padding:11px 4px 11px 22px!important;
+        white-space:pre-wrap;
+        line-height:1.65;
+        color:#304457;
+      }
+      .timeline-stage .checklist-list li:before{
+        display:block!important;
+        content:'•'!important;
+        position:absolute;
+        left:3px;
+        top:8px;
+        color:#1769a4;
+        font-size:1.15rem;
+        font-weight:900;
+      }
+      .timeline-stage{width:auto;min-width:0}
+      .timeline-stage .section{width:100%}
+
       @media print{.live-note-page .lt-quick,.closing-cram-page .cc-nav,.live-nav-show{display:none!important}}
     </style>
     <script>
