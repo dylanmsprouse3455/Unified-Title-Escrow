@@ -1,1 +1,55 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qualia Master Reference</title><script>location.replace('./qualia-master-reference-loader.html'+location.search+location.hash)</script><noscript><a href="./qualia-master-reference-loader.html">Open Qualia Master Reference</a></noscript>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Qualia Master Reference · Unified Title & Escrow</title>
+<style>
+:root{--navy:#0d2a45;--blue:#2b6f9f;--gold:#d5aa58;--ink:#152330;--muted:#5d6c79;--line:#dbe3ea;--soft:#f4f7f9;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--soft);color:var(--ink)}
+.shell{min-height:100vh;display:grid;place-items:center;padding:22px}.card{width:min(720px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 55px rgba(13,42,69,.12);overflow:hidden}.head{background:linear-gradient(135deg,var(--navy),#184a6d);color:#fff;padding:22px}.back{color:#cbd9e4;text-decoration:none;font-size:12px;font-weight:800}.brand{display:flex;gap:13px;align-items:center;margin-top:15px}.mark{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#f5e5b8,#c79843);color:var(--navy);font-size:20px;font-weight:900}.head h1{margin:0;font:700 1.55rem/1.1 Georgia,serif}.head p{margin:5px 0 0;color:#cbd9e4;font-size:12px}.body{padding:22px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9a7636}.body h2{margin:5px 0 8px;color:var(--navy);font:700 1.45rem/1.2 Georgia,serif}.body p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:17px 0}.fact{background:#f6f9fb;border:1px solid #e3eaef;border-radius:12px;padding:11px}.fact strong{display:block;color:var(--navy);font-size:17px}.fact span{display:block;color:#758591;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}.actions{display:grid;gap:9px;margin-top:18px}.btn{min-height:48px;border-radius:12px;font-weight:900;border:1px solid var(--line);padding:11px 14px;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;cursor:pointer}.primary{background:var(--navy);color:#fff;border-color:var(--navy)}.secondary{background:#fff;color:#31536a}.danger{background:#fff;color:#8a4b45}.status{margin-top:13px;border-radius:11px;padding:10px 12px;background:#eef6fa;border:1px solid #cfe1ec;color:#3c667f;font-size:12px;line-height:1.45}.status.error{background:#fff5f4;border-color:#efceca;color:#8b4d46}.status.good{background:#eef8f1;border-color:#cfe5d6;color:#476d53}.hidden{display:none!important}input[type=file]{position:absolute;left:-9999px}.small{margin-top:13px!important;font-size:11px!important;color:#82909b!important}.drop{margin-top:17px;border:2px dashed #c7d7e1;border-radius:14px;padding:18px;text-align:center;color:#6e7f8c;font-size:12px;background:#fafcfd}.drop.drag{border-color:#6da1c1;background:#eef7fc}.cached-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:12px;border:1px solid #d9e7dd;background:#f3faf5;border-radius:13px}.cached-row strong{color:#315e40;font-size:13px}.cached-row span{display:block;color:#6c8273;font-size:11px;margin-top:3px}@media(max-width:600px){.shell{padding:10px}.card{border-radius:16px}.head,.body{padding:16px}.facts{grid-template-columns:1fr 1fr}.fact:last-child{grid-column:1/-1}.head h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <main class="card">
+    <header class="head">
+      <a class="back" href="./index.html">← Back to Training Wizard</a>
+      <div class="brand"><div class="mark">Q</div><div><h1>Qualia Master Reference</h1><p>Your full searchable v22 reference tool</p></div></div>
+    </header>
+    <section class="body">
+      <div class="eyebrow">Integrated Tool</div>
+      <h2>Open the exact Master Reference.</h2>
+      <p>The v22 file is much larger than a normal GitHub Pages source file, so this page stores your exact HTML locally in this browser. Import it once here; after that, the Qualia Master Reference opens directly from the Training Wizard on this device.</p>
+      <div class="facts"><div class="fact"><strong>1,070</strong><span>Articles</span></div><div class="fact"><strong>7,606</strong><span>Internal sections</span></div><div class="fact"><strong>2,658</strong><span>Article links</span></div></div>
+      <div id="cached" class="cached-row hidden"><div><strong>Master Reference saved on this device</strong><span id="cachedMeta">Ready to open.</span></div></div>
+      <div class="actions">
+        <button class="btn primary hidden" id="openBtn" type="button">Open Qualia Master Reference →</button>
+        <button class="btn secondary" id="importBtn" type="button">Choose v22 Master Reference HTML</button>
+        <button class="btn danger hidden" id="removeBtn" type="button">Remove saved copy from this device</button>
+      </div>
+      <input id="fileInput" type="file" accept=".html,text/html">
+      <div class="drop" id="drop">You can also drag <b>qualia-master-reference-v22-data-reading-tour.html</b> onto this box.</div>
+      <div id="status" class="status">The imported reference stays in this browser's local storage. It is not uploaded to another service by this page.</div>
+      <p class="small">If you use a different phone, computer, or browser, import the v22 HTML once on that device too.</p>
+    </section>
+  </main>
+</div>
+<script>
+const DB='ute-qualia-master-reference', STORE='files', KEY='v22';
+const fileInput=document.getElementById('fileInput'),importBtn=document.getElementById('importBtn'),openBtn=document.getElementById('openBtn'),removeBtn=document.getElementById('removeBtn'),cached=document.getElementById('cached'),cachedMeta=document.getElementById('cachedMeta'),status=document.getElementById('status'),drop=document.getElementById('drop');
+function setStatus(text,type=''){status.textContent=text;status.className='status'+(type?' '+type:'')}
+function db(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function getSaved(){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction(STORE,'readonly'),r=t.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)})}
+async function save(record){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).put(record,KEY);t.oncomplete=resolve;t.onerror=()=>reject(t.error)})}
+async function del(){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).delete(KEY);t.oncomplete=resolve;t.onerror=()=>reject(t.error)})}
+function valid(html){return html.includes('Qualia Master Reference')&&html.includes('"articleCount":1070')&&html.includes('id="payload"')}
+function launch(html){document.open();document.write(html);document.close()}
+async function refresh(){try{const r=await getSaved();const yes=!!(r&&r.html&&valid(r.html));cached.classList.toggle('hidden',!yes);openBtn.classList.toggle('hidden',!yes);removeBtn.classList.toggle('hidden',!yes);importBtn.textContent=yes?'Replace saved Master Reference':'Choose v22 Master Reference HTML';if(yes){const when=r.savedAt?new Date(r.savedAt).toLocaleString():'';cachedMeta.textContent=when?`Saved ${when}. Ready to open.`:'Ready to open.'}}catch(e){console.error(e);setStatus('Browser storage is unavailable here. You can still choose the file for this session.','error')}}
+async function handle(file){if(!file)return;setStatus('Reading the Master Reference…');try{const html=await file.text();if(!valid(html)){setStatus('That does not appear to be the v22 Qualia Master Reference with 1,070 articles. Choose the exact Master Reference HTML file.','error');return}setStatus('Saving the full reference on this device…');await save({html,name:file.name,size:file.size,savedAt:Date.now()});setStatus('Saved. The exact Qualia Master Reference is now connected to this Training Wizard on this device.','good');await refresh();launch(html)}catch(e){console.error(e);setStatus('I could not store that file in this browser. Try opening it again or use a browser with local storage enabled.','error')}}
+importBtn.onclick=()=>fileInput.click();fileInput.onchange=()=>handle(fileInput.files[0]);openBtn.onclick=async()=>{const r=await getSaved();if(r?.html)launch(r.html)};removeBtn.onclick=async()=>{await del();setStatus('Saved copy removed from this device.');await refresh()};
+['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>handle(e.dataTransfer.files[0]));
+refresh();
+</script>
+</body>
+</html>
