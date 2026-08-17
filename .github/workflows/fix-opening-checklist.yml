@@ -15,28 +15,48 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Rebuild plain HTML from staged payload
+      - name: Verify payload and rebuild plain HTML
         shell: python
         run: |
-          import base64, gzip
+          import base64, gzip, hashlib
           from pathlib import Path
 
-          parts = sorted(Path('.opening-parts').glob('part*.txt'))
-          assert len(parts) == 7, f'Expected 7 payload parts, found {len(parts)}'
-          payload = ''.join(p.read_text(encoding='utf-8').strip() for p in parts)
+          expected = [
+            '43ce8ac289311978b49939e202de8e53ab29282af66ae3eb094a0811c9aef789',
+            '8dbd5d657b350a9f198048a85c5d010da346598b26267526aed31c94bb12b6d2',
+            '773c609066ef8cb0a5d0b033aaa20e8d03ba96a18a61bdc9ef79a8ab324c0024',
+            'a00b3d15b44823697390b7e062168c760e6e6846d685288f09d816b16160e65d',
+            '17aa991c99780b7e087bb06ea85876084a8bc1bd83eb6d932eede2330a144097',
+            '7512c034a05f5a88e19d106979ec9e1d2e9975b6a84023cf3599892215b27489',
+            '006650c1c94b6015c80305bad41b4965d384bc0522a16532ab5ac01bdefcde0e',
+            '45a99c6bbae9a057938556e9abb107ac25bf0c023eb569be0ec6c67736a1f938',
+            '7f8f98e64a67884602b0428a01b8d4973cd76201ed57ec60330d5824ae8a092c',
+            '5a470d241b510556af50923a40012a5f6a0f9b60b43c46c4976b1769b26abbd5',
+            '1ac29128bfec334ffc2f79363114b876676660cbd4edfe188cf10e0d2d52566b',
+          ]
+          parts = sorted(Path('.opening-payload').glob('part*.txt'))
+          assert len(parts) == 11, f'Expected 11 payload parts, found {len(parts)}'
+          chunks = []
+          for i, (p, wanted) in enumerate(zip(parts, expected), 1):
+              chunk = p.read_text(encoding='utf-8').strip()
+              got = hashlib.sha256(chunk.encode()).hexdigest()
+              assert got == wanted, f'Part {i:02d} hash mismatch: {got}'
+              chunks.append(chunk)
+          payload = ''.join(chunks)
           assert len(payload) == 20900, f'Unexpected payload length: {len(payload)}'
-          assert len(payload) % 4 == 0
+          assert hashlib.sha256(payload.encode()).hexdigest() == '6d57aebafe92957468a55651992f7e170704fb0722f306362ae95d32ff9fd68f'
           html = gzip.decompress(base64.b64decode(payload)).decode('utf-8')
+          assert len(html) == 56289, f'Unexpected HTML length: {len(html)}'
           assert 'Opening Order Case Tracker' in html
           assert 'Create My First Case' in html
           assert '.flag-controls{' in html
           Path('opening-checklist.html').write_text(html, encoding='utf-8')
-          print(f'Rebuilt opening-checklist.html with {len(html)} characters')
-      - name: Commit repaired page and remove staging parts
+          print('Opening checklist payload verified and rebuilt successfully.')
+      - name: Commit repaired page and remove temporary payload files
         run: |
-          rm -rf .opening-parts
+          rm -rf .opening-payload .opening-parts
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add opening-checklist.html .opening-parts
+          git add -A opening-checklist.html .opening-payload .opening-parts
           git commit -m "Fix blank opening checklist page"
           git push
