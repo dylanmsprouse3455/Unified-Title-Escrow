@@ -1,4 +1,4 @@
-name: Fix Opening Checklist
+name: Validate Opening Checklist
 
 on:
   push:
@@ -6,40 +6,26 @@ on:
       - '.github/workflows/fix-opening-checklist.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  fix:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Replace compressed loader with real checklist HTML
+      - name: Validate compressed checklist payload
         shell: python
         run: |
           import base64, gzip, re
           from pathlib import Path
 
-          path = Path('opening-checklist.html')
-          source = path.read_text(encoding='utf-8')
+          source = Path('opening-checklist.html').read_text(encoding='utf-8')
           m = re.search(r"const b64='([^']+)'", source)
-          if not m:
-              print('Opening checklist is already plain HTML; nothing to do.')
-              raise SystemExit(0)
-
-          html = gzip.decompress(base64.b64decode(m.group(1))).decode('utf-8')
-          html = html.replace('.\nflag-controls{', '.flag-controls{')
-          path.write_text(html, encoding='utf-8')
-          print(f'Wrote {len(html)} characters of plain HTML.')
-      - name: Commit repaired checklist
-        run: |
-          if git diff --quiet -- opening-checklist.html; then
-            echo "No changes needed"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add opening-checklist.html
-          git commit -m "Repair opening checklist page"
-          git push
+          assert m, 'Compressed payload was not found.'
+          payload = m.group(1)
+          assert len(payload) % 4 == 0, f'Invalid base64 length: {len(payload)}'
+          html = gzip.decompress(base64.b64decode(payload)).decode('utf-8')
+          assert 'Opening Order Case Tracker' in html, 'Expected app title not found.'
+          assert 'Create My First Case' in html, 'Expected case-creation UI not found.'
+          assert '.flag-controls{' in html, 'Flag-controls CSS rule is missing.'
+          print(f'Validated payload: {len(payload)} base64 chars -> {len(html)} HTML chars')
