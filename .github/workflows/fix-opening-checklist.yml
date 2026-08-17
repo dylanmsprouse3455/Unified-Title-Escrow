@@ -1,6 +1,5 @@
-name: Repair Opening Checklist
+name: Publish Opening Checklist v9
 
-# Verified payload repair run
 on:
   push:
     paths:
@@ -10,59 +9,302 @@ permissions:
   contents: write
 
 jobs:
-  repair:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify payload and rebuild plain HTML
+
+      - name: Upgrade opening checklist to guided v9
         shell: python
         run: |
-          import base64, gzip, hashlib
           from pathlib import Path
+          import re
 
-          expected = [
-            '43ce8ac289311978b49939e202de8e53ab29282af66ae3eb094a0811c9aef789',
-            '8dbd5d657b350a9f198048a85c5d010da346598b26267526aed31c94bb12b6d2',
-            '773c609066ef8cb0a5d0b033aaa20e8d03ba96a18a61bdc9ef79a8ab324c0024',
-            'a00b3d15b44823697390b7e062168c760e6e6846d685288f09d816b16160e65d',
-            '17aa991c99780b7e087bb06ea85876084a8bc1bd83eb6d932eede2330a144097',
-            'b2acd1e20ceeb857024434385d49635a21d11030a5252ccb477d77d892084dd3',
-            '006650c1c94b6015c80305bad41b4965d384bc0522a16532ab5ac01bdefcde0e',
-            '45a99c6bbae9a057938556e9abb107ac25bf0c023eb569be0ec6c67736a1f938',
-            '7f8f98e64a67884602b0428a01b8d4973cd76201ed57ec60330d5824ae8a092c',
-            '5a470d241b510556af50923a40012a5f6a0f9b60b43c46c4976b1769b26abbd5',
-            '1ac29128bfec334ffc2f79363114b876676660cbd4edfe188cf10e0d2d52566b',
-          ]
-          parts = sorted(Path('.opening-payload').glob('part*.txt'))
-          assert len(parts) == 11, f'Expected 11 payload parts, found {len(parts)}'
-          chunks = []
-          mismatches = []
-          for i, (p, wanted) in enumerate(zip(parts, expected), 1):
-              chunk = p.read_text(encoding='utf-8').strip()
-              got = hashlib.sha256(chunk.encode()).hexdigest()
-              print(f'Part {i:02d}: {len(chunk)} chars, sha256={got}')
-              if got != wanted:
-                  mismatches.append((i, got, wanted))
-              chunks.append(chunk)
-          if mismatches:
-              raise AssertionError('Payload mismatches: ' + '; '.join(f'part {i:02d} got {got} expected {wanted}' for i, got, wanted in mismatches))
-          payload = ''.join(chunks)
-          assert len(payload) == 20900, f'Unexpected payload length: {len(payload)}'
-          assert hashlib.sha256(payload.encode()).hexdigest() == '6d57aebafe92957468a55651992f7e170704fb0722f306362ae95d32ff9fd68f'
-          html = gzip.decompress(base64.b64decode(payload)).decode('utf-8')
-          assert len(html) == 56289, f'Unexpected HTML length: {len(html)}'
-          assert 'Opening Order Case Tracker' in html
-          assert 'Create My First Case' in html
-          assert '.flag-controls{' in html
-          Path('opening-checklist.html').write_text(html, encoding='utf-8')
-          print('Opening checklist payload verified and rebuilt successfully.')
-      - name: Commit repaired page and remove temporary payload files
+          path = Path('opening-checklist.html')
+          html = path.read_text(encoding='utf-8')
+
+          if 'Quick tutorial for new users' in html and 'Checklist starts here' in html:
+              print('Opening Checklist v9 is already published.')
+              raise SystemExit(0)
+
+          css_anchor = '''.notes-box{
+            margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:14px
+          }
+          .notes-box h3{margin:0;color:var(--navy);font-size:14px}
+          .notes-box p{margin:4px 0 9px;color:var(--muted);font-size:11px}
+          .notes-box textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:11px 12px;resize:vertical}
+          '''
+
+          css_insert = '''.tutorial-box{
+            margin-top:14px;
+            border:1px solid #BFDBFE;
+            background:#EFF6FF;
+            border-radius:16px;
+            padding:14px;
+          }
+          .tutorial-top{
+            display:flex;justify-content:space-between;align-items:flex-start;gap:12px
+          }
+          .tutorial-box h3{margin:0;color:#1E3A8A;font-size:15px}
+          .tutorial-box p{margin:4px 0 0;color:#334155;font-size:12px;line-height:1.5}
+          .tutorial-steps{
+            display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px
+          }
+          .tutorial-step{
+            border:1px solid #CFE0FF;background:#fff;border-radius:13px;padding:11px
+          }
+          .tutorial-step .step-kicker{
+            font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:#2563EB
+          }
+          .tutorial-step .step-title{
+            font-size:13px;font-weight:900;color:#17365D;margin-top:3px
+          }
+          .tutorial-step .step-copy{
+            font-size:12px;line-height:1.45;color:#334155;margin-top:4px
+          }
+          .tutorial-box.hidden-tutorial{display:none}
+          .tutorial-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+          .checklist-start-box{
+            margin-top:14px;
+            border:1px solid #B6E0FE;
+            background:#E0F2FE;
+            border-radius:16px;
+            padding:14px;
+          }
+          .checklist-kicker{
+            font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:#075985
+          }
+          .checklist-title{
+            font-size:18px;font-weight:900;color:#0F172A;margin-top:4px
+          }
+          .checklist-copy{
+            font-size:12px;line-height:1.5;color:#334155;margin-top:4px
+          }
+          .sections-wrap{
+            margin-top:12px;
+            border:1px solid #D9EAF7;
+            background:#F8FCFF;
+            border-radius:18px;
+            padding:12px;
+          }
+          '''
+          assert css_anchor in html, 'CSS insertion anchor not found'
+          html = html.replace(css_anchor, css_insert + css_anchor, 1)
+
+          mobile_anchor = '''@media(max-width:700px){
+            .form-grid{grid-template-columns:1fr}
+            .detail-grid{grid-template-columns:1fr}
+            .detail-box.full{grid-column:auto}
+            .case-card-top,.backline{align-items:flex-start}
+            .topbar{align-items:flex-start}
+          }
+          '''
+          mobile_repl = '''@media(max-width:700px){
+            .form-grid{grid-template-columns:1fr}
+            .detail-grid{grid-template-columns:1fr}
+            .detail-box.full{grid-column:auto}
+            .case-card-top,.backline{align-items:flex-start}
+            .topbar{align-items:flex-start}
+            .tutorial-steps{grid-template-columns:1fr}
+          }
+          '''
+          assert mobile_anchor in html, 'Mobile CSS anchor not found'
+          html = html.replace(mobile_anchor, mobile_repl, 1)
+
+          tools_old = '''      <div class="case-tools">
+                <button class="secondary" id="expandAll">Expand All</button>
+                <button class="secondary" id="collapseAll">Collapse All</button>
+                <button class="secondary" id="copySummary">Copy Summary</button>
+                <button class="danger" id="deleteCase">Delete Case</button>
+              </div>'''
+          tools_new = '''      <div class="case-tools">
+                <button class="secondary" id="tutorialToggle">Hide Tutorial</button>
+                <button class="secondary" id="expandAll">Expand All</button>
+                <button class="secondary" id="collapseAll">Collapse All</button>
+                <button class="secondary" id="copySummary">Copy Summary</button>
+                <button class="danger" id="deleteCase">Delete Case</button>
+              </div>'''
+          assert tools_old in html, 'Case tools anchor not found'
+          html = html.replace(tools_old, tools_new, 1)
+
+          sections_old = '''    <div id="alerts" class="file-alerts hidden">
+                <h3>Special things this file needs</h3>
+                <div id="alertsContent"></div>
+              </div>
+
+              <div id="sections"></div>
+
+              <div class="notes-box">'''
+          sections_new = '''    <div id="alerts" class="file-alerts hidden">
+                <h3>Special things this file needs</h3>
+                <div id="alertsContent"></div>
+              </div>
+
+              <div id="tutorialBox" class="tutorial-box">
+                <div class="tutorial-top">
+                  <div>
+                    <h3>Quick tutorial for new users</h3>
+                    <p>This page is built to walk you through an opening order one piece at a time.</p>
+                  </div>
+                  <button class="secondary" id="tutorialClose">Got It</button>
+                </div>
+
+                <div class="tutorial-steps">
+                  <div class="tutorial-step">
+                    <div class="step-kicker">1. Start here</div>
+                    <div class="step-title">Look at “Your Next Step” first</div>
+                    <div class="step-copy">That box tells you the next thing you should do right now, so you do not have to guess where to begin.</div>
+                  </div>
+                  <div class="tutorial-step">
+                    <div class="step-kicker">2. Watch for special file flags</div>
+                    <div class="step-title">Check the warning box above the checklist</div>
+                    <div class="step-copy">If the file has things like Mobile Home, POA, Mail-away, or No Title Order, the tracker lists the extra things you need to do.</div>
+                  </div>
+                  <div class="tutorial-step">
+                    <div class="step-kicker">3. The checklist begins below</div>
+                    <div class="step-title">Open each section and work top to bottom</div>
+                    <div class="step-copy">The blue checklist area below is the actual workflow. The section with your next incomplete step opens automatically first.</div>
+                  </div>
+                  <div class="tutorial-step">
+                    <div class="step-kicker">4. Need more detail?</div>
+                    <div class="step-title">Use the ? button inside any step</div>
+                    <div class="step-copy">That opens plain-English help showing what to do, where to do it, why it matters, and how to know you did it right.</div>
+                  </div>
+                </div>
+
+                <div class="tutorial-actions">
+                  <button class="primary" id="tutorialJump">Show Me Where the Checklist Starts</button>
+                </div>
+              </div>
+
+              <div class="checklist-start-box" id="checklistStartBox">
+                <div class="checklist-kicker">Checklist starts here</div>
+                <div class="checklist-title">Opening Order Workflow</div>
+                <div class="checklist-copy">This blue area is the actual step-by-step checklist. Open the sections below, use the ? button if you need help, and check things off as you complete them.</div>
+              </div>
+
+              <div class="sections-wrap">
+                <div id="sections"></div>
+              </div>
+
+              <div class="notes-box">'''
+          assert sections_old in html, 'Checklist section anchor not found'
+          html = html.replace(sections_old, sections_new, 1)
+
+          state_old = '''let cases = JSON.parse(localStorage.getItem("uteCaseTrackerV2") || "[]");
+          let activeCaseId = null;
+          let modalMode = "new";
+          let editingCaseId = null;
+          let modalFlags = {};
+          '''
+          state_new = '''let cases = JSON.parse(localStorage.getItem("uteCaseTrackerV2") || "[]");
+          let activeCaseId = null;
+          let modalMode = "new";
+          let editingCaseId = null;
+          let modalFlags = {};
+          let tutorialHidden = JSON.parse(localStorage.getItem("uteTutorialHidden") || "false");
+          '''
+          assert state_old in html, 'State anchor not found'
+          html = html.replace(state_old, state_new, 1)
+
+          util_old = '''const $ = id => document.getElementById(id);
+          const saveCases = () => localStorage.setItem("uteCaseTrackerV2", JSON.stringify(cases));
+          const uid = () => "c_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+
+          function totalItems(){ return WORKFLOW.reduce((n,s)=>n+s.items.length,0); }
+          function doneItems(c){ return Object.values(c.checked || {}).filter(Boolean).length; }
+          '''
+          util_new = '''const $ = id => document.getElementById(id);
+          const saveCases = () => localStorage.setItem("uteCaseTrackerV2", JSON.stringify(cases));
+          const uid = () => "c_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+
+          function totalItems(){ return WORKFLOW.reduce((n,s)=>n+s.items.length,0); }
+          function doneItems(c){ return Object.values(c.checked || {}).filter(Boolean).length; }
+
+          function saveTutorialState(){
+            localStorage.setItem("uteTutorialHidden", JSON.stringify(tutorialHidden));
+          }
+
+          function updateTutorialUI(){
+            const box = $("tutorialBox");
+            const toggle = $("tutorialToggle");
+            if(!box || !toggle) return;
+            box.classList.toggle("hidden-tutorial", tutorialHidden);
+            toggle.textContent = tutorialHidden ? "Show Tutorial" : "Hide Tutorial";
+          }
+          '''
+          assert util_old in html, 'Utility anchor not found'
+          html = html.replace(util_old, util_new, 1)
+
+          render_old = '''  $("sections").innerHTML="";
+            WORKFLOW.forEach((section,sIdx)=>{
+              const done = section.items.filter((_,i)=>c.checked?.[`s${sIdx}i${i}`]).length;
+              const sec = document.createElement("div");
+              sec.className = "section collapsed";'''
+          render_new = '''  updateTutorialUI();
+            const next = findNext(c);
+            const defaultOpenSection = next ? next.s : 0;
+
+            $("sections").innerHTML="";
+            WORKFLOW.forEach((section,sIdx)=>{
+              const done = section.items.filter((_,i)=>c.checked?.[`s${sIdx}i${i}`]).length;
+              const sec = document.createElement("div");
+              sec.className = "section" + (sIdx===defaultOpenSection ? "" : " collapsed");'''
+          assert render_old in html, 'renderCase anchor not found'
+          html = html.replace(render_old, render_new, 1)
+
+          handler_old = '''$("newCaseTop").onclick=()=>openModal("new");
+          $("newCaseEmpty").onclick=()=>openModal("new");
+          $("cancelModal").onclick=closeModal;
+          $("saveCase").onclick=createOrSaveCase;
+          $("backBtn").onclick=renderDashboard;
+          $("editCaseBtn").onclick=()=>openModal("edit",activeCaseId);
+          '''
+          handler_new = '''$("newCaseTop").onclick=()=>openModal("new");
+          $("newCaseEmpty").onclick=()=>openModal("new");
+          $("cancelModal").onclick=closeModal;
+          $("saveCase").onclick=createOrSaveCase;
+          $("backBtn").onclick=renderDashboard;
+          $("editCaseBtn").onclick=()=>openModal("edit",activeCaseId);
+
+          $("tutorialToggle").onclick=()=>{
+            tutorialHidden = !tutorialHidden;
+            saveTutorialState();
+            updateTutorialUI();
+          };
+
+          $("tutorialClose").onclick=()=>{
+            tutorialHidden = true;
+            saveTutorialState();
+            updateTutorialUI();
+          };
+
+          $("tutorialJump").onclick=()=>{
+            tutorialHidden = false;
+            updateTutorialUI();
+            $("checklistStartBox").scrollIntoView({behavior:"smooth", block:"start"});
+          };
+          '''
+          assert handler_old in html, 'Handler anchor not found'
+          html = html.replace(handler_old, handler_new, 1)
+
+          assert 'Quick tutorial for new users' in html
+          assert 'Checklist starts here' in html
+          assert 'tutorialToggle' in html
+          path.write_text(html, encoding='utf-8')
+          print('Opening Checklist upgraded to guided v9.')
+
+      - name: Commit v9
         run: |
-          rm -rf .opening-payload .opening-parts
+          if git diff --quiet -- opening-checklist.html; then
+            echo "No changes needed"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A opening-checklist.html .opening-payload .opening-parts
-          git commit -m "Fix blank opening checklist page"
+          git add opening-checklist.html
+          git commit -m "Publish guided Opening Checklist v9"
           git push
