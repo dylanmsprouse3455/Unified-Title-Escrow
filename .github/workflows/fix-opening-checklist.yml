@@ -1,0 +1,45 @@
+name: Fix Opening Checklist
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-opening-checklist.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace compressed loader with real checklist HTML
+        shell: python
+        run: |
+          import base64, gzip, re
+          from pathlib import Path
+
+          path = Path('opening-checklist.html')
+          source = path.read_text(encoding='utf-8')
+          m = re.search(r"const b64='([^']+)'", source)
+          if not m:
+              print('Opening checklist is already plain HTML; nothing to do.')
+              raise SystemExit(0)
+
+          html = gzip.decompress(base64.b64decode(m.group(1))).decode('utf-8')
+          html = html.replace('.\nflag-controls{', '.flag-controls{')
+          path.write_text(html, encoding='utf-8')
+          print(f'Wrote {len(html)} characters of plain HTML.')
+      - name: Commit repaired checklist
+        run: |
+          if git diff --quiet -- opening-checklist.html; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add opening-checklist.html
+          git commit -m "Repair opening checklist page"
+          git push
