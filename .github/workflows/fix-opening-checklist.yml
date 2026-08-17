@@ -1,5 +1,6 @@
 name: Repair Opening Checklist
 
+# Verified payload repair run
 on:
   push:
     paths:
