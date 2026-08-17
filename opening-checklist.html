@@ -268,6 +268,25 @@ button{cursor:pointer}
   line-height:1.5;
   color:#6B4F12;
 }
+
+.tutorial-box{
+  margin-top:14px;border:1px solid #BFDBFE;background:#EFF6FF;border-radius:16px;padding:14px
+}
+.tutorial-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.tutorial-box h3{margin:0;color:#1E3A8A;font-size:15px}
+.tutorial-box p{margin:4px 0 0;color:#334155;font-size:12px;line-height:1.5}
+.tutorial-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tutorial-step{border:1px solid #CFE0FF;background:#fff;border-radius:13px;padding:11px}
+.tutorial-step .step-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:#2563EB}
+.tutorial-step .step-title{font-size:13px;font-weight:900;color:#17365D;margin-top:3px}
+.tutorial-step .step-copy{font-size:12px;line-height:1.45;color:#334155;margin-top:4px}
+.tutorial-box.hidden-tutorial{display:none}
+.tutorial-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.checklist-start-box{margin-top:14px;border:1px solid #B6E0FE;background:#E0F2FE;border-radius:16px;padding:14px}
+.checklist-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:#075985}
+.checklist-title{font-size:18px;font-weight:900;color:#0F172A;margin-top:4px}
+.checklist-copy{font-size:12px;line-height:1.5;color:#334155;margin-top:4px}
+.sections-wrap{margin-top:12px;border:1px solid #D9EAF7;background:#F8FCFF;border-radius:18px;padding:12px}
 .notes-box{
   margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:14px
 }
@@ -281,6 +300,7 @@ button{cursor:pointer}
   .detail-box.full{grid-column:auto}
   .case-card-top,.backline{align-items:flex-start}
   .topbar{align-items:flex-start}
+  .tutorial-steps{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -338,6 +358,7 @@ button{cursor:pointer}
       </div>
 
       <div class="case-tools">
+        <button class="secondary" id="tutorialToggle">Hide Tutorial</button>
         <button class="secondary" id="expandAll">Expand All</button>
         <button class="secondary" id="collapseAll">Collapse All</button>
         <button class="secondary" id="copySummary">Copy Summary</button>
@@ -350,7 +371,32 @@ button{cursor:pointer}
       <div id="alertsContent"></div>
     </div>
 
+    <div id="tutorialBox" class="tutorial-box">
+    <div class="tutorial-top">
+      <div>
+        <h3>Quick tutorial for new users</h3>
+        <p>This page is built to walk you through an opening order one piece at a time.</p>
+      </div>
+      <button class="secondary" id="tutorialClose">Got It</button>
+    </div>
+    <div class="tutorial-steps">
+      <div class="tutorial-step"><div class="step-kicker">1. Start here</div><div class="step-title">Look at “Your Next Step” first</div><div class="step-copy">That box tells you the next thing you should do right now, so you do not have to guess where to begin.</div></div>
+      <div class="tutorial-step"><div class="step-kicker">2. Watch for special file flags</div><div class="step-title">Check the warning box above the checklist</div><div class="step-copy">If the file has things like Mobile Home, POA, Mail-away, or No Title Order, the tracker lists the extra things you need to do.</div></div>
+      <div class="tutorial-step"><div class="step-kicker">3. The checklist begins below</div><div class="step-title">Open each section and work top to bottom</div><div class="step-copy">The blue checklist area below is the actual workflow. The section with your next incomplete step opens automatically first.</div></div>
+      <div class="tutorial-step"><div class="step-kicker">4. Need more detail?</div><div class="step-title">Use the ? button inside any step</div><div class="step-copy">That opens plain-English help showing what to do, where to do it, why it matters, and how to know you did it right.</div></div>
+    </div>
+    <div class="tutorial-actions"><button class="primary" id="tutorialJump">Show Me Where the Checklist Starts</button></div>
+  </div>
+
+  <div class="checklist-start-box" id="checklistStartBox">
+    <div class="checklist-kicker">Checklist starts here</div>
+    <div class="checklist-title">Opening Order Workflow</div>
+    <div class="checklist-copy">This blue area is the actual step-by-step checklist. Open the sections below, use the ? button if you need help, and check things off as you complete them.</div>
+  </div>
+
+  <div class="sections-wrap">
     <div id="sections"></div>
+  </div>
 
     <div class="notes-box">
       <h3>What am I waiting on?</h3>
@@ -988,6 +1034,7 @@ let activeCaseId = null;
 let modalMode = "new";
 let editingCaseId = null;
 let modalFlags = {};
+let tutorialHidden = JSON.parse(localStorage.getItem("uteTutorialHidden") || "false");
 
 const $ = id => document.getElementById(id);
 const saveCases = () => localStorage.setItem("uteCaseTrackerV2", JSON.stringify(cases));
@@ -995,6 +1042,17 @@ const uid = () => "c_" + Date.now() + "_" + Math.random().toString(36).slice(2,8
 
 function totalItems(){ return WORKFLOW.reduce((n,s)=>n+s.items.length,0); }
 function doneItems(c){ return Object.values(c.checked || {}).filter(Boolean).length; }
+
+function saveTutorialState(){
+  localStorage.setItem("uteTutorialHidden", JSON.stringify(tutorialHidden));
+}
+function updateTutorialUI(){
+  const box = $("tutorialBox");
+  const toggle = $("tutorialToggle");
+  if(!box || !toggle) return;
+  box.classList.toggle("hidden-tutorial", tutorialHidden);
+  toggle.textContent = tutorialHidden ? "Show Tutorial" : "Hide Tutorial";
+}
 
 function renderDashboard(){
   activeCaseId = null;
@@ -1068,11 +1126,15 @@ function renderCase(){
     $("alerts").classList.add("hidden");
   }
 
+  updateTutorialUI();
+  const next = findNext(c);
+  const defaultOpenSection = next ? next.s : 0;
+
   $("sections").innerHTML="";
   WORKFLOW.forEach((section,sIdx)=>{
     const done = section.items.filter((_,i)=>c.checked?.[`s${sIdx}i${i}`]).length;
     const sec = document.createElement("div");
-    sec.className = "section collapsed";
+    sec.className = "section" + (sIdx===defaultOpenSection ? "" : " collapsed");
     sec.dataset.section = sIdx;
     sec.innerHTML = `
       <div class="section-head">
@@ -1311,6 +1373,22 @@ $("cancelModal").onclick=closeModal;
 $("saveCase").onclick=createOrSaveCase;
 $("backBtn").onclick=renderDashboard;
 $("editCaseBtn").onclick=()=>openModal("edit",activeCaseId);
+
+$("tutorialToggle").onclick=()=>{
+  tutorialHidden = !tutorialHidden;
+  saveTutorialState();
+  updateTutorialUI();
+};
+$("tutorialClose").onclick=()=>{
+  tutorialHidden = true;
+  saveTutorialState();
+  updateTutorialUI();
+};
+$("tutorialJump").onclick=()=>{
+  tutorialHidden = false;
+  updateTutorialUI();
+  $("checklistStartBox").scrollIntoView({behavior:"smooth", block:"start"});
+};
 
 document.querySelectorAll("#modalFlags [data-flag]").forEach(b=>{
   b.addEventListener("mouseenter",()=>showFlagHelp(b.dataset.flag));
