@@ -1,4 +1,4 @@
-name: Validate Opening Checklist
+name: Repair Opening Checklist
 
 on:
   push:
@@ -6,26 +6,37 @@ on:
       - '.github/workflows/fix-opening-checklist.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  validate:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate compressed checklist payload
+        with:
+          fetch-depth: 0
+      - name: Rebuild plain HTML from staged payload
         shell: python
         run: |
-          import base64, gzip, re
+          import base64, gzip
           from pathlib import Path
 
-          source = Path('opening-checklist.html').read_text(encoding='utf-8')
-          m = re.search(r"const b64='([^']+)'", source)
-          assert m, 'Compressed payload was not found.'
-          payload = m.group(1)
-          assert len(payload) % 4 == 0, f'Invalid base64 length: {len(payload)}'
+          parts = sorted(Path('.opening-parts').glob('part*.txt'))
+          assert len(parts) == 7, f'Expected 7 payload parts, found {len(parts)}'
+          payload = ''.join(p.read_text(encoding='utf-8').strip() for p in parts)
+          assert len(payload) == 20900, f'Unexpected payload length: {len(payload)}'
+          assert len(payload) % 4 == 0
           html = gzip.decompress(base64.b64decode(payload)).decode('utf-8')
-          assert 'Opening Order Case Tracker' in html, 'Expected app title not found.'
-          assert 'Create My First Case' in html, 'Expected case-creation UI not found.'
-          assert '.flag-controls{' in html, 'Flag-controls CSS rule is missing.'
-          print(f'Validated payload: {len(payload)} base64 chars -> {len(html)} HTML chars')
+          assert 'Opening Order Case Tracker' in html
+          assert 'Create My First Case' in html
+          assert '.flag-controls{' in html
+          Path('opening-checklist.html').write_text(html, encoding='utf-8')
+          print(f'Rebuilt opening-checklist.html with {len(html)} characters')
+      - name: Commit repaired page and remove staging parts
+        run: |
+          rm -rf .opening-parts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add opening-checklist.html .opening-parts
+          git commit -m "Fix blank opening checklist page"
+          git push
