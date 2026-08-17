@@ -37,11 +37,16 @@ jobs:
           parts = sorted(Path('.opening-payload').glob('part*.txt'))
           assert len(parts) == 11, f'Expected 11 payload parts, found {len(parts)}'
           chunks = []
+          mismatches = []
           for i, (p, wanted) in enumerate(zip(parts, expected), 1):
               chunk = p.read_text(encoding='utf-8').strip()
               got = hashlib.sha256(chunk.encode()).hexdigest()
-              assert got == wanted, f'Part {i:02d} hash mismatch: {got}'
+              print(f'Part {i:02d}: {len(chunk)} chars, sha256={got}')
+              if got != wanted:
+                  mismatches.append((i, got, wanted))
               chunks.append(chunk)
+          if mismatches:
+              raise AssertionError('Payload mismatches: ' + '; '.join(f'part {i:02d} got {got} expected {wanted}' for i, got, wanted in mismatches))
           payload = ''.join(chunks)
           assert len(payload) == 20900, f'Unexpected payload length: {len(payload)}'
           assert hashlib.sha256(payload.encode()).hexdigest() == '6d57aebafe92957468a55651992f7e170704fb0722f306362ae95d32ff9fd68f'
