@@ -17,7 +17,13 @@ fetch('./training-wizard.html',{cache:'no-store'})
   .then(r=>{if(!r.ok)throw new Error('Unable to load training wizard');return r.text()})
   .then(src=>{
     const inject=`<style>
-      /* Interactive document tools */
+      .lunchtime-launch{position:fixed;right:18px;top:18px;z-index:250;display:flex;align-items:center;gap:10px;padding:10px 15px;border:1px solid rgba(9,41,71,.16);border-radius:999px;background:linear-gradient(135deg,#fff6d7,#f2c45f);color:#092947;text-decoration:none;font-weight:900;box-shadow:0 10px 28px rgba(9,41,71,.18);transition:.16s ease}
+      .lunchtime-launch:hover,.lunchtime-launch:focus-visible{transform:translateY(-2px);box-shadow:0 14px 34px rgba(9,41,71,.24)}
+      .lunchtime-launch .lunch-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#092947;color:#fff;font-size:16px}
+      .lunchtime-launch .lunch-copy{display:flex;flex-direction:column;line-height:1.05}
+      .lunchtime-launch .lunch-copy b{font-size:.9rem}
+      .lunchtime-launch .lunch-copy small{font-size:.61rem;letter-spacing:.05em;text-transform:uppercase;color:#6b5018;margin-top:3px}
+
       .interactive-tools-section{margin:34px 0 6px;padding:22px;border:1px solid #b9ccda;border-radius:18px;background:linear-gradient(135deg,#eef7fc,#f8fbfd)}
       .interactive-tools-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px}
       .interactive-tools-kicker{color:#1769a4;font-size:.69rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
@@ -33,7 +39,6 @@ fetch('./training-wizard.html',{cache:'no-store'})
       .interactive-tool-pill{padding:7px 10px;border-radius:999px;background:#eaf5fc;color:#1769a4;font-size:.72rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
       .interactive-tool-arrow{color:#c99e4b;font-size:1.4rem;font-weight:900}
 
-      /* Workflow checklist section — intentionally light blue */
       .workflow-checklists-section{margin:18px 0 6px;padding:22px;border:1px solid #b8d9ee;border-radius:18px;background:#eaf7ff}
       .workflow-checklists-head{margin-bottom:16px}
       .workflow-checklists-kicker{color:#1769a4;font-size:.69rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
@@ -48,103 +53,29 @@ fetch('./training-wizard.html',{cache:'no-store'})
       .workflow-checklist-card .arrow{color:#1769a4!important}
       .workflow-checklist-card.coming-soon{cursor:default;background:rgba(255,255,255,.82);border-style:dashed}
       .coming-soon-caption{display:inline-block;margin-top:12px;padding:5px 8px;border-radius:999px;background:#fff0ef;color:#b42318;border:1px solid #f1b6b0;font-size:.68rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
-
-      /* Live-training side navigation */
-      .live-note-page [id],.closing-cram-page [id]{scroll-margin-top:100px}
-      .live-note-page .lt-quick,.closing-cram-page .cc-nav{position:fixed!important;right:16px;top:112px;z-index:170;display:flex!important;flex-direction:column;grid-template-columns:none!important;gap:7px!important;width:232px;max-height:calc(100vh - 138px);overflow-y:auto;margin:0!important;padding:12px!important;background:rgba(255,255,255,.98);border:1px solid #cbd8e2;border-radius:16px;box-shadow:0 16px 42px rgba(9,41,71,.18);transition:transform .2s ease,opacity .2s ease;-webkit-overflow-scrolling:touch}
-      .live-note-page .lt-quick .live-nav-hide,.closing-cram-page .cc-nav .live-nav-hide{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;border-bottom:1px solid #dce5eb;background:#fff;color:#092947;padding:4px 2px 10px;margin:0 0 2px;cursor:pointer;font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-      .live-note-page .lt-quick .live-nav-hide b,.closing-cram-page .cc-nav .live-nav-hide b{color:#1769a4;font-size:.69rem}
-      .live-note-page .lt-quick a,.closing-cram-page .cc-nav a{display:block;width:100%;border:1px solid #d5e0e8!important;border-radius:10px!important;background:#fff!important;color:#092947!important;padding:10px 11px!important;text-align:left!important;transition:.15s ease}
-      .live-note-page .lt-quick a:hover,.closing-cram-page .cc-nav a:hover{border-color:#9bbbd0!important;background:#f5faff!important}
-      .live-note-page .lt-quick a.active,.closing-cram-page .cc-nav a.active{background:#092947!important;border-color:#092947!important;color:#fff!important;box-shadow:0 5px 13px rgba(9,41,71,.18)}
-      body.live-sections-hidden .live-note-page .lt-quick,body.live-sections-hidden .closing-cram-page .cc-nav{transform:translateX(calc(100% + 34px));opacity:0;pointer-events:none}
-      .live-nav-show{position:fixed;right:12px;top:112px;z-index:175;display:none;border:1px solid #092947;border-radius:12px 0 0 12px;background:#092947;color:#fff;padding:10px 12px;box-shadow:0 8px 24px rgba(9,41,71,.22);font-weight:900;cursor:pointer}
-      body.live-sections-available.live-sections-hidden .live-nav-show{display:block}
-
-      /* Keep checklist timeline bullets readable */
-      .timeline-stage .checklist-list{width:100%;margin:0;padding:0}
-      .timeline-stage .checklist-list li{display:block!important;grid-template-columns:none!important;position:relative;padding:11px 4px 11px 22px!important;white-space:pre-wrap;line-height:1.65;color:#304457}
-      .timeline-stage .checklist-list li:before{display:block!important;content:'•'!important;position:absolute;left:3px;top:8px;color:#1769a4;font-size:1.15rem;font-weight:900}
-      .timeline-stage{width:auto;min-width:0}
-      .timeline-stage .section{width:100%}
-
       @media(max-width:760px){
-        .interactive-tools-section,.workflow-checklists-section{padding:17px}
-        .interactive-tools-head{display:block}
-        .interactive-tool-card{grid-template-columns:auto 1fr;align-items:start}
-        .interactive-tool-meta{grid-column:1/-1;justify-content:space-between;padding-left:72px}
-        .interactive-tool-icon{width:50px;height:50px}
-        .workflow-checklists-grid{grid-template-columns:1fr}
+        .lunchtime-launch{top:10px;right:10px;padding:8px 11px}.lunchtime-launch .lunch-icon{width:27px;height:27px}.lunchtime-launch .lunch-copy small{display:none}
+        .interactive-tools-section,.workflow-checklists-section{padding:17px}.interactive-tools-head{display:block}.interactive-tool-card{grid-template-columns:auto 1fr;align-items:start}.interactive-tool-meta{grid-column:1/-1;justify-content:space-between;padding-left:68px}.workflow-checklists-grid{grid-template-columns:1fr}
       }
-      @media(max-width:900px){
-        .live-note-page .lt-quick,.closing-cram-page .cc-nav{right:10px;top:74px;width:min(84vw,300px);max-height:calc(100vh - 94px);box-shadow:0 18px 55px rgba(9,41,71,.3)}
-        .live-nav-show{right:8px;top:74px;padding:9px 11px}
-      }
-      @media print{.live-note-page .lt-quick,.closing-cram-page .cc-nav,.live-nav-show{display:none!important}}
+      @media print{.lunchtime-launch{display:none!important}}
     </style>
+    <a class="lunchtime-launch" href="lunchtime.html" aria-label="Open Lunchtime food guide"><span class="lunch-icon">☰</span><span class="lunch-copy"><b>Lunchtime</b><small>Greeneville food guide</small></span></a>
     <script>
       function insertInteractiveTools(){
-        const grid=document.getElementById('grid');
-        if(!grid || document.getElementById('interactiveToolsSection'))return;
-        const section=document.createElement('section');
-        section.id='interactiveToolsSection';
-        section.className='interactive-tools-section';
-        section.innerHTML='<div class="interactive-tools-head"><div><div class="interactive-tools-kicker">Interactive Tools</div><h2>Interactive Document Review</h2><p>Hands-on document study tools, state references, and your full Qualia Master Reference for learning and working through settlement files.</p></div></div><div class="interactive-tools-grid"><a class="interactive-tool-card" href="interactive-document-review.html"><div class="interactive-tool-icon">↗</div><div class="interactive-tool-copy"><h3>Closing Disclosure + HUD-1</h3><p>Open the interactive form viewer, choose the document you want to study, and tap mapped sections to see the related Qualia paths and explanations.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Tool</span><span class="interactive-tool-arrow">→</span></div></a><a class="interactive-tool-card" href="state-document-library.html"><div class="interactive-tool-icon">▤</div><div class="interactive-tool-copy"><h3>State Document Library</h3><p>Browse every state and district, open its document list, and build out detailed references for each state-specific, government, county, and city form over time.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Library</span><span class="interactive-tool-arrow">→</span></div></a><a class="interactive-tool-card" href="qualia-master-reference.html"><div class="interactive-tool-icon">Q</div><div class="interactive-tool-copy"><h3>Qualia Master Reference</h3><p>Open your full v22 reference with 1,070 articles, full-text search, workflow browsing, role and work-area filters, article details, related articles, and the guided tour.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Reference</span><span class="interactive-tool-arrow">→</span></div></a></div>';
-        grid.insertAdjacentElement('afterend',section);
+        const grid=document.getElementById('grid');if(!grid||document.getElementById('interactiveToolsSection'))return;
+        const section=document.createElement('section');section.id='interactiveToolsSection';section.className='interactive-tools-section';
+        section.innerHTML='<div class="interactive-tools-head"><div><div class="interactive-tools-kicker">Interactive Tools</div><h2>Interactive Document Review</h2><p>Hands-on document study tools, state references, and your full Qualia Master Reference for learning and working through settlement files.</p></div></div><div class="interactive-tools-grid"><a class="interactive-tool-card" href="interactive-document-review.html"><div class="interactive-tool-icon">↗</div><div class="interactive-tool-copy"><h3>Closing Disclosure + HUD-1</h3><p>Open the interactive form viewer and tap mapped sections for related Qualia paths and explanations.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Tool</span><span class="interactive-tool-arrow">→</span></div></a><a class="interactive-tool-card" href="state-document-library.html"><div class="interactive-tool-icon">▤</div><div class="interactive-tool-copy"><h3>State Document Library</h3><p>Browse state-specific, government, county, and city document references.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Library</span><span class="interactive-tool-arrow">→</span></div></a><a class="interactive-tool-card" href="qualia-master-reference.html"><div class="interactive-tool-icon">Q</div><div class="interactive-tool-copy"><h3>Qualia Master Reference</h3><p>Open the full searchable Qualia reference with workflows, filters, articles, and guided study tools.</p></div><div class="interactive-tool-meta"><span class="interactive-tool-pill">Open Reference</span><span class="interactive-tool-arrow">→</span></div></a></div>';
+        grid.insertAdjacentElement('afterend',section)
       }
-
       function insertWorkflowChecklists(){
-        const live=document.querySelector('.live-training-section');
-        if(!live || document.getElementById('workflowChecklistsSection'))return;
-        const section=document.createElement('section');
-        section.id='workflowChecklistsSection';
-        section.className='workflow-checklists-section';
-        section.innerHTML='<div class="workflow-checklists-head"><div class="workflow-checklists-kicker">WORKFLOW CHECKLISTS</div><h2>Working Checklists</h2><p>Track a real file from start to finish. Open the checklist you need and keep your place as you work.</p></div><div class="workflow-checklists-grid"><a class="workflow-checklist-card available" href="opening-checklist.html"><span class="arrow">→</span><div class="num">1</div><h3>Opening Checklist</h3><p>Create and track opening-order cases, see your next step, and open plain-English explanations only when you need them.</p></a><div class="workflow-checklist-card coming-soon" aria-disabled="true"><div class="num">2</div><h3>Closing Checklist</h3><p>A guided closing workflow will live here once it is built.</p><span class="coming-soon-caption">Coming Soon</span></div><div class="workflow-checklist-card coming-soon" aria-disabled="true"><div class="num">3</div><h3>Post-Closing Checklist</h3><p>A guided post-closing workflow will live here once it is built.</p><span class="coming-soon-caption">Coming Soon</span></div></div>';
-        live.insertAdjacentElement('afterend',section);
+        const live=document.querySelector('.live-training-section');if(!live||document.getElementById('workflowChecklistsSection'))return;
+        const section=document.createElement('section');section.id='workflowChecklistsSection';section.className='workflow-checklists-section';
+        section.innerHTML='<div class="workflow-checklists-head"><div class="workflow-checklists-kicker">WORKFLOW CHECKLISTS</div><h2>Working Checklists</h2><p>Track a real file from start to finish and keep your place as you work.</p></div><div class="workflow-checklists-grid"><a class="workflow-checklist-card available" href="opening-checklist.html"><span class="arrow">→</span><div class="num">1</div><h3>Opening Checklist</h3><p>Create and track opening-order cases and see your next step.</p></a><div class="workflow-checklist-card coming-soon"><div class="num">2</div><h3>Closing Checklist</h3><p>A guided closing workflow will live here once it is built.</p><span class="coming-soon-caption">Coming Soon</span></div><div class="workflow-checklist-card coming-soon"><div class="num">3</div><h3>Post-Closing Checklist</h3><p>A guided post-closing workflow will live here once it is built.</p><span class="coming-soon-caption">Coming Soon</span></div></div>';
+        live.insertAdjacentElement('afterend',section)
       }
-
       setTimeout(()=>{insertInteractiveTools();insertWorkflowChecklists()},0);
-
-      const LIVE_NAV_STORE='ute-live-section-nav-hidden';
-      let liveNavTick=false;
-      const getLiveSectionNav=()=>document.querySelector('.live-note-page .lt-quick, .closing-cram-page .cc-nav');
-      function setLiveNavHidden(hidden,save=true){
-        document.body.classList.toggle('live-sections-hidden',hidden);
-        if(save){try{localStorage.setItem(LIVE_NAV_STORE,hidden?'1':'0')}catch(e){}}
-        const show=document.getElementById('liveNavShow');
-        if(show)show.setAttribute('aria-expanded',hidden?'false':'true');
-      }
-      function updateLiveSectionHighlight(){
-        const nav=getLiveSectionNav();if(!nav)return;
-        const links=Array.from(nav.querySelectorAll('a[href^="#"]'));if(!links.length)return;
-        const marker=window.scrollY+Math.min(window.innerHeight*.34,260);
-        let current=links[0];
-        links.forEach(link=>{const target=document.querySelector(link.getAttribute('href'));const absoluteTop=target?target.getBoundingClientRect().top+window.scrollY:Infinity;if(target&&absoluteTop<=marker)current=link});
-        links.forEach(link=>link.classList.toggle('active',link===current));
-        if(current){const top=current.offsetTop,bottom=top+current.offsetHeight;if(top<nav.scrollTop+42)nav.scrollTop=Math.max(0,top-42);else if(bottom>nav.scrollTop+nav.clientHeight)nav.scrollTop=bottom-nav.clientHeight+18}
-      }
-      function enhanceLiveSectionNav(){
-        const nav=getLiveSectionNav(),show=document.getElementById('liveNavShow');
-        document.body.classList.toggle('live-sections-available',!!nav);if(!nav)return;
-        if(nav.dataset.sideNavReady!=='1'){
-          nav.dataset.sideNavReady='1';
-          const hide=document.createElement('button');hide.type='button';hide.className='live-nav-hide';hide.innerHTML='<span>On this page</span><b>Hide</b>';hide.addEventListener('click',()=>setLiveNavHidden(true));nav.prepend(hide);
-          nav.querySelectorAll('a[href^="#"]').forEach(link=>{link.addEventListener('click',event=>{const target=document.querySelector(link.getAttribute('href'));if(!target)return;event.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});try{history.replaceState(null,'',link.getAttribute('href'))}catch(e){}})});
-          let stored=null;try{stored=localStorage.getItem(LIVE_NAV_STORE)}catch(e){}
-          if(stored===null)setLiveNavHidden(window.innerWidth<900,false);else setLiveNavHidden(stored==='1',false);
-        }
-        if(show)show.hidden=false;updateLiveSectionHighlight();
-      }
-      if(!document.getElementById('liveNavShow')){
-        const show=document.createElement('button');show.id='liveNavShow';show.className='live-nav-show';show.type='button';show.textContent='Sections';show.setAttribute('aria-label','Show section navigation');show.addEventListener('click',()=>setLiveNavHidden(false));document.body.appendChild(show);
-      }
-      window.addEventListener('scroll',()=>{if(liveNavTick)return;liveNavTick=true;requestAnimationFrame(()=>{liveNavTick=false;updateLiveSectionHighlight()})},{passive:true});
-      window.addEventListener('resize',updateLiveSectionHighlight,{passive:true});
-      const liveNavObserver=new MutationObserver(()=>requestAnimationFrame(()=>{insertWorkflowChecklists();enhanceLiveSectionNav()}));
-      liveNavObserver.observe(document.body,{childList:true,subtree:true});
-      setTimeout(()=>{insertWorkflowChecklists();enhanceLiveSectionNav()},0);
+      const obs=new MutationObserver(()=>{insertInteractiveTools();insertWorkflowChecklists()});obs.observe(document.body,{childList:true,subtree:true});
     <\/script>`;
-
     src=src.replace('</head>','<link rel="stylesheet" href="./closing-fundamentals-fix.css"></head>');
     src=src.replace('</body>',inject+'</body>');
     document.open();document.write(src);document.close();
