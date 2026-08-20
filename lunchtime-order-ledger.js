@@ -33,87 +33,114 @@ const balance=document.getElementById('lunchRunningBalance');
 const balanceLabel=document.getElementById('lunchRunningBalanceLabel');
 const warning=document.getElementById('lunchLedgerWarning');
 
-function qtyFromLine(line){
-  const text=line.querySelector('h4')?.textContent||'';
-  const match=text.match(/^\s*(\d+)\s*[x×]/i);
-  return match?Number(match[1]):1;
-}
-function listedDetail(line){
-  return [...line.querySelectorAll('.order-detail')].map(x=>x.textContent.trim()).find(t=>/^Listed\s*:/i.test(t))||'';
-}
-function exactUnitPrice(line){
-  const detail=listedDetail(line);
-  if(!detail)return {amount:null,status:'missing'};
-  const amounts=[...detail.matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)].map(m=>Number(m[1]));
-  if(amounts.length===1&&Number.isFinite(amounts[0]))return {amount:amounts[0],status:'exact'};
-  if(amounts.length>1)return {amount:null,status:'ambiguous'};
-  return {amount:null,status:'missing'};
-}
 function cleanText(text){return String(text||'').replace(/\s+/g,' ').trim()}
 
-function buildLedger(){
-  const nodes=[...orderContents.querySelectorAll('.order-group,.order-line')];
-  if(!nodes.length){
-    return {text:'No items selected yet.',total:0,unpriced:0,items:0};
-  }
-  const out=['OFFICE LUNCH ORDER',''];
-  let total=0,unpriced=0,items=0;
-  for(const node of nodes){
-    if(node.classList.contains('order-group')){
-      const currentGroup=cleanText(node.textContent).toUpperCase();
-      if(currentGroup){
-        if(out[out.length-1]!=='')out.push('');
-        out.push(currentGroup);
+function readOrder(){
+  const groups=[];
+  let total=0;
+  let unpriced=0;
+  let items=0;
+  let hasTax=false;
+
+  orderContents.querySelectorAll('.order-group').forEach(groupEl=>{
+    const group={name:cleanText(groupEl.textContent),items:[]};
+    let node=groupEl.nextElementSibling;
+
+    while(node&&!node.classList.contains('order-group')){
+      if(node.classList.contains('order-line')){
+        const rawTitle=cleanText(node.querySelector('h4')?.textContent);
+        const qtyMatch=rawTitle.match(/^\s*(\d+)\s*[x×]\s*(.*)$/i);
+        const qty=qtyMatch?Number(qtyMatch[1]):1;
+        const name=qtyMatch?qtyMatch[2].trim():rawTitle;
+
+        const detailText=(node.querySelector('.order-detail')?.innerText||'').trim();
+        const detailLines=detailText.split(/\n+/).map(cleanText).filter(Boolean);
+        const priceLine=detailLines.find(line=>/^Listed\s*:/i.test(line));
+        const listed=priceLine?priceLine.replace(/^Listed\s*:\s*/i,'').trim():'';
+        const extras=detailLines.filter(line=>!/^Listed\s*:/i.test(line));
+        const note=cleanText(node.querySelector('.order-note')?.value);
+
+        items+=qty;
+        if(/\+\s*tax/i.test(listed))hasTax=true;
+
+        const amounts=[...listed.matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)].map(m=>Number(m[1]));
+        if(amounts.length===1&&Number.isFinite(amounts[0])) total+=amounts[0]*qty;
+        else unpriced+=qty;
+
+        group.items.push({qty,name,listed,extras,note});
       }
-      continue;
+      node=node.nextElementSibling;
     }
-    const title=cleanText(node.querySelector('h4')?.textContent);
-    if(!title)continue;
-    const qty=qtyFromLine(node);
-    items+=qty;
-    out.push(title);
-    const details=[...node.querySelectorAll('.order-detail')].map(x=>cleanText(x.textContent)).filter(Boolean);
-    details.forEach(d=>out.push(`  ${d}`));
-    const note=cleanText(node.querySelector('.order-note')?.value);
-    if(note)out.push(`  Notes: ${note}`);
-    const price=exactUnitPrice(node);
-    if(price.status==='exact') total+=price.amount*qty;
-    else unpriced+=qty;
-  }
-  out.push('');
-  if(unpriced===0){
-    out.push(`RUNNING BALANCE: $${total.toFixed(2)}`);
+
+    if(group.items.length)groups.push(group);
+  });
+
+  return {groups,total,unpriced,items,hasTax};
+}
+
+function formatGroups(data){
+  const lines=[];
+  data.groups.forEach((group,gi)=>{
+    if(gi)lines.push('');
+    lines.push(group.name.toUpperCase());
+    lines.push('────────────────────────');
+    group.items.forEach((item,ii)=>{
+      const price=item.listed?` — ${item.listed}`:'';
+      lines.push(`• ${item.qty} × ${item.name}${price}`);
+      item.extras.forEach(extra=>lines.push(`  ↳ ${extra}`));
+      if(item.note)lines.push(`  ↳ Notes: ${item.note}`);
+      if(ii<group.items.length-1)lines.push('');
+    });
+  });
+  return lines;
+}
+
+function formatRailText(){
+  const data=readOrder();
+  if(!data.items)return 'No items yet.';
+  return formatGroups(data).join('\n');
+}
+
+function formatCopyText(){
+  const data=readOrder();
+  if(!data.items)return 'OFFICE LUNCH ORDER\n\nNo items selected.';
+
+  const lines=[
+    'OFFICE LUNCH ORDER',
+    '════════════════════════',
+    '',
+    ...formatGroups(data),
+    '',
+    '════════════════════════'
+  ];
+
+  if(data.unpriced){
+    lines.push(`KNOWN SUBTOTAL: $${data.total.toFixed(2)}`);
+    lines.push(`${data.unpriced} item${data.unpriced===1?'':'s'} need${data.unpriced===1?'s':''} a price check`);
+  }else if(data.hasTax){
+    lines.push(`SUBTOTAL BEFORE TAX: $${data.total.toFixed(2)}`);
   }else{
-    out.push(`KNOWN SUBTOTAL: $${total.toFixed(2)}`);
-    out.push(`${unpriced} item${unpriced===1?'':'s'} need price confirmation.`);
+    lines.push(`TOTAL: $${data.total.toFixed(2)}`);
   }
-  return {text:out.join('\n'),total,unpriced,items};
+  lines.push(`${data.items} item${data.items===1?'':'s'}`);
+  return lines.join('\n');
 }
 
-function prettyLedgerText(){
-  if(typeof window.lunchPrettyRailText==='function'){
-    try{return window.lunchPrettyRailText()}
-    catch(err){console.warn('Pretty rail formatter failed',err)}
-  }
-  return buildLedger().text;
-}
-
-function prettyCopyText(){
-  if(typeof window.lunchPrettyOrderText==='function'){
-    try{return window.lunchPrettyOrderText()}
-    catch(err){console.warn('Pretty copy formatter failed',err)}
-  }
-  return buildLedger().text;
-}
+window.lunchPrettyRailText=formatRailText;
+window.lunchPrettyOrderText=formatCopyText;
 
 function updateLedger(){
-  const data=buildLedger();
-  if(ledgerText)ledgerText.textContent=prettyLedgerText();
+  const data=readOrder();
+  if(ledgerText)ledgerText.textContent=formatRailText();
   if(balance)balance.textContent=`$${data.total.toFixed(2)}`;
-  if(balanceLabel)balanceLabel.textContent=data.unpriced?`Known subtotal • ${data.unpriced} unpriced`:'Running balance';
+  if(balanceLabel){
+    balanceLabel.textContent=data.unpriced
+      ? `Known subtotal • ${data.unpriced} unpriced`
+      : (data.hasTax?'Subtotal before tax':'Running balance');
+  }
   if(warning){
     if(data.unpriced){
-      warning.textContent=`${data.unpriced} selected item${data.unpriced===1?' has':'s have'} a missing or multi-price listing, so the balance only includes prices that can be calculated exactly.`;
+      warning.textContent=`${data.unpriced} selected item${data.unpriced===1?' has':'s have'} a missing or multi-price listing, so the subtotal only includes prices that can be calculated exactly.`;
       warning.classList.add('show');
     }else{
       warning.textContent='';
@@ -128,7 +155,8 @@ function fallbackCopy(text){
   area.style.position='fixed';
   area.style.opacity='0';
   document.body.appendChild(area);
-  area.focus();area.select();
+  area.focus();
+  area.select();
   try{document.execCommand('copy')}catch(e){}
   area.remove();
 }
@@ -137,16 +165,16 @@ if(copyButton){
   copyButton.addEventListener('click',async e=>{
     e.preventDefault();
     e.stopImmediatePropagation();
-    const text=prettyCopyText();
+    const text=formatCopyText();
     try{
       if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);
       else fallbackCopy(text);
-      const old=copyButton.textContent;
-      copyButton.textContent='Copied ✓';
-      setTimeout(()=>copyButton.textContent=old,1000);
     }catch(err){
       fallbackCopy(text);
     }
+    const old=copyButton.textContent;
+    copyButton.textContent='Copied ✓';
+    setTimeout(()=>copyButton.textContent=old,1000);
     requestAnimationFrame(updateLedger);
   },true);
 }
@@ -154,11 +182,13 @@ if(copyButton){
 function addPrintSummary(){
   if(!printArea)return;
   printArea.querySelector('.ledger-print-summary')?.remove();
-  const data=buildLedger();
+  const data=readOrder();
   const box=document.createElement('div');
   box.className='ledger-print-summary';
   box.style.cssText='margin:18px 0 0;padding-top:10px;border-top:2px solid #000;font-weight:700';
-  box.textContent=data.unpriced?`Known subtotal: $${data.total.toFixed(2)} • ${data.unpriced} item(s) need price confirmation`:`Running balance: $${data.total.toFixed(2)}`;
+  if(data.unpriced)box.textContent=`Known subtotal: $${data.total.toFixed(2)} • ${data.unpriced} item(s) need price confirmation`;
+  else if(data.hasTax)box.textContent=`Subtotal before tax: $${data.total.toFixed(2)}`;
+  else box.textContent=`Total: $${data.total.toFixed(2)}`;
   printArea.appendChild(box);
 }
 window.addEventListener('beforeprint',addPrintSummary);
@@ -166,10 +196,8 @@ window.addEventListener('beforeprint',addPrintSummary);
 document.addEventListener('input',e=>{
   if(e.target?.classList?.contains('order-note'))updateLedger();
 });
-const observer=new MutationObserver(()=>updateLedger());
-observer.observe(orderContents,{childList:true,subtree:true,characterData:true});
+new MutationObserver(()=>updateLedger()).observe(orderContents,{childList:true,subtree:true,characterData:true});
 orderContents.addEventListener('click',()=>setTimeout(updateLedger,0));
 orderDialog.addEventListener('toggle',updateLedger);
-window.addEventListener('lunch-order-format-ready',updateLedger);
 setTimeout(updateLedger,0);
 })();
