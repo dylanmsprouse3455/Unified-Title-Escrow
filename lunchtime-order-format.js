@@ -48,12 +48,13 @@ function boot(){
     return {groups,total,unknownUnits,itemCount,hasTax};
   }
 
-  function formatBody(data){
+  function formatBody(data,compact=false){
     const lines=[];
+    const divider=compact?'──────────────────':'────────────────────────────';
     data.groups.forEach((group,gi)=>{
       if(gi)lines.push('');
       lines.push(group.name.toUpperCase());
-      lines.push('────────────────────────────');
+      lines.push(divider);
       group.items.forEach((item,ii)=>{
         const price=item.listed?` — ${item.listed}`:'';
         lines.push(`• ${item.qty} × ${item.name}${price}`);
@@ -69,7 +70,7 @@ function boot(){
     const data=readOrder();
     if(!data.itemCount)return 'OFFICE LUNCH ORDER\n\nNo items selected.';
 
-    const lines=['OFFICE LUNCH ORDER','════════════════════════════','',...formatBody(data),'','════════════════════════════'];
+    const lines=['OFFICE LUNCH ORDER','════════════════════════════','',...formatBody(data,false),'','════════════════════════════'];
     if(data.unknownUnits){
       lines.push(`KNOWN SUBTOTAL: $${data.total.toFixed(2)}`);
       lines.push(`${data.unknownUnits} item${data.unknownUnits===1?'':'s'} need${data.unknownUnits===1?'s':''} a price check`);
@@ -85,7 +86,7 @@ function boot(){
   function prettyRailText(){
     const data=readOrder();
     if(!data.itemCount)return 'No items yet.';
-    return formatBody(data).join('\n');
+    return formatBody(data,true).join('\n');
   }
 
   window.lunchPrettyOrderText=prettyOrderText;
