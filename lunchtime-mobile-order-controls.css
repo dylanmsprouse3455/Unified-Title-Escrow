@@ -26,10 +26,12 @@
     background:#173f73!important;
     color:#fff!important;
   }
-  .remove-order{
-    background:#fff1ef!important;
-    color:#d94f44!important;
-    border-color:#e45d52!important;
+  /* Delete button: keep the compact size, but make the X unmistakably red. */
+  .qty-controls button.remove-order,
+  .qty-controls .remove-order{
+    background:#fff5f5!important;
+    color:#dc2626!important;
+    border:2px solid #dc2626!important;
   }
   .order-note{
     min-height:54px!important;
