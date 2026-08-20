@@ -57,10 +57,10 @@ function buildLedger(){
     return {text:'No items selected yet.',total:0,unpriced:0,items:0};
   }
   const out=['OFFICE LUNCH ORDER',''];
-  let total=0,unpriced=0,items=0,currentGroup='';
+  let total=0,unpriced=0,items=0;
   for(const node of nodes){
     if(node.classList.contains('order-group')){
-      currentGroup=cleanText(node.textContent).toUpperCase();
+      const currentGroup=cleanText(node.textContent).toUpperCase();
       if(currentGroup){
         if(out[out.length-1]!=='')out.push('');
         out.push(currentGroup);
@@ -90,16 +90,35 @@ function buildLedger(){
   return {text:out.join('\n'),total,unpriced,items};
 }
 
+function prettyLedgerText(){
+  if(typeof window.lunchPrettyRailText==='function'){
+    try{return window.lunchPrettyRailText()}
+    catch(err){console.warn('Pretty rail formatter failed',err)}
+  }
+  return buildLedger().text;
+}
+
+function prettyCopyText(){
+  if(typeof window.lunchPrettyOrderText==='function'){
+    try{return window.lunchPrettyOrderText()}
+    catch(err){console.warn('Pretty copy formatter failed',err)}
+  }
+  return buildLedger().text;
+}
+
 function updateLedger(){
   const data=buildLedger();
-  if(ledgerText)ledgerText.textContent=data.text;
+  if(ledgerText)ledgerText.textContent=prettyLedgerText();
   if(balance)balance.textContent=`$${data.total.toFixed(2)}`;
   if(balanceLabel)balanceLabel.textContent=data.unpriced?`Known subtotal • ${data.unpriced} unpriced`:'Running balance';
   if(warning){
     if(data.unpriced){
       warning.textContent=`${data.unpriced} selected item${data.unpriced===1?' has':'s have'} a missing or multi-price listing, so the balance only includes prices that can be calculated exactly.`;
       warning.classList.add('show');
-    }else warning.classList.remove('show');
+    }else{
+      warning.textContent='';
+      warning.classList.remove('show');
+    }
   }
 }
 
@@ -118,16 +137,17 @@ if(copyButton){
   copyButton.addEventListener('click',async e=>{
     e.preventDefault();
     e.stopImmediatePropagation();
-    const data=buildLedger();
+    const text=prettyCopyText();
     try{
-      if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(data.text);
-      else fallbackCopy(data.text);
+      if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);
+      else fallbackCopy(text);
       const old=copyButton.textContent;
       copyButton.textContent='Copied ✓';
       setTimeout(()=>copyButton.textContent=old,1000);
     }catch(err){
-      fallbackCopy(data.text);
+      fallbackCopy(text);
     }
+    requestAnimationFrame(updateLedger);
   },true);
 }
 
@@ -150,5 +170,6 @@ const observer=new MutationObserver(()=>updateLedger());
 observer.observe(orderContents,{childList:true,subtree:true,characterData:true});
 orderContents.addEventListener('click',()=>setTimeout(updateLedger,0));
 orderDialog.addEventListener('toggle',updateLedger);
-updateLedger();
+window.addEventListener('lunch-order-format-ready',updateLedger);
+setTimeout(updateLedger,0);
 })();
