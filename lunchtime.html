@@ -13,14 +13,12 @@ body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f3efe8;
 <script>
 (async()=>{
   try{
-    const paths=['part01.txt','part02.txt','part03.txt','part04.txt'];
-    const parts=await Promise.all(paths.map(p=>fetch('./lunchtime-data/'+p+'?v=20260819-2130',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.text()})));
+    const paths=['part01.txt','part02.txt','part03.txt','part04.txt','part05.txt','part06.txt','part07.txt','part08.txt'];
+    const parts=await Promise.all(paths.map(p=>fetch('./lunchtime-data/'+p+'?v=20260819-2145',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.text()})));
     const bin=atob(parts.join('').replace(/\s+/g,''));
     const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
     const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    let html=await new Response(stream).text();
-    html=html.replace('</head>','<link rel="stylesheet" href="./lunchtime-clickfix.css?v=20260819-2130"></head>');
-    html=html.replace('</body>','<script src="./lunchtime-result-fix.js?v=20260819-2130"><\\/script></body>');
+    const html=await new Response(stream).text();
     document.open();document.write(html);document.close();
   }catch(err){
     document.body.innerHTML='<div class="loading"><div><strong>Unable to load Lunchtime.</strong><br><small>Please refresh the page.</small></div></div>';
