@@ -20,6 +20,22 @@ body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f3efe8;
     const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
     const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
     let html=await new Response(stream).text();
+    html=html.replace('</head>',`<style>
+      .floating-controls{align-items:stretch!important}
+      .floating-order,.floating-help,.floating-random{
+        width:128px!important;
+        min-width:128px!important;
+        max-width:128px!important;
+        height:52px!important;
+        min-height:52px!important;
+        padding:0 14px!important;
+        border-radius:999px!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        box-sizing:border-box!important;
+      }
+    </style></head>`);
     html=html.replace('</body>','<script src="./lunchtime-order-builder.js?v=20260819-2205"><\/script></body>');
     document.open();document.write(html);document.close();
   }catch(err){
