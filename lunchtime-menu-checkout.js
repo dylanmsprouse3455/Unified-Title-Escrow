@@ -1,154 +1,157 @@
-(()=>{
+(()=> {
 'use strict';
 
-const restaurantDialog=document.getElementById('restaurantDialog');
-const modalBody=document.getElementById('modalBody');
-const orderDialog=document.getElementById('lunchOrderDialog');
-const orderButton=document.getElementById('lunchOrderButton');
-const orderContents=document.getElementById('lunchOrderContents');
-const orderCount=document.getElementById('lunchOrderCount');
+function ready(fn){
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+  else fn();
+}
 
-if(!restaurantDialog||!modalBody||!orderDialog||!orderButton||!orderContents||!orderCount)return;
+ready(() => {
+  const restaurantDialog = document.getElementById('restaurantDialog');
+  const modalBody = document.getElementById('modalBody');
+  const orderDialog = document.getElementById('lunchOrderDialog');
+  const orderButton = document.getElementById('lunchOrderButton');
+  const orderContents = document.getElementById('lunchOrderContents');
+  const orderCount = document.getElementById('lunchOrderCount');
 
-let snapshotBusy=false;
+  if(!restaurantDialog || !modalBody || !orderDialog || !orderButton || !orderContents || !orderCount) return;
 
-function parseRenderedOrder(){
-  let total=0;
-  let unknownUnits=0;
-  let itemCount=0;
+  function compiledOrderText(){
+    if(window.lunchCompileText) return window.lunchCompileText();
+    const blocks = [];
+    orderContents.querySelectorAll('.order-group').forEach(group => {
+      const lines = [];
+      let sib = group.nextElementSibling;
+      while(sib && !sib.classList.contains('order-group')){
+        if(sib.classList.contains('order-line')){
+          const title = sib.querySelector('h4')?.textContent?.trim() || '';
+          const detail = sib.querySelector('.order-detail')?.textContent?.trim() || '';
+          const note = sib.querySelector('.order-note')?.value?.trim() || '';
+          let line = title;
+          if(detail) line += "\n  " + detail.replace(/\s+/g,' ').trim();
+          if(note) line += "\n  Note: " + note;
+          lines.push(line);
+        }
+        sib = sib.nextElementSibling;
+      }
+      if(lines.length) blocks.push(group.textContent.trim() + "\n" + lines.join("\n"));
+    });
+    return blocks.join("\n\n");
+  }
 
-  orderContents.querySelectorAll('.order-line').forEach(line=>{
-    const title=line.querySelector('h4')?.textContent||'';
-    const qtyMatch=title.match(/^\s*(\d+)\s*[x×]/i);
-    const qty=qtyMatch?Number(qtyMatch[1]):1;
-    itemCount+=qty;
+  function parseSummary(){
+    let total = 0;
+    let unknownUnits = 0;
+    let itemCount = 0;
 
-    const detail=line.querySelector('.order-detail')?.textContent||'';
-    const listedMatch=detail.match(/Listed:\s*([^\n]+)/i);
-    if(!listedMatch){
-      unknownUnits+=qty;
-      return;
+    orderContents.querySelectorAll('.order-line').forEach(line => {
+      const title = line.querySelector('h4')?.textContent || '';
+      const qtyMatch = title.match(/^\s*(\d+)\s*[x×]/i);
+      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+      itemCount += qty;
+
+      const detail = line.querySelector('.order-detail')?.textContent || '';
+      const listedMatch = detail.match(/Listed:\s*([^\n]+)/i);
+      if(!listedMatch){
+        unknownUnits += qty;
+        return;
+      }
+
+      const prices = [...listedMatch[1].matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)].map(m => Number(m[1]));
+      if(prices.length === 1 && Number.isFinite(prices[0])) total += prices[0] * qty;
+      else unknownUnits += qty;
+    });
+
+    if(!itemCount){
+      const badge = Number(orderCount.textContent) || 0;
+      itemCount = badge;
+      if(badge > 0) unknownUnits = badge;
     }
 
-    const prices=[...listedMatch[1].matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)].map(m=>Number(m[1]));
-    if(prices.length===1 && Number.isFinite(prices[0])) total+=prices[0]*qty;
-    else unknownUnits+=qty;
-  });
-
-  if(!itemCount){
-    const badgeCount=Number(orderCount.textContent)||0;
-    itemCount=badgeCount;
-    if(badgeCount>0) unknownUnits=badgeCount;
+    return {total, unknownUnits, itemCount};
   }
 
-  return {total,unknownUnits,itemCount};
-}
+  function renderRail(){
+    if(!restaurantDialog.open) return;
 
-function getOrderSnapshot(){
-  if(snapshotBusy)return parseRenderedOrder();
+    let layout = modalBody.querySelector('.restaurant-menu-layout');
+    let aside = modalBody.querySelector('#restaurantOrderSummary');
+    if(!layout){
+      const existing = [...modalBody.childNodes];
+      const main = document.createElement('div');
+      main.className = 'restaurant-menu-main';
+      existing.forEach(node => main.appendChild(node));
 
-  const wasOpen=orderDialog.open;
-  snapshotBusy=true;
-  try{
-    if(!wasOpen){
-      orderDialog.classList.add('lunch-order-snapshotting');
-      orderButton.click();
+      aside = document.createElement('aside');
+      aside.className = 'restaurant-order-summary';
+      aside.id = 'restaurantOrderSummary';
+      aside.innerHTML = `
+        <div class="restaurant-order-summary__card">
+          <div class="restaurant-order-summary__top">
+            <div class="restaurant-order-summary__eyebrow">Your order</div>
+            <div class="restaurant-order-summary__count" data-summary-count>0 items</div>
+          </div>
+          <div class="restaurant-order-summary__label" data-summary-label>Running balance</div>
+          <div class="restaurant-order-summary__balance" data-summary-balance>$0.00</div>
+          <div class="restaurant-order-summary__warning" data-summary-warning hidden></div>
+          <div class="restaurant-order-summary__ledger-title">Running list</div>
+          <pre class="restaurant-order-summary__ledger" data-summary-ledger>No items yet.</pre>
+          <button type="button" class="restaurant-checkout-btn" data-summary-checkout>Checkout</button>
+          <div class="restaurant-order-summary__hint">Review, copy, or print the full order on checkout.</div>
+        </div>
+      `;
+      aside.querySelector('[data-summary-checkout]').addEventListener('click', () => {
+        if(restaurantDialog.open) restaurantDialog.close();
+        setTimeout(() => orderButton.click(), 0);
+      });
+
+      layout = document.createElement('div');
+      layout.className = 'restaurant-menu-layout';
+      layout.append(main, aside);
+      modalBody.appendChild(layout);
     }
-    return parseRenderedOrder();
-  }catch(err){
-    return {total:0,unknownUnits:Number(orderCount.textContent)||0,itemCount:Number(orderCount.textContent)||0};
-  }finally{
-    if(!wasOpen && orderDialog.open)orderDialog.close();
-    orderDialog.classList.remove('lunch-order-snapshotting');
-    snapshotBusy=false;
-  }
-}
-
-function updateSummary(){
-  const summary=document.getElementById('restaurantOrderSummary');
-  if(!summary)return;
-
-  const snap=getOrderSnapshot();
-  const countEl=summary.querySelector('[data-summary-count]');
-  const labelEl=summary.querySelector('[data-summary-label]');
-  const balanceEl=summary.querySelector('[data-summary-balance]');
-  const warningEl=summary.querySelector('[data-summary-warning]');
-  const checkout=summary.querySelector('[data-summary-checkout]');
-
-  countEl.textContent=`${snap.itemCount} item${snap.itemCount===1?'':'s'}`;
-  labelEl.textContent=snap.unknownUnits?'Known subtotal':'Running balance';
-  balanceEl.textContent=`$${snap.total.toFixed(2)}`;
-
-  if(snap.unknownUnits){
-    warningEl.hidden=false;
-    warningEl.textContent=`+ ${snap.unknownUnits} item${snap.unknownUnits===1?'':'s'} need${snap.unknownUnits===1?'s':''} a price check`;
-  }else{
-    warningEl.hidden=true;
-    warningEl.textContent='';
+    updateRail();
   }
 
-  checkout.disabled=snap.itemCount===0;
-  checkout.textContent=snap.itemCount?`Checkout • ${snap.itemCount}`:'Checkout';
-}
+  function updateRail(){
+    const summary = document.getElementById('restaurantOrderSummary');
+    if(!summary) return;
 
-function checkout(){
-  if(restaurantDialog.open)restaurantDialog.close();
-  setTimeout(()=>orderButton.click(),0);
-}
+    const snap = parseSummary();
+    summary.querySelector('[data-summary-count]').textContent = `${snap.itemCount} item${snap.itemCount === 1 ? '' : 's'}`;
+    summary.querySelector('[data-summary-label]').textContent = snap.unknownUnits ? 'Known subtotal' : 'Running balance';
+    summary.querySelector('[data-summary-balance]').textContent = `$${snap.total.toFixed(2)}`;
 
-function mountSummary(){
-  if(!restaurantDialog.open)return;
-  if(modalBody.querySelector('.restaurant-menu-layout')){
-    updateSummary();
-    return;
+    const warning = summary.querySelector('[data-summary-warning]');
+    if(snap.unknownUnits){
+      warning.hidden = false;
+      warning.textContent = `+ ${snap.unknownUnits} item${snap.unknownUnits === 1 ? '' : 's'} need${snap.unknownUnits === 1 ? 's' : ''} a price check`;
+    } else {
+      warning.hidden = true;
+      warning.textContent = '';
+    }
+
+    const ledger = summary.querySelector('[data-summary-ledger]');
+    const text = compiledOrderText().trim();
+    ledger.textContent = text || 'No items yet.';
+    summary.querySelector('[data-summary-checkout]').disabled = snap.itemCount === 0;
   }
 
-  const layout=document.createElement('div');
-  layout.className='restaurant-menu-layout';
+  const prevOpenRestaurant = window.openRestaurant;
+  if(typeof prevOpenRestaurant === 'function'){
+    window.openRestaurant = function(...args){
+      const result = prevOpenRestaurant.apply(this, args);
+      requestAnimationFrame(renderRail);
+      return result;
+    };
+  }
 
-  const main=document.createElement('div');
-  main.className='restaurant-menu-main';
+  new MutationObserver(() => {
+    if(restaurantDialog.open) requestAnimationFrame(updateRail);
+  }).observe(orderContents, {childList:true, subtree:true, characterData:true});
 
-  const existing=[...modalBody.childNodes];
-  existing.forEach(node=>main.appendChild(node));
-
-  const aside=document.createElement('aside');
-  aside.className='restaurant-order-summary';
-  aside.id='restaurantOrderSummary';
-  aside.innerHTML=`
-    <div class="restaurant-order-summary__top">
-      <div class="restaurant-order-summary__eyebrow">Your order</div>
-      <div class="restaurant-order-summary__count" data-summary-count>0 items</div>
-    </div>
-    <div class="restaurant-order-summary__label" data-summary-label>Running balance</div>
-    <div class="restaurant-order-summary__balance" data-summary-balance>$0.00</div>
-    <div class="restaurant-order-summary__warning" data-summary-warning hidden></div>
-    <button type="button" class="restaurant-checkout-btn" data-summary-checkout>Checkout</button>
-    <div class="restaurant-order-summary__hint">Review, copy, or print the full order on checkout.</div>`;
-
-  aside.querySelector('[data-summary-checkout]').addEventListener('click',checkout);
-
-  layout.append(main,aside);
-  modalBody.appendChild(layout);
-  updateSummary();
-}
-
-const previousOpenRestaurant=window.openRestaurant;
-if(typeof previousOpenRestaurant==='function'){
-  window.openRestaurant=function(restaurant){
-    previousOpenRestaurant(restaurant);
-    requestAnimationFrame(mountSummary);
-  };
-}
-
-const countObserver=new MutationObserver(()=>{
-  if(restaurantDialog.open)requestAnimationFrame(updateSummary);
+  new MutationObserver(() => {
+    if(restaurantDialog.open) requestAnimationFrame(updateRail);
+  }).observe(orderCount, {childList:true, subtree:true, characterData:true});
 });
-countObserver.observe(orderCount,{childList:true,subtree:true,characterData:true});
-
-const dialogObserver=new MutationObserver(()=>{
-  if(restaurantDialog.open && !modalBody.querySelector('.restaurant-menu-layout'))requestAnimationFrame(mountSummary);
-});
-dialogObserver.observe(modalBody,{childList:true});
-
 })();
