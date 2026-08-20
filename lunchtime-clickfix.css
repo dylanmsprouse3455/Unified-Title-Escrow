@@ -1,0 +1,8 @@
+/* Click-layer fix for Help Me Decide results */
+#wizardDialog .wizard-body{position:relative;}
+#wizardDialog .match-card{position:relative;z-index:3;pointer-events:auto;}
+#wizardDialog .match-actions{position:relative;z-index:4;pointer-events:auto;}
+#wizardDialog .match-actions button{position:relative;z-index:5;pointer-events:auto!important;touch-action:manipulation;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.08);}
+#wizardDialog .wizard-nav{z-index:2;pointer-events:none;}
+#wizardDialog .wizard-nav button{pointer-events:auto;}
+#wizardDialog #wizardResults{position:relative;z-index:3;pointer-events:auto;padding-bottom:12px;}
