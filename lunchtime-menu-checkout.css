@@ -1,0 +1,163 @@
+/* Live order summary inside restaurant menus */
+#restaurantDialog{
+  width:min(1180px,calc(100% - 20px))!important;
+  max-width:1180px!important;
+}
+.restaurant-menu-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 280px;
+  gap:16px;
+  align-items:start;
+}
+.restaurant-menu-main{min-width:0}
+.restaurant-order-summary{
+  position:sticky;
+  top:8px;
+  padding:16px;
+  border-radius:18px;
+  background:linear-gradient(160deg,#123b6c 0%,#0b315d 100%);
+  border:2px solid #0b315d;
+  box-shadow:0 12px 28px rgba(18,59,108,.18);
+  color:#fff;
+}
+.restaurant-order-summary__top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:18px;
+}
+.restaurant-order-summary__eyebrow{
+  font-size:13px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:#bed8f3;
+}
+.restaurant-order-summary__count{
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:12px;
+  font-weight:900;
+  color:#fff;
+  white-space:nowrap;
+}
+.restaurant-order-summary__label{
+  font-size:13px;
+  font-weight:850;
+  color:#dbeafe;
+  margin-bottom:4px;
+}
+.restaurant-order-summary__balance{
+  font-size:38px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.04em;
+  color:#ffd15c;
+  margin-bottom:12px;
+}
+.restaurant-order-summary__warning{
+  padding:9px 10px;
+  margin-bottom:12px;
+  border-radius:10px;
+  background:#fff2c7;
+  color:#533b00;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:900;
+}
+.restaurant-order-summary__warning[hidden]{display:none!important}
+.restaurant-checkout-btn{
+  width:100%;
+  min-height:50px;
+  border:0;
+  border-radius:13px;
+  background:#f0b429;
+  color:#2e260c;
+  font-size:16px;
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(0,0,0,.14);
+}
+.restaurant-checkout-btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+.restaurant-order-summary__hint{
+  margin-top:9px;
+  color:#d9e8f6;
+  font-size:11px;
+  line-height:1.4;
+  text-align:center;
+  font-weight:700;
+}
+.lunch-order-snapshotting{
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+.lunch-order-snapshotting::backdrop{background:transparent!important}
+
+@media(max-width:760px){
+  #restaurantDialog{
+    width:100%!important;
+    max-width:none!important;
+  }
+  .restaurant-menu-layout{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .restaurant-order-summary{
+    position:sticky;
+    bottom:0;
+    top:auto;
+    z-index:12;
+    display:grid;
+    grid-template-columns:1fr auto;
+    column-gap:12px;
+    row-gap:2px;
+    align-items:center;
+    margin:0 -4px 10px;
+    padding:12px 13px calc(12px + env(safe-area-inset-bottom));
+    border-radius:15px;
+  }
+  .restaurant-order-summary__top{
+    grid-column:1;
+    grid-row:1;
+    margin:0;
+    justify-content:flex-start;
+  }
+  .restaurant-order-summary__eyebrow{display:none}
+  .restaurant-order-summary__count{
+    padding:3px 7px;
+    font-size:11px;
+  }
+  .restaurant-order-summary__label{
+    grid-column:1;
+    grid-row:2;
+    margin:0;
+    font-size:11px;
+  }
+  .restaurant-order-summary__balance{
+    grid-column:1;
+    grid-row:3;
+    margin:0;
+    font-size:28px;
+  }
+  .restaurant-order-summary__warning{
+    grid-column:1/-1;
+    grid-row:4;
+    margin:7px 0 0;
+    padding:7px 8px;
+  }
+  .restaurant-checkout-btn{
+    grid-column:2;
+    grid-row:1/4;
+    min-width:126px;
+    min-height:48px;
+    padding:0 14px;
+  }
+  .restaurant-order-summary__hint{display:none}
+}
