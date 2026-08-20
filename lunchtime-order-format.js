@@ -5,6 +5,7 @@ function boot(){
   const orderContents=document.getElementById('lunchOrderContents');
   const copyButton=document.getElementById('lunchCopyOrder');
   const restaurantDialog=document.getElementById('restaurantDialog');
+  const orderDialog=document.getElementById('lunchOrderDialog');
   const orderCount=document.getElementById('lunchOrderCount');
   if(!orderContents||!copyButton)return;
 
@@ -102,15 +103,25 @@ function boot(){
     setTimeout(()=>copyButton.textContent=old,1000);
   };
 
-  function refreshRail(){
-    if(restaurantDialog&&!restaurantDialog.open)return;
-    const ledger=document.querySelector('[data-summary-ledger]');
-    if(ledger)ledger.textContent=prettyRailText();
+  function refreshDisplays(){
+    const text=prettyRailText();
+
+    if(!restaurantDialog||restaurantDialog.open){
+      const restaurantLedger=document.querySelector('[data-summary-ledger]');
+      if(restaurantLedger)restaurantLedger.textContent=text;
+    }
+
+    const checkoutLedger=document.getElementById('lunchLedgerText');
+    if(checkoutLedger)checkoutLedger.textContent=text;
   }
 
-  new MutationObserver(()=>requestAnimationFrame(refreshRail)).observe(orderContents,{childList:true,subtree:true,characterData:true});
-  if(orderCount)new MutationObserver(()=>requestAnimationFrame(refreshRail)).observe(orderCount,{childList:true,subtree:true,characterData:true});
-  refreshRail();
+  new MutationObserver(()=>requestAnimationFrame(refreshDisplays)).observe(orderContents,{childList:true,subtree:true,characterData:true});
+  if(orderCount)new MutationObserver(()=>requestAnimationFrame(refreshDisplays)).observe(orderCount,{childList:true,subtree:true,characterData:true});
+  if(orderDialog)orderDialog.addEventListener('toggle',()=>requestAnimationFrame(refreshDisplays));
+  document.addEventListener('input',e=>{
+    if(e.target?.classList?.contains('order-note'))requestAnimationFrame(refreshDisplays);
+  });
+  refreshDisplays();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
