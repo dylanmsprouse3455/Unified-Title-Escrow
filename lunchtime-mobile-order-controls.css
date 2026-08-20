@@ -1,0 +1,48 @@
+/* Compact iPhone quantity controls for the Office Lunch Order */
+@media(max-width:760px){
+  .order-line{
+    padding:13px!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    column-gap:8px!important;
+  }
+  .qty-controls{
+    gap:5px!important;
+    font-size:16px!important;
+    font-weight:950!important;
+    white-space:nowrap!important;
+    align-self:start!important;
+  }
+  .qty-controls button,.remove-order{
+    min-width:40px!important;
+    width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+    border-radius:10px!important;
+    font-size:17px!important;
+    padding:0!important;
+    box-shadow:none!important;
+  }
+  .qty-controls button:nth-of-type(2){
+    background:#173f73!important;
+    color:#fff!important;
+  }
+  .remove-order{
+    background:#fff1ef!important;
+    color:#d94f44!important;
+    border-color:#e45d52!important;
+  }
+  .order-note{
+    min-height:54px!important;
+    font-size:15px!important;
+    padding:10px 11px!important;
+  }
+}
+@media(max-width:390px){
+  .qty-controls{gap:4px!important;font-size:15px!important}
+  .qty-controls button,.remove-order{
+    min-width:38px!important;
+    width:38px!important;
+    height:38px!important;
+    min-height:38px!important;
+  }
+}
