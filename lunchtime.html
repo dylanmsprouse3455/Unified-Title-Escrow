@@ -20,7 +20,7 @@ body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f3efe8;
     const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
     const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
     let html=await new Response(stream).text();
-    html=html.replace('</head>',`<link rel="stylesheet" href="./lunchtime-order-bold.css?v=20260819-2218"><style>
+    html=html.replace('</head>',`<link rel="stylesheet" href="./lunchtime-order-bold.css?v=20260819-2218"><link rel="stylesheet" href="./lunchtime-mobile-order-controls.css?v=20260819-2241"><style>
       .floating-controls{align-items:stretch!important}
       .floating-order,.floating-help,.floating-random{
         width:128px!important;
