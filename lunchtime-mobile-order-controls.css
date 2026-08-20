@@ -26,12 +26,11 @@
     background:#173f73!important;
     color:#fff!important;
   }
-  /* Delete button: keep the compact size, but make the X unmistakably red. */
   .qty-controls button.remove-order,
-  .qty-controls .remove-order{
-    background:#fff5f5!important;
-    color:#dc2626!important;
-    border:2px solid #dc2626!important;
+  button.remove-order[data-remove]{
+    background:#fff1ef!important;
+    color:#d92d20!important;
+    border:2px solid #ef4444!important;
   }
   .order-note{
     min-height:54px!important;
@@ -46,5 +45,11 @@
     width:38px!important;
     height:38px!important;
     min-height:38px!important;
+  }
+  .qty-controls button.remove-order,
+  button.remove-order[data-remove]{
+    background:#fff1ef!important;
+    color:#d92d20!important;
+    border-color:#ef4444!important;
   }
 }
