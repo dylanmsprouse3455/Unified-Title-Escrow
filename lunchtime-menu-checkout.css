@@ -128,13 +128,98 @@
     position:sticky;
     bottom:0;
     top:auto;
-    z-index:2;
+    z-index:12;
+  }
+}
+
+/* iPhone: compact checkout rail instead of a giant full-screen card */
+@media (max-width: 760px){
+  #restaurantDialog .modal-body{
+    padding-bottom:8px!important;
+  }
+  .restaurant-menu-layout{
+    display:block;
+  }
+  .restaurant-menu-main{
+    padding-bottom:104px;
+  }
+  .restaurant-order-summary{
+    position:sticky;
+    left:0;
+    right:0;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    z-index:20;
+    margin:0 2px 8px;
   }
   .restaurant-order-summary__card{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 126px;
+    grid-template-areas:
+      "top checkout"
+      "balance checkout"
+      "warning warning"
+      "ledger ledger";
+    column-gap:12px;
+    row-gap:3px;
+    align-items:center;
+    padding:12px 13px;
     border-radius:18px;
-    padding:16px;
+    box-shadow:0 10px 28px rgba(0,0,0,.24);
+  }
+  .restaurant-order-summary__top{
+    grid-area:top;
+    margin:0;
+    justify-content:flex-start;
+    gap:8px;
+  }
+  .restaurant-order-summary__eyebrow{
+    font-size:11px;
+    letter-spacing:.05em;
+  }
+  .restaurant-order-summary__count{
+    padding:3px 7px;
+    font-size:11px;
+  }
+  .restaurant-order-summary__label{
+    display:none;
+  }
+  .restaurant-order-summary__balance{
+    grid-area:balance;
+    margin:0;
+    font-size:30px;
+    line-height:1;
+  }
+  .restaurant-checkout-btn{
+    grid-area:checkout;
+    width:126px;
+    min-height:52px;
+    margin:0;
+    border-radius:14px;
+    padding:0 10px;
+    font-size:15px;
+  }
+  .restaurant-order-summary__warning{
+    grid-area:warning;
+    margin:5px 0 0;
+    font-size:11px;
+    line-height:1.25;
+  }
+  .restaurant-order-summary__ledger-title,
+  .restaurant-order-summary__hint{
+    display:none;
   }
   .restaurant-order-summary__ledger{
-    max-height:130px;
+    display:none;
+    grid-area:ledger;
+    min-height:0;
+    max-height:86px;
+    margin:7px 0 0;
+    padding:9px 10px;
+    border-radius:12px;
+    font-size:11px;
+    line-height:1.35;
+  }
+  .restaurant-order-summary.has-items .restaurant-order-summary__ledger{
+    display:block;
   }
 }
