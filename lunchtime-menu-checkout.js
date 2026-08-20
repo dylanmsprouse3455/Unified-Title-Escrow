@@ -24,12 +24,7 @@ ready(() => {
 
     const originalShowModal = orderDialog.showModal;
     try{
-      // The order builder keeps the real order array private inside its closure.
-      // Calling its existing Order button handler is the safest way to make it
-      // render that real state into #lunchOrderContents. Temporarily suppress
-      // showModal so we can do that while the restaurant modal stays open.
       orderDialog.showModal = function(){};
-
       if(typeof orderButton.onclick === 'function'){
         orderButton.onclick.call(orderButton, new MouseEvent('click', {bubbles:true}));
       }else{
@@ -44,18 +39,19 @@ ready(() => {
   }
 
   function compiledOrderText(){
-    const blocks = [];
+    if(typeof window.lunchPrettyRailText === 'function'){
+      return window.lunchPrettyRailText();
+    }
 
+    const blocks = [];
     orderContents.querySelectorAll('.order-group').forEach(group => {
       const lines = [];
       let sib = group.nextElementSibling;
-
       while(sib && !sib.classList.contains('order-group')){
         if(sib.classList.contains('order-line')){
           const title = sib.querySelector('h4')?.textContent?.trim() || '';
           const detail = sib.querySelector('.order-detail')?.textContent?.trim() || '';
           const note = sib.querySelector('.order-note')?.value?.trim() || '';
-
           let line = title;
           if(detail) line += '\n  ' + detail.replace(/\s+/g,' ').trim();
           if(note) line += '\n  Notes: ' + note;
@@ -63,10 +59,8 @@ ready(() => {
         }
         sib = sib.nextElementSibling;
       }
-
       if(lines.length) blocks.push(group.textContent.trim().toUpperCase() + '\n' + lines.join('\n'));
     });
-
     return blocks.join('\n\n');
   }
 
@@ -83,15 +77,12 @@ ready(() => {
 
       const detail = line.querySelector('.order-detail')?.textContent || '';
       const listedMatch = detail.match(/Listed:\s*([^\n]+)/i);
-
       if(!listedMatch){
         unknownUnits += qty;
         return;
       }
 
-      const prices = [...listedMatch[1].matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)]
-        .map(m => Number(m[1]));
-
+      const prices = [...listedMatch[1].matchAll(/\$\s*([0-9]+(?:\.[0-9]{1,2})?)/g)].map(m => Number(m[1]));
       if(prices.length === 1 && Number.isFinite(prices[0])) total += prices[0] * qty;
       else unknownUnits += qty;
     });
@@ -112,6 +103,9 @@ ready(() => {
     const warningEl = summary.querySelector('[data-summary-warning]');
     const ledgerEl = summary.querySelector('[data-summary-ledger]');
     const checkoutEl = summary.querySelector('[data-summary-checkout]');
+
+    summary.classList.toggle('has-items', snap.itemCount > 0);
+    summary.classList.toggle('has-price-warning', snap.unknownUnits > 0);
 
     countEl.textContent = `${snap.itemCount} item${snap.itemCount === 1 ? '' : 's'}`;
     labelEl.textContent = snap.unknownUnits ? 'Known subtotal' : 'Running balance';
@@ -183,8 +177,6 @@ ready(() => {
     };
   }
 
-  // Every add/remove/quantity change already updates this badge, so it becomes
-  // the single reliable trigger for refreshing the side rail.
   new MutationObserver(() => {
     if(restaurantDialog.open && !renderingSnapshot) requestAnimationFrame(updateRail);
   }).observe(orderCount, {childList:true, subtree:true, characterData:true});
