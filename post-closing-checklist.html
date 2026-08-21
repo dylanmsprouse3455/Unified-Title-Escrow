@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Unified Title & Escrow — Post-Closing Checklist</title>
+<style>
+:root{--navy:#17365D;--navy2:#244A78;--gold:#B78A2C;--text:#1F2937;--muted:#6B7280;--line:#E5E7EB;--soft:#F8FAFC;--blue:#EFF6FF;--green:#1E7A4C;--greenSoft:#EEF8F3;--amber:#9A6200;--amberSoft:#FFF8E8}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}.app{max-width:980px;margin:0 auto;padding:18px 14px 70px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:14px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900}.brand h1{margin:0;color:var(--navy);font-size:22px}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:800;font-size:12px;text-decoration:none;cursor:pointer}.primary{background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important}.hero{margin:18px 0;border:1px solid #CBD5E1;background:var(--soft);border-radius:18px;padding:16px}.hero h2{margin:0;color:var(--navy);font-size:18px}.hero p{margin:6px 0 0;color:#475569;font-size:13px;line-height:1.5}.rule{margin-top:12px;border-left:5px solid var(--gold);background:#FFF9E8;border-radius:10px;padding:11px 12px;font-size:13px;line-height:1.5;color:#5C4712;font-weight:700}.copy-guide{margin:16px 0;border:2px solid #9DC3E6;background:#F7FBFF;border-radius:18px;padding:16px}.copy-guide h2{margin:0;color:var(--navy);font-size:20px}.copy-guide .lead{margin:6px 0 12px;color:#334155;font-size:13px;line-height:1.55}.copy-test{border:1px solid #93C5FD;background:var(--blue);border-radius:14px;padding:13px}.copy-test strong{color:#1D4ED8}.decision{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.decision>div{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px}.decision h3{margin:0 0 5px;font-size:13px;color:var(--navy)}.decision p{margin:0;font-size:12px;line-height:1.5;color:#475569}.workflow{margin-top:12px;border:1px solid #D7E2EA;background:#fff;border-radius:12px;padding:12px;font-size:12px;line-height:1.55}.section{margin-top:12px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}.section-head{display:flex;align-items:center;gap:10px;background:var(--soft);padding:13px 14px;cursor:pointer}.num{width:28px;height:28px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900}.section-title{font-size:14px;font-weight:900;color:var(--navy)}.section-sub{font-size:11px;color:var(--muted);margin-top:2px}.section-body{padding:2px 14px 12px}.section.collapsed .section-body{display:none}.item{padding:11px 0;border-top:1px solid var(--line)}.item:first-child{border-top:none}.item label{display:flex;gap:10px;align-items:flex-start;font-size:13px;font-weight:700;line-height:1.4}.item input{width:20px;height:20px;accent-color:var(--navy);flex:0 0 auto}.hint{margin:4px 0 0 30px;color:var(--muted);font-size:11px;line-height:1.45}.mini-rule{margin:10px 0;border:1px solid #F2D58B;background:var(--amberSoft);border-radius:10px;padding:10px 11px;color:#6B4F12;font-size:12px;line-height:1.5}.footer-note{margin-top:18px;border:1px solid #BBE0CB;background:var(--greenSoft);border-radius:14px;padding:13px;color:#14532D;font-size:12px;line-height:1.5}.progress{margin-top:12px}.progress-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:800}.bar{height:9px;background:#EEF2F7;border-radius:999px;overflow:hidden;margin-top:6px}.bar>div{height:100%;width:0;background:var(--navy);transition:.2s}@media(max-width:700px){.top{align-items:flex-start;flex-direction:column}.decision{grid-template-columns:1fr}}@media print{.actions{display:none}.app{max-width:none;padding:0}.section{break-inside:avoid}.section.collapsed .section-body{display:block}.copy-guide,.hero{break-inside:avoid}body{font-size:11pt}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand"><div class="logo">UTE</div><div><h1>Post-Closing Checklist</h1><p>Unified Title &amp; Escrow — working processing guide</p></div></div>
+    <div class="actions"><a class="btn" href="index.html">← Training Home</a><button onclick="clearChecks()">Clear Checks</button><button class="primary" onclick="window.print()">Print</button></div>
+  </div>
+
+  <div class="hero">
+    <h2>Process first. Documents second.</h2>
+    <p>Work one destination at a time: lender return, financials, recording, then our internal file. Preserve originals and do not create extra copies just because a document looks important.</p>
+    <div class="rule">Main rule: if you pull an original from a package, mark where it came from, make the required copy, and return the original to the same spot.</div>
+    <div class="progress"><div class="progress-meta"><span>Checklist progress</span><span id="progressText">0%</span></div><div class="bar"><div id="progressBar"></div></div></div>
+  </div>
+
+  <div class="copy-guide">
+    <h2>How Do I Know What to Make Copies Of?</h2>
+    <p class="lead">Do not copy every important-looking document. Copy a document when the same information is needed in more than one destination, or when the lender/office procedure specifically requires a copy.</p>
+    <div class="copy-test"><strong>COPY TEST:</strong> Ask: <b>“Does this document need to exist in two different places?”</b><br>If yes → make a copy. If no → leave it alone unless the lender or office procedure specifically requires one.</div>
+    <div class="decision">
+      <div><h3>Make a copy when…</h3><p>The lender requires it but the original belongs elsewhere; an original must be recorded but a lender/file copy is also needed; a check or invoice is leaving the office but proof must stay in our file; or office/lender instructions specifically say to retain/send a copy.</p></div>
+      <div><h3>Do not automatically copy when…</h3><p>The document only has one destination and no instruction says to duplicate it. “Important” does not automatically mean “copy.”</p></div>
+    </div>
+    <div class="workflow"><b>Physical workflow:</b> Pull original → mark exact location → make required copy → identify/stamp the copy if office procedure requires it → put original back → send/file the copy where it belongs.</div>
+    <div class="mini-rule"><b>Confirmed training examples:</b> Deed of Trust — copy may go to lender while original goes for recording. Checks — retain copies because originals leave the office. Supporting invoices/statements — retain support when the payment/document leaves. Disbursement Summary/Ledger — provide a lender copy when required while keeping it with the financial records.</div>
+  </div>
+
+  <div class="section"><div class="section-head"><div class="num">1</div><div><div class="section-title">Closed Package</div><div class="section-sub">Preserve order and protect originals.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Keep the lender package in the order it was received.</label></div>
+    <div class="item"><label><input type="checkbox">Do not take the package apart unnecessarily.</label></div>
+    <div class="item"><label><input type="checkbox">Mark the exact location of anything pulled out for copying.</label></div>
+    <div class="item"><label><input type="checkbox">Return every original to its proper location after copying.</label></div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">2</div><div><div class="section-title">Lender Return Package</div><div class="section-sub">Follow that lender's instructions — not a universal list.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Review the lender's return instructions.</label></div>
+    <div class="item"><label><input type="checkbox">Identify exactly what the lender requires back.</label></div>
+    <div class="item"><label><input type="checkbox">Make copies only where an original is needed elsewhere or instructions require a copy.</label></div>
+    <div class="item"><label><input type="checkbox">Confirm required Closing Disclosure / Disbursement Summary / Deed of Trust copies are included when applicable.</label></div>
+    <div class="item"><label><input type="checkbox">Do not send seller 1099s to the lender.</label></div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">3</div><div><div class="section-title">Money In / Money Out</div><div class="section-sub">Financials stay together.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Old Republic National Title Insurance Company check on top when applicable.</label></div>
+    <div class="item"><label><input type="checkbox">Disbursement Ledger / Disbursement Summary next.</label></div>
+    <div class="item"><label><input type="checkbox">Copies of disbursement checks underneath.</label></div>
+    <div class="item"><label><input type="checkbox">Receipts showing money received.</label></div>
+    <div class="item"><label><input type="checkbox">Add wire confirmations, wire instructions, funding authorization, payoffs, invoices, and other payment support.</label></div>
+    <div class="mini-rule"><b>Rule:</b> If it explains money received, money paid, where money went, or why it was paid, it belongs with the financial documentation.</div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">4</div><div><div class="section-title">Checks / Mailed Payments</div><div class="section-sub">Keep proof before the original leaves.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Confirm correct payee and mailing information.</label></div>
+    <div class="item"><label><input type="checkbox">Locate the invoice, statement, or supporting document.</label></div>
+    <div class="item"><label><input type="checkbox">Retain a copy/support in our file before mailing the payment.</label></div>
+    <div class="item"><label><input type="checkbox">Mail/send according to office procedure.</label></div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">5</div><div><div class="section-title">Recording Package</div><div class="section-sub">Original recordables go to the recording process.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Separate the Warranty Deed, Deed of Trust, legal description/Exhibit A, and applicable commitment material.</label></div>
+    <div class="item"><label><input type="checkbox">Make any required lender/file copies before sending originals for recording.</label></div>
+    <div class="item"><label><input type="checkbox">Paper-clip each separate recordable document individually.</label></div>
+    <div class="item"><label><input type="checkbox">For Greene County workflow reviewed in training, give the completed recording package to Amy.</label></div>
+    <div class="hint">County-specific procedures can differ. Follow the office procedure for the actual county.</div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">6</div><div><div class="section-title">Unified Internal File</div><div class="section-sub">Financials on top; internal support underneath.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Place the completed financial section on top.</label></div>
+    <div class="item"><label><input type="checkbox">Place Unified/seller internal documents and ID copies underneath.</label></div>
+    <div class="item"><label><input type="checkbox">Do not over-focus on micro-order below the financial section unless office procedure requires it.</label></div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">7</div><div><div class="section-title">Seller / 1099 Records</div><div class="section-sub">Seller tax records stay with Unified, not lender.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Confirm seller copies were provided.</label></div>
+    <div class="item"><label><input type="checkbox">Retain Unified's required seller documents.</label></div>
+    <div class="item"><label><input type="checkbox">Separate 1099 copies according to office/file-room procedure.</label></div>
+    <div class="item"><label><input type="checkbox">Do not send seller 1099s to the lender.</label></div>
+  </div></div>
+
+  <div class="section"><div class="section-head"><div class="num">8</div><div><div class="section-title">Final Review</div><div class="section-sub">Make sure every destination is complete.</div></div></div><div class="section-body">
+    <div class="item"><label><input type="checkbox">Lender package complete and order preserved.</label></div>
+    <div class="item"><label><input type="checkbox">Required copies made; originals are where they belong.</label></div>
+    <div class="item"><label><input type="checkbox">Financial section complete with ledger, check copies, receipts, wires, funding authorization, and support.</label></div>
+    <div class="item"><label><input type="checkbox">Recording package complete.</label></div>
+    <div class="item"><label><input type="checkbox">Seller/1099/internal records separated correctly.</label></div>
+    <div class="item"><label><input type="checkbox">Physical payments that must leave the office have been prepared/sent.</label></div>
+  </div></div>
+
+  <div class="footer-note"><b>Quick classification:</b> Money → Financials. Public record → Recording. Lender specifically requires it → Lender package. Seller tax documentation → Unified records. Unified executed/internal document → Internal file. If one document must satisfy two destinations, that is your signal to make the required copy.</div>
+</div>
+<script>
+const KEY='ute-post-closing-checklist-v1';
+const checks=[...document.querySelectorAll('input[type="checkbox"]')];
+function save(){localStorage.setItem(KEY,JSON.stringify(checks.map(c=>c.checked)));updateProgress()}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'[]');checks.forEach((c,i)=>c.checked=!!s[i])}catch(e){}updateProgress()}
+function updateProgress(){const done=checks.filter(c=>c.checked).length;const pct=checks.length?Math.round(done/checks.length*100):0;document.getElementById('progressText').textContent=pct+'%';document.getElementById('progressBar').style.width=pct+'%'}
+function clearChecks(){if(confirm('Clear all checked items?')){checks.forEach(c=>c.checked=false);save()}}
+checks.forEach(c=>c.addEventListener('change',save));
+document.querySelectorAll('.section-head').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+load();
+</script>
+</body>
+</html>
