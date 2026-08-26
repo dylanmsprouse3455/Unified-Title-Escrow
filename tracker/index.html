@@ -48,6 +48,7 @@ body.guided-locked{overflow:hidden!important;overscroll-behavior:none;touch-acti
 .lane-body .case{position:relative}.case-delete-x{position:absolute;right:8px;top:8px;z-index:4;display:grid;place-items:center;width:28px!important;height:28px;padding:0!important;border:1px solid #e5c4c1!important;border-radius:50%!important;background:#fff5f4!important;color:#a72b22!important;font-size:1rem!important;line-height:1!important;box-shadow:none!important}.case-delete-x:hover{background:#a72b22!important;color:#fff!important}.lane-body .case-title{padding-right:31px}.delete-reason-wrap{display:none;position:fixed;inset:0;z-index:160;background:rgba(7,25,49,.52);padding:16px;align-items:flex-start;justify-content:center}.delete-reason-wrap.show{display:flex}.delete-reason-card{width:min(650px,100%);margin-top:10px;padding:20px;border:1px solid #e2b9b5;border-top:5px solid #ad3027;border-radius:15px;background:#fff;box-shadow:0 20px 65px rgba(8,27,51,.3)}.delete-reason-card h2{margin:0;color:#7f211b;font-size:1.25rem}.delete-reason-card p{margin:7px 0 13px;color:#65748a;line-height:1.5}.delete-reason-card label{display:block;margin-bottom:6px;color:#344963;font-size:.8rem;font-weight:900}.delete-reason-card textarea{width:100%;min-height:85px;padding:11px 12px;border:2px solid #c8d3df;border-radius:10px;resize:vertical;font:inherit}.delete-reason-card textarea:focus{outline:0;border-color:#ad3027;box-shadow:0 0 0 4px rgba(173,48,39,.1)}.delete-reason-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px}.delete-reason-actions button:disabled{opacity:.45;cursor:not-allowed}
 </style>
 <link rel="stylesheet" href="case-import.css">
+<link rel="stylesheet" href="case-popout.css">
 </head>
 <body>
 <div class="wrap">
@@ -221,6 +222,7 @@ tutorialNext=guidedNext;tutorialPrevious=guidedPrevious;installGuidedGuards();
 let toastTimer;function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}document.getElementById("editorWrap").addEventListener("click",e=>{if(e.target.id==="editorWrap")closeEditor()});document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redoLastAction():undoLastAction()}if(e.key==="Escape"&&document.getElementById("tutorialWrap")?.classList.contains("show"))closeTutorial()});document.getElementById("cloudEmail").setAttribute("name","username");document.getElementById("cloudPassword").setAttribute("name","password");document.getElementById("signinPanel").setAttribute("autocomplete","on");initializeCloudApp();
 </script>
 <script src="case-import.js"></script>
+<script src="case-popout.js"></script>
 </body>
 </html>
 
