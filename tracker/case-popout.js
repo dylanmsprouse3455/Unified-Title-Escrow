@@ -104,9 +104,16 @@ function deletePopoutTodo(id){var c=poCase(),todo=c&&(c.todos||[]).find(function
 function addPopoutUpdate(){var doc=poDocument(),c=poCase(),input=doc&&doc.getElementById("poNewUpdate"),text=input&&input.value.trim();if(!c||!text)return;poCommit(c,"Floating window update: "+text);}
 
 function installFloatingCaseButton(){
-  var actions=document.querySelector(".dashboard-actions");if(!actions||actions.querySelector("[data-floating-case]"))return;
-  var button=document.createElement("button");button.type="button";button.className="secondary";button.dataset.floatingCase="true";button.textContent="Open Floating Case";button.addEventListener("click",openFloatingCase);
-  var addButton=actions.querySelector(".gold");actions.insertBefore(button,addButton||null);
+  var actions=document.querySelector(".dashboard-actions");
+  if(actions&&!actions.querySelector("[data-floating-case]")){
+    var button=document.createElement("button");button.type="button";button.className="secondary";button.dataset.floatingCase="true";button.textContent="Open Floating Case";button.addEventListener("click",openFloatingCase);
+    var addButton=actions.querySelector(".gold");actions.insertBefore(button,addButton||null);
+  }
+  var topButtons=document.querySelector(".topbar-buttons");
+  if(topButtons&&!topButtons.querySelector("[data-top-floating-case]")){
+    var topButton=document.createElement("button");topButton.type="button";topButton.className="top-floating-case";topButton.dataset.topFloatingCase="true";topButton.innerHTML='<span aria-hidden="true">▣</span> Floating Case';topButton.addEventListener("click",openFloatingCase);
+    var menuButton=document.getElementById("menuButton");topButtons.insertBefore(topButton,menuButton||null);
+  }
 }
 
 var popoutBaseRender=render;
