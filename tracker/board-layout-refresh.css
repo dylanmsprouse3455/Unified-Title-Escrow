@@ -4,13 +4,13 @@ body{background:linear-gradient(180deg,#f4f7fb 0,#eef3f8 100%)}
 .topbar{position:relative;margin-bottom:12px;padding:19px 20px;background:linear-gradient(135deg,#fff 0,#f8fbff 100%);border:1px solid #d7e0eb;border-left:6px solid var(--gold);border-radius:18px;box-shadow:0 9px 24px rgba(23,52,94,.08)}
 .brand{min-width:280px}.brand small{font-size:.72rem}.brand h1{font-size:clamp(1.75rem,3vw,2.3rem);line-height:1.08}.brand p{margin-top:5px;font-size:.91rem}
 .topbar-buttons{justify-content:flex-end;flex-wrap:wrap}.topbar-buttons>button{min-height:47px;border-radius:12px;box-shadow:0 6px 14px rgba(23,52,94,.11)}
-.top-floating-case{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:#eaf1fa;color:var(--navy);border:1px solid #b9c9dc}.top-floating-case:hover{background:#dde9f6}.top-floating-case span{font-size:1.05rem}
+.top-floating-case{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:#2f6fae;color:#fff;border:2px solid #0b223f}.top-floating-case:hover{background:#255f98}.top-floating-case span{font-size:1.05rem}
 .cloud-user{min-height:43px;border-radius:11px}
 .toolbar{grid-template-columns:minmax(300px,2fr) repeat(3,minmax(150px,1fr));gap:9px;margin:0;padding:10px;background:#fff;border:1px solid #d7e0eb;border-radius:15px 15px 0 0;box-shadow:0 7px 20px rgba(23,52,94,.06)}
-.toolbar input,.toolbar select{min-height:44px;border-color:#cbd6e3;background:#fbfdff}
+.toolbar input,.toolbar select{min-height:44px;border:2px solid #111820!important;background:#fff;color:#05080c;font-weight:800;box-shadow:none}.toolbar input::placeholder{color:#263241;opacity:.85;font-weight:750}.toolbar input:focus,.toolbar select:focus{outline:3px solid rgba(201,161,59,.38);outline-offset:1px;border-color:#000!important}
 .tabs{gap:7px;margin:0;padding:9px 10px;background:#fff;border:1px solid #d7e0eb;border-top:0;border-radius:0 0 15px 15px;box-shadow:0 7px 20px rgba(23,52,94,.06)}
-.tab{min-height:42px;padding:9px 14px;border-radius:10px}.tab.active{box-shadow:0 4px 10px rgba(23,52,94,.16)}
-.board-legend{margin:10px 2px 14px;padding:0 4px}
+.tab{min-height:42px;padding:9px 14px;border:2px solid #111820!important;border-radius:10px;font-weight:900}.tab.active{border-color:#000!important;box-shadow:0 4px 10px rgba(23,52,94,.16)}
+.board-legend{display:none!important}
 
 /* Four workflow accordions arranged as a 2 x 2 board */
 .cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;overflow:visible;padding-bottom:8px}
