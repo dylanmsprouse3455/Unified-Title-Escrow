@@ -1,0 +1,263 @@
+{
+  "source": "August 26, 2026 consolidated Qualia report and office transcript",
+  "version": 1,
+  "cases": [
+    {
+      "number": "G26-0232",
+      "address": "105 Johnson Hollow Lane",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-05-28",
+      "status": "Waiting on Information",
+      "nextAction": "Obtain court approval/order adding the property to the deceased owner's estate before it can be sold.",
+      "priority": "High",
+      "runningNotes": "Property was placed in an LLC that dissolved in 2010; the owner later died. Court approval is needed to add the property to the estate before sale."
+    },
+    {
+      "number": "G26-0445",
+      "address": "131 Pear Tree Way",
+      "assigned": "Unassigned",
+      "closingDate": "2026-09-21",
+      "status": "Problem / Research",
+      "nextAction": "Complete the title search in person at the courthouse because the applicable county records are not online; confirm the title-searcher assignment.",
+      "priority": "High",
+      "runningNotes": "Latest Qualia Order Status Report left the title searcher blank. Transcript says the search requires an in-person courthouse visit because the records are not available online. Do not infer an assignee."
+    },
+    {
+      "number": "G26-0446",
+      "address": "336 Belle Arden Drive",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-10-05",
+      "status": "Waiting on Information",
+      "nextAction": "Follow up for the LLC documents, then continue the title work.",
+      "priority": "Normal",
+      "runningNotes": "Amy had already attempted to call for the LLC documents. Latest Qualia report confirms Amy as title searcher and an October 5, 2026 closing."
+    },
+    {
+      "number": "G26-0447",
+      "address": "1630 Birdwell Mill Road",
+      "assigned": "Unassigned",
+      "closingDate": "2026-08-31",
+      "targetDate": "2026-08-27",
+      "status": "In Progress",
+      "nextAction": "Finish the rush purchase title search and confirm the title-searcher assignment in Qualia.",
+      "priority": "Rush",
+      "runningNotes": "RUSH file. Transcript indicated Amy was actively working it and expected completion today or tomorrow, but the latest Qualia report left the title-searcher field blank. Preserve the assignment as unassigned until confirmed."
+    },
+    {
+      "number": "G26-0448",
+      "address": "125 Ball Lane",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-16",
+      "status": "Problem / Research",
+      "nextAction": "Search by address and subdivision, locate the prior policy/back chain, and determine whether an update can replace a full search.",
+      "priority": "Normal",
+      "runningNotes": "Purchase with loan. Amy is handling it. Transcript indicates a back chain may exist and could avoid a full search; prior policy was not immediately located."
+    },
+    {
+      "number": "G26-0451",
+      "address": "925 Keller Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-24",
+      "status": "Not Started",
+      "nextAction": "Complete the purchase-loan title update/title work.",
+      "priority": "Normal",
+      "runningNotes": "Transcript assigned the update/title work to Amy; latest Qualia report confirms Amy as title searcher."
+    },
+    {
+      "number": "G26-0453",
+      "address": "1135 Pleasant Hill Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-15",
+      "status": "Not Started",
+      "nextAction": "Complete the title update.",
+      "priority": "Normal",
+      "runningNotes": "Transcript identified this as an update for Amy rather than Mike; latest Qualia report confirms Amy."
+    },
+    {
+      "number": "G26-0454",
+      "address": "7691 Asheville Highway",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-09-25",
+      "status": "Not Started",
+      "nextAction": "Complete the purchase-loan title search.",
+      "priority": "Normal",
+      "runningNotes": "The transcript initially left assignment uncertain between Amy and Mike. The latest Qualia Order Status Report resolves the assignment to Michael Womelduff."
+    },
+    {
+      "number": "G26-0456",
+      "address": "610 West Main Street",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-11",
+      "status": "In Progress",
+      "nextAction": "Verify the updated title work is complete and monitor whether the transaction will close.",
+      "priority": "Normal",
+      "runningNotes": "Purchase with loan. Amy said she had already updated everything but was unsure whether the transaction would close. Latest Qualia report confirms Amy."
+    },
+    {
+      "number": "G26-0458",
+      "address": "Lot 11 Old Stage Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-25",
+      "status": "Not Started",
+      "nextAction": "Confirm the current work status and complete the title search before closing.",
+      "priority": "Normal",
+      "runningNotes": "The transcript was unclear on the exact assignment and progress. The latest Qualia Order Status Report lists Amy Hartman as title searcher; no more detailed progress was confirmed."
+    },
+    {
+      "number": "G26-0459",
+      "address": "58 Fairview Ridges Drive",
+      "assigned": "Unassigned",
+      "closingDate": "2026-09-25",
+      "status": "Problem / Research",
+      "nextAction": "Confirm the title-searcher assignment, pull and review the file, and determine whether a prior search permits an update.",
+      "priority": "High",
+      "runningNotes": "Transcript indicated Amy expected to handle the file and would pull it to check for prior work. The latest Qualia report left the title-searcher field blank, so assignment remains unassigned until confirmed."
+    },
+    {
+      "number": "G26-0397",
+      "address": "13190 Warrensburg Road",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-08-26",
+      "status": "Problem / Research",
+      "nextAction": "Continue property-description research, follow up with seller Deborah for supporting information, and confirm the case now populates correctly in reports.",
+      "priority": "High",
+      "runningNotes": "Ongoing research on the property description. Seller Deborah was expected to bring additional material if located. The case previously failed to appear on the report; a title-section change was made for later regeneration. Latest Qualia report lists Michael Womelduff."
+    },
+    {
+      "number": "G26-0408",
+      "address": "84 Powell Street",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-08-21",
+      "status": "Problem / Research",
+      "nextAction": "Review the problem file and verify that its reporting/title-section setup is correct.",
+      "priority": "High",
+      "runningNotes": "Open problem file that previously did not appear on an open-order report even though Qualia showed it open. Latest Qualia Order Status Report now includes the case and lists Michael Womelduff."
+    },
+    {
+      "number": "G26-0416",
+      "address": "20 Brown Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-01",
+      "status": "In Progress",
+      "nextAction": "Complete the title search and prepare the quitclaim deed.",
+      "priority": "High",
+      "runningNotes": "Title-search-only file. Transcript says both the title search and quitclaim deed were still needed and targeted for this week; backups were available. Latest Qualia report confirms Amy."
+    },
+    {
+      "number": "G26-0422",
+      "address": "Lots 6 & 12 Arnold Palmer Drive",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-30",
+      "status": "Not Started",
+      "nextAction": "Complete the title search before the September 30 closing.",
+      "priority": "Normal",
+      "runningNotes": "Title search needed. Transcript and latest Qualia report confirm Amy and a September 30, 2026 closing."
+    },
+    {
+      "number": "G26-0424",
+      "address": "Lots 3-6 Linda Street",
+      "assigned": "Michael Womelduff",
+      "status": "In Progress",
+      "nextAction": "Assemble and send the commitment, invoice, and Exhibit A.",
+      "priority": "High",
+      "runningNotes": "Substantive work was described as complete; remaining work was to assemble and send the commitment, invoice, and Exhibit A. Assignment supplied as Michael Womelduff; no closing date was confirmed in the latest report text."
+    },
+    {
+      "number": "G26-0428",
+      "address": "279 Ted Weems Road",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-09-09",
+      "status": "In Progress",
+      "nextAction": "Complete and send the in-house refinance title work.",
+      "priority": "High",
+      "runningNotes": "Refinance through Apex handled in house. Transcript expected the work to go out that day. Latest Qualia report lists Michael Womelduff."
+    },
+    {
+      "number": "G26-0432",
+      "address": "470 Chestnut Ridge Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-09-02",
+      "status": "In Progress",
+      "nextAction": "Complete the title search and prepare the quitclaim deed.",
+      "priority": "High",
+      "runningNotes": "Transcript says the title search and quitclaim deed were still needed and targeted for this week; backups were available. Latest Qualia report confirms Amy."
+    },
+    {
+      "number": "G26-0433",
+      "address": "TBD Gap Creek Road",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-10-29",
+      "status": "Problem / Research",
+      "nextAction": "Check for an existing back chain and decide the scope of the search.",
+      "priority": "Normal",
+      "runningNotes": "Transcript said Amy needed to check for a backup/back chain and would likely send the file to Mike. Latest Qualia report confirms Michael Womelduff."
+    },
+    {
+      "number": "G26-0444",
+      "address": "1107 Aspen Terrace",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-10-05",
+      "status": "Problem / Research",
+      "nextAction": "Review for an existing back chain and determine the required title-search scope.",
+      "priority": "Normal",
+      "runningNotes": "Purchase with loan. Transcript said it needed back-chain review and would most likely be passed to Mike. Latest Qualia report confirms Michael Womelduff and an October 5, 2026 closing."
+    },
+    {
+      "number": "G26-0455",
+      "address": "111 Wayfair Drive",
+      "assigned": "Michael Womelduff",
+      "closingDate": "2026-09-22",
+      "status": "Not Started",
+      "nextAction": "Review the file and complete the purchase-loan title search.",
+      "priority": "Normal",
+      "runningNotes": "The transcript left the Amy/Mike assignment undecided. The latest Qualia Order Status Report resolves it to Michael Womelduff."
+    },
+    {
+      "number": "G26-0247",
+      "address": "555 McDonald Road",
+      "assigned": "Unassigned",
+      "status": "Problem / Research",
+      "nextAction": "Resolve the heirship issues and obtain the required affidavit of heirship and supporting heir information.",
+      "priority": "High",
+      "runningNotes": "Older problem file with significant heir/heirship issues. An affidavit of heirship and documentation concerning the heirs were discussed. No title-searcher assignment or closing date was confirmed."
+    },
+    {
+      "number": "G26-0289",
+      "address": "1325 Mysinger Road",
+      "assigned": "Amy Hartman",
+      "closingDate": "2026-06-26",
+      "status": "Problem / Research",
+      "nextAction": "Investigate and resolve the title problem so the property can be placed on the market.",
+      "priority": "High",
+      "runningNotes": "Older file with a title problem; the work relates to preparing the property for sale. Latest Qualia report confirms Amy."
+    },
+    {
+      "number": "G26-0286",
+      "address": "95 Byerley Lane",
+      "assigned": "Amy Hartman",
+      "status": "Problem / Research",
+      "nextAction": "Investigate and resolve the personal judgment affecting the family conveyance.",
+      "priority": "High",
+      "runningNotes": "Problem file involving a personal judgment in a parent-to-son conveyance rather than a bank transaction. Latest Qualia report confirms Amy; no closing date was shown."
+    },
+    {
+      "number": "G26-0015",
+      "address": "260 Dominique Lane",
+      "assigned": "Unassigned",
+      "status": "Waiting on Information",
+      "nextAction": "Monitor the outside title-search order and use the result for the back-chain work.",
+      "priority": "Low",
+      "runningNotes": "The physical file was being used for back-chain research. The title-search order was ultimately sent out. No title-searcher assignment or closing date was confirmed."
+    },
+    {
+      "number": "G26-0078",
+      "address": "85 Mt. Carmel Rd",
+      "assigned": "Unassigned",
+      "status": "Complete",
+      "nextAction": "File the completed back-chain material and put the file away.",
+      "priority": "Low",
+      "runningNotes": "Inactive/put away. The back-chain issue was described as resolved, scanned, and ready to be filed back. Included for the running record, not active workload."
+    }
+  ]
+}
+
