@@ -30,7 +30,7 @@ window.openFloatingCase=async function(){
   if(casePopoutWindow&&!casePopoutWindow.closed){casePopoutWindow.focus();return;}
   try{
     if(window.documentPictureInPicture&&documentPictureInPicture.requestWindow){
-      casePopoutWindow=await documentPictureInPicture.requestWindow({width:390,height:720});
+      casePopoutWindow=await window.documentPictureInPicture.requestWindow({width:390,height:720});
       casePopoutIsAlwaysOnTop=true;
     }else{
       casePopoutWindow=window.open("","utei-floating-case","popup=yes,width=390,height=720,resizable=yes,scrollbars=yes");
