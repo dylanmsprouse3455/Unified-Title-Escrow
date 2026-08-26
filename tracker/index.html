@@ -221,6 +221,7 @@ tutorialNext=guidedNext;tutorialPrevious=guidedPrevious;installGuidedGuards();
 let toastTimer;function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}document.getElementById("editorWrap").addEventListener("click",e=>{if(e.target.id==="editorWrap")closeEditor()});document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redoLastAction():undoLastAction()}if(e.key==="Escape"&&document.getElementById("tutorialWrap")?.classList.contains("show"))closeTutorial()});document.getElementById("cloudEmail").setAttribute("name","username");document.getElementById("cloudPassword").setAttribute("name","password");document.getElementById("signinPanel").setAttribute("autocomplete","on");initializeCloudApp();
 </script>
 <script src="case-import.js"></script>
+<script src="case-popout.js"></script>
 </body>
 </html>
 
