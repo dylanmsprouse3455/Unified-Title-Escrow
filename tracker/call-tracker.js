@@ -10,6 +10,7 @@ var contacts=[];
 var currentFilter="all";
 var editingId="";
 var callWizardStep=1;
+var callWizardEditMode=true;
 
 function ownerSignedIn(){var node=document.getElementById("cloudUserEmail");return String(node&&node.textContent||"").trim().toLowerCase()===OWNER_EMAIL;}
 function id(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():"call-"+Date.now()+"-"+Math.random().toString(36).slice(2);}
@@ -254,22 +255,27 @@ function installCallWizard(){
   progress.innerHTML='<div class="call-wizard-progress-row"><span id="callWizardStepText">Step 1 of 7</span><span id="callWizardPercent">14%</span></div><div class="call-wizard-track"><span id="callWizardBar"></span></div>';
   modal.insertBefore(progress,body);
 
+  var labelChanges={ctNotes:"Why were they calling?",ctPromise:"What did you advise?",ctFollowDate:"Follow-Up Date",ctNext:"Next Action (optional)"};
+  Object.keys(labelChanges).forEach(function(fieldId){var input=document.getElementById(fieldId),label=input&&input.closest(".call-field")&&input.closest(".call-field").querySelector("label");if(label)label.textContent=labelChanges[fieldId];});
+
+  var legacy=document.createElement("div");
+  legacy.hidden=true;
+  legacy.id="callLegacyFields";
+  ["ctCompany","ctIssue","ctAssigned","ctStatus","ctOutcome","ctCallback","ctFollowType"].forEach(function(fieldId){var input=document.getElementById(fieldId),fieldBox=input&&input.closest(".call-field");if(fieldBox)legacy.appendChild(fieldBox);});
+  body.insertBefore(legacy,note||history||null);
+
   var stepInfo=[
     ["What file is this call connected to?","Enter the file number and property address if they are available."],
-    ["Who is calling?","Add enough information to know who to contact later."],
-    ["What is the call about?","Choose or type the issue, then capture what was discussed."],
-    ["What did you promise to do?","Record any commitment you made so it does not get lost."],
-    ["Does anything need to happen after this call?","Choose the follow-up type and set a callback or check-in date when needed."],
-    ["Who owns the next step?","Keep the current status separate from the exact action that needs to happen."],
-    ["Review and save the call","Check the important details below. Use Back to correct anything before saving."]
+    ["Who was calling?","Enter the caller's name and callback number."],
+    ["What happened on the call?","Record why they called and what you advised."],
+    ["Does anything need to happen next?","Choose a callback, a status check, or no follow-up. Both follow-up choices use the same date field."],
+    ["Review and save the call","Check the important answers below before saving."]
   ];
   var fieldGroups=[
     ["ctFile","ctAddress"],
-    ["ctCaller","ctCompany","ctPhone"],
-    ["ctIssue","ctNotes"],
-    ["ctPromise"],
-    ["ctFollowType","ctFollowDate","ctCallback"],
-    ["ctAssigned","ctStatus","ctNext","ctOutcome"]
+    ["ctCaller","ctPhone"],
+    ["ctNotes","ctPromise"],
+    ["ctFollowDate","ctNext"]
   ];
 
   fieldGroups.forEach(function(ids,index){
@@ -286,16 +292,22 @@ function installCallWizard(){
     if(index===0){
       var n=document.createElement("div");n.className="call-wizard-note";n.textContent="You can continue if one of these is not known yet.";step.appendChild(n);
     }
+    if(index===2){var p=document.createElement("div");p.className="call-wizard-note";p.textContent="Keep this practical: what they needed, and exactly what you told them.";step.appendChild(p);}
     if(index===3){
-      var p=document.createElement("div");p.className="call-wizard-note";p.textContent="Leave this blank when you did not make a commitment.";step.appendChild(p);
+      var choices=document.createElement("div");
+      choices.className="call-follow-choice";
+      choices.innerHTML='<button type="button" data-follow-choice="No Follow-Up">No Follow-Up</button><button type="button" data-follow-choice="Callback">Callback Needed</button><button type="button" data-follow-choice="Check-In">Check Up on Status</button>';
+      step.insertBefore(choices,grid);
+      var nextField=document.getElementById("ctNext")&&document.getElementById("ctNext").closest(".call-field");
+      if(nextField){var helper=document.createElement("button");helper.id="useAdviceForNext";helper.type="button";helper.className="call-use-advice";helper.textContent="Use What I Advised";nextField.appendChild(helper);}
     }
     body.insertBefore(step,note||history||null);
   });
 
   var review=document.createElement("section");
   review.className="call-wizard-step";
-  review.dataset.callStep="7";
-  review.innerHTML='<h3 class="call-wizard-question">Full Case Details</h3><p class="call-wizard-help">Review the complete call record, manage its to-do list, print it, or use Back to edit any field.</p><div id="callWizardReview" class="call-wizard-review"></div><section id="callTodosSection" class="call-todos-panel"><div class="call-todos-head"><div><span>Working list</span><h4>Case To-Do List</h4></div><strong id="callTodoSummary">No items yet</strong></div><div id="callTodoList" class="call-todo-list"></div><div class="call-todo-add"><input id="callTodoText" placeholder="Add the next task for this call…"><button id="addCallTodo" type="button" class="call-btn">+ Add To-Do</button></div></section>';
+  review.dataset.callStep="5";
+  review.innerHTML='<h3 class="call-wizard-question">Call Details</h3><p class="call-wizard-help">The information needed to understand the call and follow through.</p><div id="callWizardReview" class="call-wizard-review"></div><section id="callTodosSection" class="call-todos-panel"><div class="call-todos-head"><div><span>Working list</span><h4>Case To-Do List</h4></div><strong id="callTodoSummary">No items yet</strong></div><div id="callTodoList" class="call-todo-list"></div><div class="call-todo-add"><input id="callTodoText" placeholder="Add the next task for this call…"><button id="addCallTodo" type="button" class="call-btn">+ Add To-Do</button></div></section>';
   if(history){history.classList.add("call-history-in-wizard");review.appendChild(history);}
   body.insertBefore(review,note||null);
 
@@ -329,6 +341,8 @@ function installCallWizard(){
   save.addEventListener("click",saveCallFromWizard);
   document.getElementById("addCallTodo").addEventListener("click",addTodo);
   document.getElementById("callTodoText").addEventListener("keydown",function(event){if(event.key==="Enter"){event.preventDefault();addTodo();}});
+  document.querySelectorAll("[data-follow-choice]").forEach(function(button){button.addEventListener("click",function(){setFollowChoice(button.dataset.followChoice);});});
+  document.getElementById("useAdviceForNext").addEventListener("click",function(){var advice=document.getElementById("ctPromise").value.trim();if(advice){document.getElementById("ctNext").value=advice;document.getElementById("ctNext").focus();}});
 
   var follow=document.getElementById("ctFollowType");
   if(follow)follow.addEventListener("change",function(){
@@ -347,22 +361,21 @@ function updateCallWizardReview(){
   var data=values();
   var rows=[
     ["File Number",data.fileNumber||"Not entered"],["Property Address",data.address||"Not entered"],
-    ["Caller",data.caller||"Not entered"],["Company / Role",data.companyRole||"Not entered"],
-    ["Callback Number",data.phone||"Not entered"],["Reason / Issue",data.issueType||"Not entered"],
-    ["Call Notes",data.notes||"Not entered","wide"],["Commitment",data.promise||"None entered"],
-    ["Follow-Up",data.followUpType+(data.callbackRequired?" · Callback required":"")],
-    ["Follow-Up Date",data.followUpDate?localDate(data.followUpDate):"No date"],
-    ["Assigned To",data.assignedTo||"Dylan"],["Status",data.status||"Open"],
-    ["Next Action",data.nextAction||"Not entered","wide"],["Final Outcome",data.finalOutcome||"Not entered"]
+    ["Caller",data.caller||"Not entered"],["Callback Number",data.phone||"Not entered"],
+    ["Why They Called",data.notes||"Not entered","wide"],["What I Advised",data.promise||"Not entered","wide"],
+    ["Follow-Up",followChoiceLabel(data.followUpType)],["Follow-Up Date",data.followUpDate?localDate(data.followUpDate):"No date"],
+    ["Next Action",data.nextAction||data.promise||"Not entered","wide"]
   ];
-  var record=currentRecord();
-  if(record)rows.push(["Created",localDateTime(record.createdAt)],["Last Updated",localDateTime(record.updatedAt||record.createdAt)]);
   var box=document.getElementById("callWizardReview");
   if(box)box.innerHTML=rows.map(function(row){return'<div class="call-review-item '+(row[2]||"")+'"><span>'+esc(row[0])+'</span><strong>'+esc(row[1])+'</strong></div>';}).join("");
 }
 
+function followChoiceLabel(value){if(value==="Callback")return"Callback Needed";if(value==="No Follow-Up")return"No Follow-Up";return"Check Up on Status";}
+function updateFollowChoice(){var follow=document.getElementById("ctFollowType"),value=follow&&follow.value||"No Follow-Up",dateLabel=document.querySelector('label[for="ctFollowDate"]');document.querySelectorAll("[data-follow-choice]").forEach(function(button){var selected=button.dataset.followChoice===(value==="Callback"?"Callback":value==="No Follow-Up"?"No Follow-Up":"Check-In");button.classList.toggle("active",selected);button.setAttribute("aria-pressed",selected?"true":"false");});if(dateLabel)dateLabel.textContent=value==="Callback"?"Callback Date":value==="No Follow-Up"?"Follow-Up Date (optional)":"Check-Up on Status Date";}
+function setFollowChoice(value){document.getElementById("ctFollowType").value=value;document.getElementById("ctCallback").checked=value==="Callback";if(value==="Callback")document.getElementById("ctStatus").value="Needs Callback";else if(value==="Check-In")document.getElementById("ctStatus").value="In Progress";else document.getElementById("ctStatus").value="Open";updateFollowChoice();if(value!=="No Follow-Up")document.getElementById("ctFollowDate").focus();}
+
 function renderCallWizard(){
-  var total=7;
+  var total=5;
   if(callWizardStep<1)callWizardStep=1;
   if(callWizardStep>total)callWizardStep=total;
 
@@ -374,15 +387,21 @@ function renderCallWizard(){
   document.getElementById("callWizardStepText").textContent="Step "+callWizardStep+" of "+total;
   document.getElementById("callWizardPercent").textContent=pct+"%";
   document.getElementById("callWizardBar").style.width=pct+"%";
-  document.getElementById("callWizardBack").disabled=callWizardStep===1;
+  var viewing=!!editingId&&callWizardStep===total&&!callWizardEditMode;
+  document.getElementById("callEditorWrap").classList.toggle("call-viewing-details",viewing);
+  document.getElementById("callWizardProgress").style.display=viewing?"none":"block";
+  document.getElementById("callWizardBack").disabled=callWizardStep===1&&!viewing;
+  document.getElementById("callWizardBack").textContent=viewing?"Edit Details":"Back";
+  document.getElementById("cancelCallButton").textContent=viewing?"Close":"Cancel";
   document.getElementById("callWizardNext").style.display=callWizardStep===total?"none":"inline-block";
-  document.getElementById("saveCallButton").style.display=callWizardStep===total?"inline-block":"none";
+  document.getElementById("saveCallButton").style.display=callWizardStep===total&&callWizardEditMode?"inline-block":"none";
 
   var existing=!!editingId;
-  document.getElementById("deleteCallButton").style.display=existing&&callWizardStep===total?"inline-block":"none";
+  document.getElementById("deleteCallButton").style.display=existing&&callWizardStep===total&&callWizardEditMode?"inline-block":"none";
   document.getElementById("printCallButton").style.display=existing&&callWizardStep===total?"inline-block":"none";
   document.getElementById("callHistorySection").style.display=existing&&callWizardStep===total?"block":"none";
 
+  if(callWizardStep===4)updateFollowChoice();
   if(callWizardStep===total){updateCallWizardReview();var record=currentRecord(),todosSection=document.getElementById("callTodosSection");if(todosSection)todosSection.style.display=record?"block":"none";if(record)renderTodos(record);}
 
   setTimeout(function(){
@@ -393,10 +412,11 @@ function renderCallWizard(){
 }
 
 function callWizardNext(){
-  if(callWizardStep<7){callWizardStep++;renderCallWizard();}
+  if(callWizardStep<5){callWizardStep++;renderCallWizard();}
 }
 
 function callWizardBack(){
+  if(editingId&&callWizardStep===5&&!callWizardEditMode){callWizardEditMode=true;callWizardStep=1;renderCallWizard();return;}
   if(callWizardStep>1){callWizardStep--;renderCallWizard();}
 }
 
@@ -413,7 +433,8 @@ function saveCallFromWizard(){
 }
 
 openEditor=function(recordId){
-  callWizardStep=recordId?7:1;
+  callWizardEditMode=!recordId;
+  callWizardStep=recordId?5:1;
   callWizardOpenEditorBase(recordId);
   renderCallWizard();
 };
