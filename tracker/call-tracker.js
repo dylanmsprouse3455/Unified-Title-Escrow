@@ -3,8 +3,10 @@
 
 var OWNER_EMAIL="dylan.sprouse@unifiedtitle.net";
 var STORAGE_KEY="utei.dylan.callTracker.v1";
+var CONTACT_STORAGE_KEY="utei.dylan.callContacts.v1";
 var installed=false;
 var calls=[];
+var contacts=[];
 var currentFilter="all";
 var editingId="";
 var callWizardStep=1;
@@ -22,7 +24,114 @@ function isWaiting(record){return /^Waiting/i.test(record.status||"")||/^Waiting
 function isCompleted(record){return record.status==="Completed";}
 function needsCallback(record){return !isCompleted(record)&&(record.callbackRequired||record.followUpType==="Callback");}
 
-function load(){try{var data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");calls=Array.isArray(data)?data:[];}catch(e){calls=[];}}
+/* CALL CONTACT MEMORY START */
+function contactKey(value){return String(value||"").trim().toLowerCase().replace(/\s+/g," ");}
+function phoneDigits(value){var digits=String(value||"").replace(/\D/g,"");if(digits.length===11&&digits.charAt(0)==="1")digits=digits.slice(1);return digits.slice(0,10);}
+function formatPhone(value){
+  var digits=phoneDigits(value);
+  if(!digits)return "";
+  if(digits.length<4)return "("+digits;
+  if(digits.length<7)return "("+digits.slice(0,3)+") "+digits.slice(3);
+  return "("+digits.slice(0,3)+") "+digits.slice(3,6)+"-"+digits.slice(6);
+}
+function persistContacts(){
+  try{localStorage.setItem(CONTACT_STORAGE_KEY,JSON.stringify(contacts.slice(0,300)));}catch(error){}
+}
+function upsertContact(record,saveNow){
+  var name=String(record&&record.caller||"").trim();
+  if(!name)return;
+  var key=contactKey(name);
+  var existing=contacts.find(function(item){return contactKey(item.name)===key;});
+  var stamp=record.updatedAt||record.createdAt||now();
+  if(!existing){
+    existing={name:name,companyRole:"",phone:"",lastUsedAt:stamp};
+    contacts.push(existing);
+  }
+  existing.name=name;
+  if(String(record.companyRole||"").trim())existing.companyRole=String(record.companyRole).trim();
+  if(String(record.phone||"").trim())existing.phone=formatPhone(record.phone);
+  existing.lastUsedAt=stamp;
+  contacts.sort(function(a,b){return String(b.lastUsedAt||"").localeCompare(String(a.lastUsedAt||""));});
+  if(saveNow){persistContacts();refreshCallerOptions();}
+}
+function loadContacts(){
+  try{
+    var saved=JSON.parse(localStorage.getItem(CONTACT_STORAGE_KEY)||"[]");
+    contacts=Array.isArray(saved)?saved.filter(function(item){return item&&String(item.name||"").trim();}):[];
+  }catch(error){contacts=[];}
+  calls.forEach(function(record){upsertContact(record,false);});
+  persistContacts();
+}
+function findContact(name){
+  var key=contactKey(name);
+  if(!key)return null;
+  return contacts.find(function(item){return contactKey(item.name)===key;})||null;
+}
+function fillContact(contact){
+  if(!contact)return;
+  var caller=field("ctCaller"),company=field("ctCompany"),phone=field("ctPhone"),hint=field("callContactHint");
+  if(caller)caller.value=contact.name||caller.value;
+  if(company)company.value=contact.companyRole||"";
+  if(phone)phone.value=formatPhone(contact.phone||"");
+  if(hint){
+    var details=[contact.companyRole,formatPhone(contact.phone)].filter(Boolean).join(" · ");
+    hint.textContent=details?"Filled from a previous call: "+details:"Previous caller selected.";
+  }
+}
+function refreshCallerOptions(){
+  var list=field("ctCallerOptions"),quick=field("callContactQuickList");
+  if(list){
+    list.innerHTML=contacts.map(function(contact){
+      var details=[contact.companyRole,formatPhone(contact.phone)].filter(Boolean).join(" · ");
+      return '<option value="'+esc(contact.name)+'" label="'+esc(details)+'"></option>';
+    }).join("");
+  }
+  if(quick){
+    quick.innerHTML=contacts.slice(0,6).map(function(contact,index){
+      return '<button type="button" class="call-contact-chip" data-contact-index="'+index+'"><strong>'+esc(contact.name)+'</strong><span>'+esc(contact.companyRole||formatPhone(contact.phone)||"Previous caller")+'</span></button>';
+    }).join("");
+    quick.querySelectorAll(".call-contact-chip").forEach(function(button){
+      button.addEventListener("click",function(){fillContact(contacts[Number(button.dataset.contactIndex)]);});
+    });
+  }
+}
+function rememberContact(record){upsertContact(record,true);}
+function installCallerMemory(){
+  var caller=field("ctCaller"),company=field("ctCompany"),phone=field("ctPhone");
+  if(!caller||!company||!phone||caller.dataset.contactMemoryInstalled==="1")return;
+  caller.dataset.contactMemoryInstalled="1";
+  caller.setAttribute("list","ctCallerOptions");
+  caller.setAttribute("autocomplete","off");
+  var list=document.createElement("datalist");
+  list.id="ctCallerOptions";
+  document.body.appendChild(list);
+  var fieldBox=caller.closest(".call-field");
+  if(fieldBox){
+    var hint=document.createElement("div");
+    hint.id="callContactHint";
+    hint.className="call-contact-hint";
+    hint.textContent="Choose a previous caller to fill their company/role and callback number.";
+    var quick=document.createElement("div");
+    quick.id="callContactQuickList";
+    quick.className="call-contact-quick";
+    fieldBox.appendChild(hint);
+    fieldBox.appendChild(quick);
+  }
+  function applyExactCaller(){var contact=findContact(caller.value);if(contact)fillContact(contact);}
+  caller.addEventListener("input",function(){if(findContact(caller.value))applyExactCaller();});
+  caller.addEventListener("change",applyExactCaller);
+  caller.addEventListener("blur",applyExactCaller);
+  phone.addEventListener("input",function(){phone.value=formatPhone(phone.value);});
+  phone.addEventListener("blur",function(){phone.value=formatPhone(phone.value);});
+  refreshCallerOptions();
+}
+/* CALL CONTACT MEMORY END */
+
+function load(){
+  try{var data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");calls=Array.isArray(data)?data:[];}catch(e){calls=[];}
+  calls.forEach(function(record){if(record.phone)record.phone=formatPhone(record.phone);});
+  loadContacts();
+}
 function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(calls));}
 function sortCalls(list){return list.slice().sort(function(a,b){if(isCompleted(a)!==isCompleted(b))return isCompleted(a)?1:-1;var ad=a.followUpDate||"9999-12-31",bd=b.followUpDate||"9999-12-31";if(ad!==bd)return ad.localeCompare(bd);return String(b.updatedAt||"").localeCompare(String(a.updatedAt||""));});}
 
@@ -74,7 +183,7 @@ function installToolboxEntry(){var panel=document.getElementById("dylanToolboxPa
 document.getElementById("openCallTrackerTool").addEventListener("click",openApp);document.getElementById("callToolboxBackHome").addEventListener("click",function(){var grid=document.getElementById("dylanHomeGrid");if(grid)grid.style.display="grid";panel.classList.remove("show");});return true;}
 
 function installApp(){if(document.getElementById("callTrackerApp"))return;var app=document.createElement("div");app.id="callTrackerApp";app.className="call-tracker-app";app.innerHTML='<main class="call-shell"><div class="call-topbar"><div class="call-brand"><small>Unified Title &amp; Escrow · Dylan\'s Tool Box</small><h1>Call &amp; Follow-Up Tracker</h1><p>Keep calls, promises, callbacks, and check-ins from falling through the cracks.</p></div><div class="call-actions"><button id="callBackToolbox" class="call-btn secondary" type="button">← Tool Box</button><button id="newCallButton" class="call-btn gold" type="button">+ New Call</button></div></div><section class="call-stats"><div class="call-stat"><strong id="callDueToday">0</strong><span>Due Today</span></div><div class="call-stat"><strong id="callUpcoming">0</strong><span>Upcoming</span></div><div class="call-stat"><strong id="callOverdue">0</strong><span>Overdue</span></div><div class="call-stat"><strong id="callWaiting">0</strong><span>Waiting on Others</span></div></section><div class="call-toolbar"><input id="callSearch" class="call-search" placeholder="Search file number, address, caller, phone, notes, or next action…"><button id="newCallButton2" class="call-btn" type="button">+ Add Call / Follow-Up</button></div><nav id="callTabs" class="call-tabs" aria-label="Call tracker views"></nav><div class="call-table-wrap"><table class="call-table"><thead><tr><th>File</th><th>Property</th><th>Caller</th><th>Issue</th><th>Assigned To</th><th>Status</th><th>Follow-Up</th><th>Days Remaining</th><th>Last Update</th><th>Next Action</th></tr></thead><tbody id="callRows"></tbody></table><div id="callEmpty" class="call-empty" style="display:none">No call records match this view.</div></div><div class="call-footer">Call records are saved in this browser for Dylan\'s personal workspace.</div></main>';
-document.body.appendChild(app);document.getElementById("callBackToolbox").addEventListener("click",closeApp);document.getElementById("newCallButton").addEventListener("click",function(){openEditor();});document.getElementById("newCallButton2").addEventListener("click",function(){openEditor();});document.getElementById("callSearch").addEventListener("input",render);installModal();installCallWizard();buildTabs();}
+document.body.appendChild(app);document.getElementById("callBackToolbox").addEventListener("click",closeApp);document.getElementById("newCallButton").addEventListener("click",function(){openEditor();});document.getElementById("newCallButton2").addEventListener("click",function(){openEditor();});document.getElementById("callSearch").addEventListener("input",render);installModal();installCallWizard();installCallerMemory();buildTabs();}
 
 function installModal(){var wrap=document.createElement("div");wrap.id="callEditorWrap";wrap.className="call-modal-wrap";wrap.innerHTML='<section class="call-modal" role="dialog" aria-modal="true" aria-labelledby="callEditorTitle"><header class="call-modal-head"><div><h2 id="callEditorTitle">New Call</h2><p id="callEditorSubtitle">Enter the essentials first, then set the follow-up.</p></div><button id="callEditorClose" class="call-close" type="button" aria-label="Close">×</button></header><div class="call-modal-body"><section class="call-section"><h3>Call essentials</h3><div class="call-grid"><div class="call-field"><label for="ctFile">File Number</label><input id="ctFile" placeholder="G26-0000"></div><div class="call-field span2"><label for="ctAddress">Property Address</label><input id="ctAddress"></div><div class="call-field"><label for="ctCaller">Caller Name</label><input id="ctCaller"></div><div class="call-field"><label for="ctCompany">Company / Role</label><input id="ctCompany" placeholder="Realtor, lender, client…"></div><div class="call-field"><label for="ctPhone">Callback Number</label><input id="ctPhone" type="tel"></div><div class="call-field span2"><label for="ctIssue">Reason / Issue Type</label><input id="ctIssue" list="ctIssueList" placeholder="Closing question, earnest money, document request…"><datalist id="ctIssueList"><option value="Closing Question"><option value="Earnest Money"><option value="Title Search"><option value="Document Request"><option value="Lender Question"><option value="Realtor Question"><option value="Client Question"><option value="Scheduling"><option value="Other"></datalist></div><div class="call-field full"><label for="ctNotes">Call Notes</label><textarea id="ctNotes" placeholder="What did the caller need and what was discussed?"></textarea></div><div class="call-field full"><label for="ctPromise">What I Promised / Commitment</label><input id="ctPromise" placeholder="Example: Call once Lynn confirms closing time"></div></div></section><section class="call-section"><h3>Follow-up</h3><div class="call-grid"><div class="call-field"><label for="ctFollowType">Follow-Up Type</label><select id="ctFollowType"><option>No Follow-Up</option><option>Callback</option><option>Internal Follow-Up</option><option>Check-In</option><option>Email</option><option>Document Needed</option><option>Waiting on Client</option><option>Waiting on Third Party</option></select></div><div class="call-field"><label for="ctAssigned">Assigned To</label><input id="ctAssigned" list="ctAssignedList" value="Dylan"><datalist id="ctAssignedList"><option value="Dylan"><option value="Lynn"><option value="Cindy"></datalist></div><div class="call-field"><label for="ctStatus">Status</label><select id="ctStatus"><option>Open</option><option>Needs Callback</option><option>In Progress</option><option>Waiting on Lynn</option><option>Waiting on Someone</option><option>Waiting on Client</option><option>Waiting on Third Party</option><option>Completed</option></select></div><div class="call-field"><label for="ctFollowDate">Callback / Check-In Date</label><input id="ctFollowDate" type="date"></div><div class="call-field span2"><label class="call-check"><input id="ctCallback" type="checkbox"> Callback required</label></div><div class="call-field full"><label for="ctNext">Next Action</label><input id="ctNext" placeholder="What needs to happen next?"></div><div class="call-field full"><label for="ctOutcome">Final Outcome</label><textarea id="ctOutcome" placeholder="Complete this when the item is resolved."></textarea></div></div></section><section id="callHistorySection" class="call-section" style="display:none"><h3>Running Call History</h3><div id="callHistory" class="call-history"></div><div class="call-history-add"><input id="callHistoryText" placeholder="Add an update, callback result, email sent, document received…"><button id="addCallHistory" type="button" class="call-btn">Add Update</button></div></section><div class="call-note">Status and Next Action are separate so you can see both where the item stands and exactly what needs to happen next.</div></div><footer class="call-modal-actions"><div><button id="deleteCallButton" type="button" class="call-btn danger" style="display:none">Delete</button></div><div class="right"><button id="printCallButton" type="button" class="call-btn secondary" style="display:none">Print Call Sheet</button><button id="cancelCallButton" type="button" class="call-btn secondary">Cancel</button><button id="saveCallButton" type="button" class="call-btn">Save Call</button></div></footer></section>';
 document.body.appendChild(wrap);document.getElementById("callEditorClose").addEventListener("click",closeEditor);document.getElementById("cancelCallButton").addEventListener("click",closeEditor);document.getElementById("saveCallButton").addEventListener("click",saveEditor);document.getElementById("deleteCallButton").addEventListener("click",deleteCurrent);document.getElementById("printCallButton").addEventListener("click",function(){if(editingId)printRecord(editingId);});document.getElementById("addCallHistory").addEventListener("click",addHistory);document.getElementById("callHistoryText").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addHistory();}});wrap.addEventListener("click",function(e){if(e.target===wrap)closeEditor();});}
@@ -85,7 +194,7 @@ function matchesFilter(r){var diff=dayDiff(r.followUpDate);if(currentFilter==="c
 function matchesSearch(r,q){if(!q)return true;return [r.fileNumber,r.address,r.caller,r.companyRole,r.phone,r.issueType,r.notes,r.promise,r.assignedTo,r.status,r.followUpType,r.nextAction,r.finalOutcome].join(" ").toLowerCase().indexOf(q)!==-1||(r.history||[]).some(function(h){return String(h.text||"").toLowerCase().indexOf(q)!==-1;});}
 
 function renderStats(){var open=calls.filter(function(r){return !isCompleted(r);});document.getElementById("callDueToday").textContent=open.filter(function(r){return dayDiff(r.followUpDate)===0;}).length;document.getElementById("callUpcoming").textContent=open.filter(function(r){var d=dayDiff(r.followUpDate);return d!==null&&d>0;}).length;document.getElementById("callOverdue").textContent=open.filter(function(r){var d=dayDiff(r.followUpDate);return d!==null&&d<0;}).length;document.getElementById("callWaiting").textContent=open.filter(isWaiting).length;}
-function render(){if(!document.getElementById("callRows"))return;renderStats();var q=String(document.getElementById("callSearch").value||"").trim().toLowerCase();var rows=sortCalls(calls.filter(matchesFilter).filter(function(r){return matchesSearch(r,q);}));var body=document.getElementById("callRows"),empty=document.getElementById("callEmpty");body.innerHTML=rows.map(function(r){var cd=countdown(r),wait=isWaiting(r)?" waiting":"",complete=isCompleted(r)?" complete":"";return'<tr data-id="'+esc(r.id)+'"><td><div class="call-main">'+esc(r.fileNumber||"—")+'</div></td><td><div>'+esc(r.address||"—")+'</div></td><td><div class="call-main">'+esc(r.caller||"—")+'</div><div class="call-muted">'+esc(r.phone||r.companyRole||"")+'</div></td><td>'+esc(r.issueType||"—")+'</td><td>'+esc(r.assignedTo||"—")+'</td><td><span class="call-pill'+wait+complete+'">'+esc(r.status||"Open")+'</span></td><td><div>'+esc(r.followUpType||"No Follow-Up")+'</div><div class="call-muted">'+(r.followUpDate?localDate(r.followUpDate):"No date")+'</div></td><td><span class="call-countdown '+cd.kind+'">'+esc(cd.label)+'</span></td><td>'+esc(localDateTime(r.updatedAt||r.createdAt))+'</td><td>'+esc(r.nextAction||"—")+'</td></tr>';}).join("");empty.style.display=rows.length?"none":"block";body.querySelectorAll("tr[data-id]").forEach(function(row){row.addEventListener("click",function(){openEditor(row.dataset.id);});});}
+function render(){if(!document.getElementById("callRows"))return;renderStats();var q=String(document.getElementById("callSearch").value||"").trim().toLowerCase();var rows=sortCalls(calls.filter(matchesFilter).filter(function(r){return matchesSearch(r,q);}));var body=document.getElementById("callRows"),empty=document.getElementById("callEmpty");body.innerHTML=rows.map(function(r){var cd=countdown(r),wait=isWaiting(r)?" waiting":"",complete=isCompleted(r)?" complete":"";return'<tr data-id="'+esc(r.id)+'"><td><div class="call-main">'+esc(r.fileNumber||"—")+'</div></td><td><div>'+esc(r.address||"—")+'</div></td><td><div class="call-main">'+esc(r.caller||"—")+'</div><div class="call-muted">'+esc([r.companyRole,r.phone].filter(Boolean).join(" · "))+'</div></td><td>'+esc(r.issueType||"—")+'</td><td>'+esc(r.assignedTo||"—")+'</td><td><span class="call-pill'+wait+complete+'">'+esc(r.status||"Open")+'</span></td><td><div>'+esc(r.followUpType||"No Follow-Up")+'</div><div class="call-muted">'+(r.followUpDate?localDate(r.followUpDate):"No date")+'</div></td><td><span class="call-countdown '+cd.kind+'">'+esc(cd.label)+'</span></td><td>'+esc(localDateTime(r.updatedAt||r.createdAt))+'</td><td>'+esc(r.nextAction||"—")+'</td></tr>';}).join("");empty.style.display=rows.length?"none":"block";body.querySelectorAll("tr[data-id]").forEach(function(row){row.addEventListener("click",function(){openEditor(row.dataset.id);});});}
 
 function openApp(){if(!ownerSignedIn())return;load();installApp();document.getElementById("callTrackerApp").classList.add("show");render();}
 function closeApp(){document.getElementById("callTrackerApp").classList.remove("show");var panel=document.getElementById("dylanToolboxPanel"),grid=document.getElementById("dylanHomeGrid");if(grid)grid.style.display="none";if(panel)panel.classList.add("show");}
@@ -101,9 +210,9 @@ function clearForm(){
 }
 function openEditor(recordId){editingId=recordId||"";clearForm();var record=calls.find(function(r){return r.id===editingId;});field("callEditorTitle").textContent=record?"Call / Follow-Up Record":"New Call";field("callEditorSubtitle").textContent=record?(record.fileNumber||"No file number")+" · "+(record.caller||"No caller entered"):"Enter the essentials first, then set the follow-up.";field("callHistorySection").style.display=record?"block":"none";field("deleteCallButton").style.display=record?"inline-block":"none";field("printCallButton").style.display=record?"inline-block":"none";if(record){field("ctFile").value=record.fileNumber||"";field("ctAddress").value=record.address||"";field("ctCaller").value=record.caller||"";field("ctCompany").value=record.companyRole||"";field("ctPhone").value=record.phone||"";field("ctIssue").value=record.issueType||"";field("ctNotes").value=record.notes||"";field("ctPromise").value=record.promise||"";field("ctFollowType").value=record.followUpType||"No Follow-Up";field("ctAssigned").value=record.assignedTo||"Dylan";field("ctStatus").value=record.status||"Open";field("ctFollowDate").value=record.followUpDate||"";field("ctCallback").checked=!!record.callbackRequired;field("ctNext").value=record.nextAction||"";field("ctOutcome").value=record.finalOutcome||"";renderHistory(record);}field("callEditorWrap").classList.add("show");setTimeout(function(){field("ctFile").focus();},40);}
 function closeEditor(){field("callEditorWrap").classList.remove("show");editingId="";}
-function values(){return{fileNumber:field("ctFile").value.trim(),address:field("ctAddress").value.trim(),caller:field("ctCaller").value.trim(),companyRole:field("ctCompany").value.trim(),phone:field("ctPhone").value.trim(),issueType:field("ctIssue").value.trim(),notes:field("ctNotes").value.trim(),promise:field("ctPromise").value.trim(),followUpType:field("ctFollowType").value,assignedTo:field("ctAssigned").value.trim()||"Dylan",status:field("ctStatus").value,followUpDate:field("ctFollowDate").value,callbackRequired:field("ctCallback").checked,nextAction:field("ctNext").value.trim(),finalOutcome:field("ctOutcome").value.trim()};}
+function values(){return{fileNumber:field("ctFile").value.trim(),address:field("ctAddress").value.trim(),caller:field("ctCaller").value.trim(),companyRole:field("ctCompany").value.trim(),phone:formatPhone(field("ctPhone").value),issueType:field("ctIssue").value.trim(),notes:field("ctNotes").value.trim(),promise:field("ctPromise").value.trim(),followUpType:field("ctFollowType").value,assignedTo:field("ctAssigned").value.trim()||"Dylan",status:field("ctStatus").value,followUpDate:field("ctFollowDate").value,callbackRequired:field("ctCallback").checked,nextAction:field("ctNext").value.trim(),finalOutcome:field("ctOutcome").value.trim()};}
 var LABELS={fileNumber:"file number",address:"address",caller:"caller",companyRole:"company / role",phone:"phone",issueType:"issue type",notes:"call notes",promise:"commitment",followUpType:"follow-up type",assignedTo:"assigned to",status:"status",followUpDate:"follow-up date",callbackRequired:"callback requirement",nextAction:"next action",finalOutcome:"final outcome"};
-function saveEditor(){var data=values();if(!data.fileNumber&&!data.caller&&!data.notes){alert("Enter at least a file number, caller, or call note before saving.");return;}var stamp=now(),record=calls.find(function(r){return r.id===editingId;});if(!record){record=Object.assign({id:id(),createdAt:stamp,updatedAt:stamp,history:[]},data);record.history.push({id:id(),at:stamp,text:"Call record created"});calls.unshift(record);editingId=record.id;}else{var changed=[];Object.keys(data).forEach(function(k){if(String(record[k]||"")!==String(data[k]||""))changed.push(LABELS[k]||k);record[k]=data[k];});record.updatedAt=stamp;if(changed.length)record.history.push({id:id(),at:stamp,text:"Updated "+changed.join(", ")});}persist();render();renderHistory(record);field("callHistorySection").style.display="block";field("deleteCallButton").style.display="inline-block";field("printCallButton").style.display="inline-block";field("callEditorTitle").textContent="Call / Follow-Up Record";field("callEditorSubtitle").textContent=(record.fileNumber||"No file number")+" · "+(record.caller||"No caller entered");}
+function saveEditor(){var data=values();if(!data.fileNumber&&!data.caller&&!data.notes){alert("Enter at least a file number, caller, or call note before saving.");return;}var stamp=now(),record=calls.find(function(r){return r.id===editingId;});if(!record){record=Object.assign({id:id(),createdAt:stamp,updatedAt:stamp,history:[]},data);record.history.push({id:id(),at:stamp,text:"Call record created"});calls.unshift(record);editingId=record.id;}else{var changed=[];Object.keys(data).forEach(function(k){if(String(record[k]||"")!==String(data[k]||""))changed.push(LABELS[k]||k);record[k]=data[k];});record.updatedAt=stamp;if(changed.length)record.history.push({id:id(),at:stamp,text:"Updated "+changed.join(", ")});}rememberContact(record);persist();render();renderHistory(record);field("callHistorySection").style.display="block";field("deleteCallButton").style.display="inline-block";field("printCallButton").style.display="inline-block";field("callEditorTitle").textContent="Call / Follow-Up Record";field("callEditorSubtitle").textContent=(record.fileNumber||"No file number")+" · "+(record.caller||"No caller entered");}
 function renderHistory(record){var list=(record.history||[]).slice().sort(function(a,b){return String(b.at).localeCompare(String(a.at));});field("callHistory").innerHTML=list.length?list.map(function(h){return'<div class="call-history-item"><time>'+esc(localDateTime(h.at))+'</time><div>'+esc(h.text)+'</div></div>';}).join(""):'<div class="call-muted">No history yet.</div>';}
 function addHistory(){var record=calls.find(function(r){return r.id===editingId;}),text=field("callHistoryText").value.trim();if(!record||!text)return;var stamp=now();record.history=record.history||[];record.history.push({id:id(),at:stamp,text:text});record.updatedAt=stamp;field("callHistoryText").value="";persist();renderHistory(record);render();}
 function deleteCurrent(){var record=calls.find(function(r){return r.id===editingId;});if(!record)return;if(!confirm("Delete this call record?"))return;calls=calls.filter(function(r){return r.id!==editingId;});persist();closeEditor();render();}

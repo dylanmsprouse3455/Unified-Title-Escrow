@@ -112,3 +112,10 @@
   .call-table tbody td:nth-child(1),.call-table tbody td:nth-child(6){background:#eef4fa}
   .call-stat{padding:18px}
 }
+
+
+.call-contact-quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.call-contact-chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:190px;padding:7px 10px;border:1px solid #bfd0e0;border-radius:10px;background:#fff;color:#17345e;text-align:left;box-shadow:none}
+.call-contact-chip:hover{background:#edf5fd;border-color:#8daac5;filter:none}
+.call-contact-chip strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
+.call-contact-chip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6d7d92;font-size:.68rem;font-weight:750}
