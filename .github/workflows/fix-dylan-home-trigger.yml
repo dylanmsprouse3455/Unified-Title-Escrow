@@ -1,0 +1,56 @@
+name: Fix Dylan home trigger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-dylan-home-trigger.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep Dylan landing page watching for sign-in
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('tracker/case-import.js')
+          text = path.read_text(encoding='utf-8')
+          old = '''  var attempts=0;
+  var timer=setInterval(function(){
+    attempts++;
+    if(signedInEmail()){
+      clearInterval(timer);
+      checkSession();
+    }else if(attempts>200){clearInterval(timer);}
+  },100);'''
+          new = '''  function watchForDylanSignIn(){
+    checkSession();
+    var emailNode=document.getElementById("cloudUserEmail");
+    if(emailNode&&window.MutationObserver){
+      var observer=new MutationObserver(function(){checkSession();});
+      observer.observe(emailNode,{childList:true,characterData:true,subtree:true});
+    }
+    setInterval(checkSession,1000);
+  }
+  watchForDylanSignIn();'''
+          if old not in text:
+              print('Trigger already fixed or source changed; no update needed.')
+          else:
+              path.write_text(text.replace(old, new), encoding='utf-8')
+      - name: Commit fix if needed
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tracker/case-import.js
+          git commit -m "Keep Dylan personal home active after sign-in"
+          git push
