@@ -1,0 +1,82 @@
+name: Repair call wizard runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-call-wizard-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preserve wizard history fields and harden form reset
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          js_path = Path('tracker/call-tracker.js')
+          js = js_path.read_text(encoding='utf-8').replace('\r\n', '\n')
+
+          old_remove = 'oldSections.forEach(function(section){if(section.parentNode)section.remove();});'
+          new_remove = 'oldSections.forEach(function(section){if(section!==history&&section.parentNode)section.remove();});'
+          if old_remove in js:
+              js = js.replace(old_remove, new_remove, 1)
+          elif new_remove not in js:
+              raise SystemExit('Could not find wizard section cleanup code')
+
+          clear_pattern = re.compile(
+              r'function clearForm\(\)\{\["ctFile".*?field\("ctCallback"\)\.checked=false;\}',
+              re.S,
+          )
+          safe_clear = '''function clearForm(){
+            ["ctFile","ctAddress","ctCaller","ctCompany","ctPhone","ctIssue","ctNotes","ctPromise","ctNext","ctOutcome","callHistoryText"].forEach(function(k){var el=field(k);if(el)el.value="";});
+            var follow=field("ctFollowType");if(follow)follow.value="No Follow-Up";
+            var assigned=field("ctAssigned");if(assigned)assigned.value="Dylan";
+            var status=field("ctStatus");if(status)status.value="Open";
+            var date=field("ctFollowDate");if(date)date.value="";
+            var callback=field("ctCallback");if(callback)callback.checked=false;
+          }'''
+          if clear_pattern.search(js):
+              js = clear_pattern.sub(safe_clear, js, count=1)
+          elif 'var el=field(k);if(el)el.value="";' not in js:
+              raise SystemExit('Could not find clearForm implementation')
+
+          js_path.write_text(js, encoding='utf-8')
+
+          html_path = Path('tracker/index.html')
+          html = html_path.read_text(encoding='utf-8').replace('\r\n', '\n')
+          html, count = re.subn(
+              r'<script src="call-tracker\.js[^\"]*"></script>',
+              '<script src="call-tracker.js?v=call-wizard-20260827-3"></script>',
+              html,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('Could not update call tracker script version')
+          html_path.write_text(html, encoding='utf-8')
+
+      - name: Check JavaScript syntax and repair markers
+        run: |
+          node --check tracker/call-tracker.js
+          grep -F 'section!==history' tracker/call-tracker.js
+          grep -F 'var el=field(k);if(el)el.value="";' tracker/call-tracker.js
+
+      - name: Commit repair
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tracker/call-tracker.js tracker/index.html
+          git commit -m "Fix call wizard buttons and missing history fields"
+          git push
