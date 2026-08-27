@@ -15,39 +15,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Keep Dylan landing page watching for sign-in
-        shell: bash
+      - name: Apply persistent Dylan home trigger
+        shell: python
         run: |
-          python - <<'PY'
           from pathlib import Path
-          path = Path('tracker/case-import.js')
-          text = path.read_text(encoding='utf-8')
-          old = '''  var attempts=0;
-          var timer=setInterval(function(){
-            attempts++;
-            if(signedInEmail()){
-              clearInterval(timer);
-              checkSession();
-            }else if(attempts>200){clearInterval(timer);}
-          },100);'''
-          new = '''  function watchForDylanSignIn(){
-            checkSession();
-            var emailNode=document.getElementById("cloudUserEmail");
-            if(emailNode&&window.MutationObserver){
-              var observer=new MutationObserver(function(){checkSession();});
-              observer.observe(emailNode,{childList:true,characterData:true,subtree:true});
-            }
-            setInterval(checkSession,1000);
-          }
-          watchForDylanSignIn();'''
-          if old in text:
-              path.write_text(text.replace(old, new), encoding='utf-8')
-              print('Updated Dylan sign-in watcher.')
-          else:
-              print('Trigger already fixed or source changed; no update needed.')
-          PY
-      - name: Commit fix if needed
-        shell: bash
+
+          js_path = Path('tracker/case-import.js')
+          js = js_path.read_text(encoding='utf-8').replace('\r\n', '\n')
+          marker = '  setInterval(checkSession,1000);'
+          if marker not in js:
+              ending = '})();\n})();'
+              pos = js.rfind(ending)
+              if pos == -1:
+                  raise SystemExit('Could not locate Dylan home script ending')
+              js = js[:pos] + marker + '\n' + js[pos:]
+              js_path.write_text(js, encoding='utf-8')
+
+          html_path = Path('tracker/index.html')
+          html = html_path.read_text(encoding='utf-8').replace('\r\n', '\n')
+          old = '<script src="case-import.js"></script>'
+          new = '<script src="case-import.js?v=dylan-home-20260827-2"></script>'
+          if old in html:
+              html = html.replace(old, new, 1)
+              html_path.write_text(html, encoding='utf-8')
+      - name: Commit applied fix
         run: |
           if git diff --quiet; then
             echo "No changes needed"
@@ -55,6 +46,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker/case-import.js
-          git commit -m "Keep Dylan personal home active after sign-in"
+          git add tracker/case-import.js tracker/index.html
+          git commit -m "Make Dylan personal home load reliably"
           git push
