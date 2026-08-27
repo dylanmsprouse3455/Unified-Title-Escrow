@@ -356,3 +356,62 @@
   .call-card-callback{margin:12px 18px}
 }
 
+/* Approved Call / Follow-Up Record details layout. */
+#callEditorWrap.call-viewing-details .call-modal{width:min(1220px,calc(100vw - 28px))!important}
+#callEditorWrap [data-call-step="5"]>.call-wizard-question,
+#callEditorWrap [data-call-step="5"]>.call-wizard-help{display:none}
+#callEditorWrap .call-wizard-step.active[data-call-step="5"]{gap:14px;padding:18px;background:#fff}
+#callEditorWrap .call-wizard-review{display:block}
+.call-detail-top,.call-detail-narratives{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.call-detail-narratives{margin-top:14px}
+.call-detail-panel{min-width:0;border:1px solid #c7d7e7;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(23,52,94,.04)}
+.call-detail-panel h4{display:flex;align-items:center;gap:10px;margin:0;padding:14px 16px;color:#17345e;font-size:1.02rem}
+.call-detail-panel h4 .call-card-icon{width:31px;height:31px;flex-basis:31px;background:transparent}
+.call-detail-panel h4 .call-card-icon svg{width:25px;height:25px;stroke-width:2}
+.call-detail-contact{padding:0 14px 14px}
+.call-detail-contact h4{padding-left:2px;padding-right:2px}
+.call-detail-contact-grid{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:1px solid #ccd9e6;border-radius:12px}
+.call-detail-entry{display:flex;align-items:center;gap:12px;min-width:0;padding:17px 18px}
+.call-detail-entry:nth-child(odd){border-right:1px solid #d6e0e9}
+.call-detail-entry:nth-child(n+3){border-top:1px solid #d6e0e9}
+.call-detail-entry .call-card-icon{width:37px;height:37px;flex-basis:37px;background:transparent;color:#17345e}
+.call-detail-entry .call-card-icon svg{width:28px;height:28px;stroke-width:1.8}
+.call-detail-entry>div,.call-detail-plan-row>div{min-width:0}
+.call-detail-entry span,.call-detail-plan-row span{display:block;margin-bottom:4px;color:#5d718b;font-size:.66rem;font-weight:900;letter-spacing:.075em;text-transform:uppercase}
+.call-detail-entry strong,.call-detail-plan-row strong{display:block;color:#17345e;font-size:.95rem;line-height:1.38;overflow-wrap:anywhere}
+.call-detail-plan{padding:0 16px 15px}
+.call-detail-plan h4{padding-left:0;padding-right:0}
+.call-detail-urgency{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #e0b855;border-radius:11px;background:#fffbf1;color:#8a6205}
+.call-detail-urgency .call-card-icon{width:31px;height:31px;flex-basis:31px;background:transparent;color:#a37208}
+.call-detail-urgency .call-card-icon svg{width:25px;height:25px}
+.call-detail-urgency strong{font-size:1rem}
+.call-detail-urgency.overdue{border-color:#e2aaa5;background:#fff1ef;color:#a3322a}
+.call-detail-urgency.complete{border-color:#acd5bf;background:#edf8f2;color:#276c49}
+.call-detail-plan-row{display:flex;align-items:flex-start;gap:12px;padding:13px 8px 0}
+.call-detail-plan-row .call-card-icon{width:34px;height:34px;flex-basis:34px;background:transparent;color:#17345e}
+.call-detail-plan-row .call-card-icon svg{width:26px;height:26px}
+.call-detail-story{padding:0 16px 16px}
+.call-detail-story h4{padding-left:0;padding-right:0;padding-bottom:8px}
+.call-detail-story p{margin:0 0 0 41px;color:#233b59;font-size:.9rem;line-height:1.5;white-space:pre-wrap}
+#callEditorWrap .call-todos-panel{align-self:start;margin-top:0;padding:15px;border-radius:15px;box-shadow:0 3px 12px rgba(130,34,28,.04)}
+#callEditorWrap .call-todos-head h4{font-size:1.02rem}
+#callEditorWrap .call-history-in-wizard{align-self:start;height:auto!important;margin-top:0;padding:0;border:1px solid #c7d7e7;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(23,52,94,.04)}
+#callEditorWrap .call-history-accordion summary{min-height:72px;padding:16px 18px;font-size:1rem}
+#callEditorWrap .call-history-accordion-body{padding:0 15px 14px}
+#callEditorWrap.call-viewing-details .call-modal-actions{background:#fff;padding:14px 18px}
+#callEditorWrap.call-viewing-details #cancelCallButton{background:#17345e;color:#fff;border-color:#17345e}
+#callEditorWrap.call-viewing-details #printCallButton,
+#callEditorWrap.call-viewing-details #callWizardBack{padding:11px 16px}
+
+@media(max-width:800px){
+  .call-detail-top,.call-detail-narratives{grid-template-columns:1fr}
+  .call-detail-contact-grid{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:560px){
+  .call-detail-contact-grid{grid-template-columns:1fr}
+  .call-detail-entry:nth-child(odd){border-right:0}
+  .call-detail-entry:nth-child(n+2){border-top:1px solid #d6e0e9}
+  .call-detail-story p{margin-left:0}
+}
+
