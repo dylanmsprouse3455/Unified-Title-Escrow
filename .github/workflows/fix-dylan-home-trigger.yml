@@ -16,34 +16,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Keep Dylan landing page watching for sign-in
-        shell: python
+        shell: bash
         run: |
+          python - <<'PY'
           from pathlib import Path
           path = Path('tracker/case-import.js')
           text = path.read_text(encoding='utf-8')
           old = '''  var attempts=0;
-  var timer=setInterval(function(){
-    attempts++;
-    if(signedInEmail()){
-      clearInterval(timer);
-      checkSession();
-    }else if(attempts>200){clearInterval(timer);}
-  },100);'''
+          var timer=setInterval(function(){
+            attempts++;
+            if(signedInEmail()){
+              clearInterval(timer);
+              checkSession();
+            }else if(attempts>200){clearInterval(timer);}
+          },100);'''
           new = '''  function watchForDylanSignIn(){
-    checkSession();
-    var emailNode=document.getElementById("cloudUserEmail");
-    if(emailNode&&window.MutationObserver){
-      var observer=new MutationObserver(function(){checkSession();});
-      observer.observe(emailNode,{childList:true,characterData:true,subtree:true});
-    }
-    setInterval(checkSession,1000);
-  }
-  watchForDylanSignIn();'''
-          if old not in text:
-              print('Trigger already fixed or source changed; no update needed.')
-          else:
+            checkSession();
+            var emailNode=document.getElementById("cloudUserEmail");
+            if(emailNode&&window.MutationObserver){
+              var observer=new MutationObserver(function(){checkSession();});
+              observer.observe(emailNode,{childList:true,characterData:true,subtree:true});
+            }
+            setInterval(checkSession,1000);
+          }
+          watchForDylanSignIn();'''
+          if old in text:
               path.write_text(text.replace(old, new), encoding='utf-8')
+              print('Updated Dylan sign-in watcher.')
+          else:
+              print('Trigger already fixed or source changed; no update needed.')
+          PY
       - name: Commit fix if needed
+        shell: bash
         run: |
           if git diff --quiet; then
             echo "No changes needed"
