@@ -416,15 +416,11 @@ function installCallWizard(){
 
 function updateCallWizardReview(){
   var data=values();
-  var rows=[
-    ["File Number",data.fileNumber||"Not entered"],["Property Address",data.address||"Not entered"],
-    ["Caller",data.caller||"Not entered"],["Callback Number",data.phone||"Not entered"],
-    ["Why They Called",data.notes||"Not entered","wide"],["What I Advised",data.promise||"Not entered","wide"],
-    ["Follow-Up",followChoiceLabel(data.followUpType)],["Follow-Up Date",data.followUpDate?localDate(data.followUpDate):"No date"],
-    ["Next Action",data.nextAction||data.promise||"Not entered","wide"]
-  ];
+  var remaining=countdown({status:data.status,followUpDate:data.followUpDate});
+  var followLabel=data.status==="Needs Callback"?callbackCardLabel(data,remaining):followChoiceLabel(data.followUpType);
   var box=document.getElementById("callWizardReview");
-  if(box)box.innerHTML=rows.map(function(row){return'<div class="call-review-item '+(row[2]||"")+'"><span>'+esc(row[0])+'</span><strong>'+esc(row[1])+'</strong></div>';}).join("");
+  if(!box)return;
+  box.innerHTML='<div class="call-detail-top"><section class="call-detail-panel call-detail-contact"><h4>'+callCardIcon("user")+'<span>Contact &amp; Property</span></h4><div class="call-detail-contact-grid"><div class="call-detail-entry">'+callCardIcon("file")+'<div><span>File Number</span><strong>'+esc(data.fileNumber||"Not entered")+'</strong></div></div><div class="call-detail-entry">'+callCardIcon("pin")+'<div><span>Property Address</span><strong>'+esc(data.address||"Not entered")+'</strong></div></div><div class="call-detail-entry">'+callCardIcon("phone")+'<div><span>Caller</span><strong>'+esc(data.caller||"Not entered")+'</strong></div></div><div class="call-detail-entry">'+callCardIcon("phone")+'<div><span>Callback Number</span><strong>'+esc(data.phone||"Not entered")+'</strong></div></div></div></section><section class="call-detail-panel call-detail-plan"><h4>'+callCardIcon("file")+'<span>Follow-Up Plan</span></h4><div class="call-detail-urgency '+esc(remaining.kind)+'">'+callCardIcon("clock")+'<strong>'+esc(followLabel)+'</strong></div><div class="call-detail-plan-row">'+callCardIcon("calendar")+'<div><span>Follow-Up Date</span><strong>'+esc(data.followUpDate?localDate(data.followUpDate):"No date")+'</strong></div></div><div class="call-detail-plan-row">'+callCardIcon("clock")+'<div><span>Next Action</span><strong>'+esc(data.nextAction||data.promise||"Not entered")+'</strong></div></div></section></div><div class="call-detail-narratives"><section class="call-detail-panel call-detail-story"><h4>'+callCardIcon("phone")+'<span>Why They Called</span></h4><p>'+esc(data.notes||"Not entered")+'</p></section><section class="call-detail-panel call-detail-story"><h4>'+callCardIcon("user")+'<span>What I Advised</span></h4><p>'+esc(data.promise||"Not entered")+'</p></section></div>';
 }
 
 function followChoiceLabel(value){if(value==="Callback")return"Callback Needed";if(value==="No Follow-Up")return"No Follow-Up";return"Check Up on Status";}
