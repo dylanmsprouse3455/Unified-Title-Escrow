@@ -497,6 +497,19 @@ openEditor=function(recordId){
 };
 /* CALL WIZARD END */
 
+/* Put callback urgency directly in the card's top-right status badge. */
+var renderCallbackBadgeBase=render;
+render=function(){
+  renderCallbackBadgeBase();
+  document.querySelectorAll("#callRows tr[data-id]").forEach(function(row){
+    var pill=row.querySelector(".call-pill");
+    var remaining=row.querySelector(".call-countdown");
+    if(!pill||!remaining||pill.textContent.trim()!=="Needs Callback")return;
+    var label=remaining.textContent.trim().replace(/\bday\b/gi,"Day").replace(/\bdays\b/gi,"Days").replace(/\boverdue\b/gi,"Overdue");
+    pill.textContent="Callback: "+label;
+  });
+};
+
 function boot(){if(installed||!ownerSignedIn())return;addStyles();if(!installToolboxEntry())return;installApp();load();render();installed=true;}
 setInterval(boot,500);
 setTimeout(boot,0);
