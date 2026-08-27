@@ -219,3 +219,71 @@
   .call-follow-choice{grid-template-columns:1fr}
 }
 
+/* Polished case cards: compact hierarchy based on the approved visual mockup. */
+.call-table tbody{grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:18px}
+.call-table tbody tr{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-areas:
+    "file file file status status status"
+    "property property property property property property"
+    "caller caller caller assigned assigned assigned"
+    "issue issue follow follow updated updated"
+    "issue issue days days updated updated"
+    "next next next next next next";
+  border:1px solid #b7c9dc;
+  border-left:1px solid #b7c9dc;
+  border-radius:18px;
+  box-shadow:0 7px 22px rgba(23,52,94,.08)
+}
+.call-table tbody tr:has(.call-countdown.overdue),
+.call-table tbody tr:has(.call-countdown.today),
+.call-table tbody tr:has(.call-pill.waiting),
+.call-table tbody tr:has(.call-pill.complete){border-left-width:1px}
+.call-table tbody td{padding:14px 18px;border-bottom:1px solid #d9e3ed;font-size:.92rem}
+.call-table tbody td::before{margin-bottom:5px;color:#61758e;font-size:.65rem}
+.call-table tbody td:nth-child(1){background:#f1f6fb;padding-top:17px;padding-bottom:17px}
+.call-table tbody td:nth-child(1)::before{content:"File"}
+.call-table tbody td:nth-child(6){align-items:flex-end;background:#f1f6fb;padding-top:17px;padding-bottom:17px}
+.call-table tbody td:nth-child(6)::before{display:none}
+.call-table tbody td:nth-child(6) .call-pill{padding:8px 13px;background:#e2ecf7;color:#17345e;text-transform:uppercase;letter-spacing:.035em}
+.call-table tbody td:nth-child(2){padding:17px 18px;font-size:1.08rem;color:#17345e}
+.call-table tbody td:nth-child(2)::before{content:"Property Address"}
+.call-table tbody td:nth-child(3),.call-table tbody td:nth-child(5){min-height:94px;padding-top:17px;padding-bottom:17px}
+.call-table tbody td:nth-child(3){border-right:1px solid #d9e3ed}
+.call-table tbody td:nth-child(3) .call-main{font-size:1.15rem}
+.call-table tbody td:nth-child(4),
+.call-table tbody td:nth-child(7),
+.call-table tbody td:nth-child(8),
+.call-table tbody td:nth-child(9){background:#fbfcfe}
+.call-table tbody td:nth-child(4){display:flex;grid-area:issue;flex-direction:column;justify-content:center;border-right:1px solid #d9e3ed;border-bottom:1px solid #d9e3ed;padding-top:17px;padding-bottom:17px}
+.call-table tbody td:nth-child(7){grid-area:follow;margin:10px 10px 0;padding:11px 13px 5px;border:1px solid #dfb755;border-bottom:0;border-radius:11px 11px 0 0;background:#fffbf1;text-align:center}
+.call-table tbody td:nth-child(7)::before{content:"Follow-Up";color:#806119}
+.call-table tbody td:nth-child(8){grid-area:days;margin:0 10px 10px;padding:3px 13px 10px;border:1px solid #dfb755;border-top:0;border-radius:0 0 11px 11px;background:#fffbf1;text-align:center}
+.call-table tbody td:nth-child(8)::before{display:none}
+.call-table tbody td:nth-child(9){display:flex;grid-area:updated;flex-direction:column;justify-content:center;border-left:1px solid #d9e3ed;border-bottom:1px solid #d9e3ed;padding-top:17px;padding-bottom:17px}
+.call-table tbody td:nth-child(9)::before{content:"Last Update"}
+.call-countdown{font-size:1rem}
+.call-table tbody td:nth-child(10){padding:18px;background:#fff;border-bottom:0}
+.call-table tbody td:nth-child(10)::before{margin-bottom:7px}
+.call-next-action{color:#1e3858;font-size:.98rem;line-height:1.52}
+.call-view-todos{margin-top:15px;padding:13px 15px;border:1px solid #17345e;border-radius:11px;background:#fff;font-size:.96rem}
+.call-view-todos::after{content:"›";margin-left:2px;font-size:1.45rem;line-height:.8}
+.call-view-todos span{margin-left:auto;padding:5px 9px;background:#e8f0f8}
+
+@media(max-width:560px){
+  .call-table tbody{grid-template-columns:1fr}
+  .call-table tbody tr{
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "file status"
+      "property property"
+      "caller assigned"
+      "issue issue"
+      "follow updated"
+      "days updated"
+      "next next"
+  }
+  .call-table tbody td:nth-child(3),.call-table tbody td:nth-child(5){min-height:auto}
+  .call-table tbody td:nth-child(4){border-right:0}
+}
+
