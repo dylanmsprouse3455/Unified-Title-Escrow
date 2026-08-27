@@ -91,7 +91,14 @@ function openApp(){if(!ownerSignedIn())return;load();installApp();document.getEl
 function closeApp(){document.getElementById("callTrackerApp").classList.remove("show");var panel=document.getElementById("dylanToolboxPanel"),grid=document.getElementById("dylanHomeGrid");if(grid)grid.style.display="none";if(panel)panel.classList.add("show");}
 
 function field(id){return document.getElementById(id);}
-function clearForm(){["ctFile","ctAddress","ctCaller","ctCompany","ctPhone","ctIssue","ctNotes","ctPromise","ctNext","ctOutcome","callHistoryText"].forEach(function(k){field(k).value="";});field("ctFollowType").value="No Follow-Up";field("ctAssigned").value="Dylan";field("ctStatus").value="Open";field("ctFollowDate").value="";field("ctCallback").checked=false;}
+function clearForm(){
+  ["ctFile","ctAddress","ctCaller","ctCompany","ctPhone","ctIssue","ctNotes","ctPromise","ctNext","ctOutcome","callHistoryText"].forEach(function(k){var el=field(k);if(el)el.value="";});
+  var follow=field("ctFollowType");if(follow)follow.value="No Follow-Up";
+  var assigned=field("ctAssigned");if(assigned)assigned.value="Dylan";
+  var status=field("ctStatus");if(status)status.value="Open";
+  var date=field("ctFollowDate");if(date)date.value="";
+  var callback=field("ctCallback");if(callback)callback.checked=false;
+}
 function openEditor(recordId){editingId=recordId||"";clearForm();var record=calls.find(function(r){return r.id===editingId;});field("callEditorTitle").textContent=record?"Call / Follow-Up Record":"New Call";field("callEditorSubtitle").textContent=record?(record.fileNumber||"No file number")+" · "+(record.caller||"No caller entered"):"Enter the essentials first, then set the follow-up.";field("callHistorySection").style.display=record?"block":"none";field("deleteCallButton").style.display=record?"inline-block":"none";field("printCallButton").style.display=record?"inline-block":"none";if(record){field("ctFile").value=record.fileNumber||"";field("ctAddress").value=record.address||"";field("ctCaller").value=record.caller||"";field("ctCompany").value=record.companyRole||"";field("ctPhone").value=record.phone||"";field("ctIssue").value=record.issueType||"";field("ctNotes").value=record.notes||"";field("ctPromise").value=record.promise||"";field("ctFollowType").value=record.followUpType||"No Follow-Up";field("ctAssigned").value=record.assignedTo||"Dylan";field("ctStatus").value=record.status||"Open";field("ctFollowDate").value=record.followUpDate||"";field("ctCallback").checked=!!record.callbackRequired;field("ctNext").value=record.nextAction||"";field("ctOutcome").value=record.finalOutcome||"";renderHistory(record);}field("callEditorWrap").classList.add("show");setTimeout(function(){field("ctFile").focus();},40);}
 function closeEditor(){field("callEditorWrap").classList.remove("show");editingId="";}
 function values(){return{fileNumber:field("ctFile").value.trim(),address:field("ctAddress").value.trim(),caller:field("ctCaller").value.trim(),companyRole:field("ctCompany").value.trim(),phone:field("ctPhone").value.trim(),issueType:field("ctIssue").value.trim(),notes:field("ctNotes").value.trim(),promise:field("ctPromise").value.trim(),followUpType:field("ctFollowType").value,assignedTo:field("ctAssigned").value.trim()||"Dylan",status:field("ctStatus").value,followUpDate:field("ctFollowDate").value,callbackRequired:field("ctCallback").checked,nextAction:field("ctNext").value.trim(),finalOutcome:field("ctOutcome").value.trim()};}
@@ -171,7 +178,7 @@ function installCallWizard(){
   if(history){history.classList.add("call-history-in-wizard");review.appendChild(history);}
   body.insertBefore(review,note||null);
 
-  oldSections.forEach(function(section){if(section.parentNode)section.remove();});
+  oldSections.forEach(function(section){if(section!==history&&section.parentNode)section.remove();});
   if(note)note.remove();
 
   var back=document.createElement("button");
