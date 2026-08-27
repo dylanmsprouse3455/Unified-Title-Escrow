@@ -1,4 +1,4 @@
-name: Fix Dylan toolbox navigation
+name: Build call-entry wizard
 
 on:
   push:
@@ -11,34 +11,253 @@ permissions:
   contents: write
 
 jobs:
-  fix:
+  build-wizard:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Keep Dylan toolbox open
+
+      - name: Convert call entry to a guided wizard
         shell: python
         run: |
           from pathlib import Path
           import re
 
-          js_path = Path('tracker/case-import.js')
+          js_path = Path('tracker/call-tracker.js')
           js = js_path.read_text(encoding='utf-8').replace('\r\n', '\n')
-          pattern = r'(  function openToolbox\(\)\{\n)(    var grid=)'
-          if not re.search(pattern, js):
-              raise SystemExit('Could not find openToolbox function')
-          js = re.sub(pattern, r'\1    trackerVisible=true;\n\2', js, count=1)
+
+          if 'var callWizardStep=1;' not in js:
+              js = js.replace('var editingId="";', 'var editingId="";\nvar callWizardStep=1;', 1)
+
+          wizard_css = r'''
+.call-modal{width:min(760px,100%)}.call-wizard-progress-wrap{padding:14px 22px 0;background:#17345e;color:#fff}.call-wizard-progress-row{display:flex;justify-content:space-between;gap:12px;color:#dce7f3;font-size:.76rem;font-weight:900}.call-wizard-track{height:8px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden}.call-wizard-track span{display:block;width:14%;height:100%;border-radius:999px;background:#d5aa39;transition:width .2s ease}.call-wizard-step{display:none}.call-wizard-step.active{display:block}.call-wizard-question{margin:0 0 6px;color:#17345e;font-size:1.45rem;font-weight:900;line-height:1.2}.call-wizard-help{margin:0 0 18px;color:#68778d;line-height:1.5}.call-wizard-panel{padding:20px;border:2px solid #d3deea;border-radius:16px;background:linear-gradient(145deg,#fbfdff,#f4f8fc)}.call-wizard-panel .call-grid{grid-template-columns:1fr 1fr}.call-wizard-panel .call-field.full{grid-column:1/-1}.call-wizard-panel .call-field input,.call-wizard-panel .call-field select,.call-wizard-panel .call-field textarea{min-height:50px;border:2px solid #c5d2e0;border-radius:11px;font-size:1rem}.call-wizard-panel .call-field textarea{min-height:120px}.call-wizard-panel .call-field label{font-size:.82rem;color:#425873}.call-wizard-choice-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#edf4fb;color:#3f5773;font-size:.8rem;font-weight:750;line-height:1.45}.call-wizard-review{display:grid;grid-template-columns:1fr 1fr;gap:9px}.call-review-item{padding:11px 12px;border:1px solid #d3deea;border-radius:11px;background:#fff}.call-review-item.wide{grid-column:1/-1}.call-review-item span{display:block;margin-bottom:4px;color:#728096;font-size:.68rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.call-review-item strong{display:block;color:#17345e;font-size:.9rem;line-height:1.4;white-space:pre-wrap}.call-wizard-actions{display:flex;align-items:center;gap:8px}.call-wizard-actions button:disabled{opacity:.45;cursor:not-allowed}.call-save-finish{background:#c9a13b!important;color:#172033!important}.call-history-in-wizard{margin-top:16px}.call-modal-body{min-height:390px}.call-modal-actions{position:sticky;bottom:0;z-index:2}.call-modal-actions .right{align-items:center}@media(max-width:620px){.call-wizard-panel{padding:15px}.call-wizard-panel .call-grid,.call-wizard-review{grid-template-columns:1fr}.call-wizard-panel .call-field.full,.call-review-item.wide{grid-column:auto}.call-wizard-question{font-size:1.25rem}.call-modal-actions{align-items:stretch}.call-modal-actions .right{width:100%;display:grid;grid-template-columns:1fr 1fr}.call-modal-actions .right button{width:100%}.call-modal-actions .right #cancelCallButton{grid-column:1/-1;order:3}.call-wizard-progress-wrap{padding:12px 16px 0}}
+'''
+          print_marker = '@media print{.call-tracker-app{display:none!important}}'
+          if '.call-wizard-progress-wrap{' not in js:
+              if print_marker not in js:
+                  raise SystemExit('Could not find call tracker style marker')
+              js = js.replace(print_marker, wizard_css + '\n' + print_marker, 1)
+
+          new_modal = r'''function installModal(){
+            var wrap=document.createElement("div");
+            wrap.id="callEditorWrap";
+            wrap.className="call-modal-wrap";
+            wrap.innerHTML=`<section class="call-modal" role="dialog" aria-modal="true" aria-labelledby="callEditorTitle">
+              <header class="call-modal-head">
+                <div><h2 id="callEditorTitle">New Call</h2><p id="callEditorSubtitle">Answer a few simple questions, one step at a time.</p></div>
+                <button id="callEditorClose" class="call-close" type="button" aria-label="Close">×</button>
+              </header>
+              <div class="call-wizard-progress-wrap">
+                <div class="call-wizard-progress-row"><span id="callWizardStepText">Step 1 of 7</span><span id="callWizardPercent">14%</span></div>
+                <div class="call-wizard-track"><span id="callWizardBar"></span></div>
+              </div>
+              <div class="call-modal-body">
+                <section class="call-wizard-step" data-call-step="1">
+                  <h3 class="call-wizard-question">What file is this call connected to?</h3>
+                  <p class="call-wizard-help">Enter the file number and property address if they are available.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field"><label for="ctFile">File Number</label><input id="ctFile" placeholder="G26-0000" autocomplete="off"></div>
+                    <div class="call-field"><label for="ctAddress">Property Address</label><input id="ctAddress" placeholder="Street address" autocomplete="off"></div>
+                  </div><div class="call-wizard-choice-note">You can continue if one of these is not known yet.</div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="2">
+                  <h3 class="call-wizard-question">Who is calling?</h3>
+                  <p class="call-wizard-help">Add enough information to know who to contact later.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field"><label for="ctCaller">Caller Name</label><input id="ctCaller" placeholder="Caller name" autocomplete="off"></div>
+                    <div class="call-field"><label for="ctCompany">Company / Role</label><input id="ctCompany" placeholder="Realtor, lender, client…" autocomplete="off"></div>
+                    <div class="call-field full"><label for="ctPhone">Callback Number</label><input id="ctPhone" type="tel" placeholder="Phone number" autocomplete="tel"></div>
+                  </div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="3">
+                  <h3 class="call-wizard-question">What is the call about?</h3>
+                  <p class="call-wizard-help">Choose or type the issue, then capture what was discussed.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field full"><label for="ctIssue">Reason / Issue Type</label><input id="ctIssue" list="ctIssueList" placeholder="Closing question, document request, scheduling…"><datalist id="ctIssueList"><option value="Closing Question"></option><option value="Earnest Money"></option><option value="Title Search"></option><option value="Document Request"></option><option value="Lender Question"></option><option value="Realtor Question"></option><option value="Client Question"></option><option value="Scheduling"></option><option value="Other"></option></datalist></div>
+                    <div class="call-field full"><label for="ctNotes">Call Notes</label><textarea id="ctNotes" placeholder="What did the caller need and what was discussed?"></textarea></div>
+                  </div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="4">
+                  <h3 class="call-wizard-question">What did you promise to do?</h3>
+                  <p class="call-wizard-help">Record any commitment you made so it does not get lost.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field full"><label for="ctPromise">What I Promised / Commitment</label><textarea id="ctPromise" placeholder="Example: Call once Lynn confirms the closing time"></textarea></div>
+                  </div><div class="call-wizard-choice-note">Leave this blank when you did not make a commitment.</div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="5">
+                  <h3 class="call-wizard-question">Does anything need to happen after this call?</h3>
+                  <p class="call-wizard-help">Choose the follow-up type and set a callback or check-in date when needed.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field"><label for="ctFollowType">Follow-Up Type</label><select id="ctFollowType"><option>No Follow-Up</option><option>Callback</option><option>Internal Follow-Up</option><option>Check-In</option><option>Email</option><option>Document Needed</option><option>Waiting on Client</option><option>Waiting on Third Party</option></select></div>
+                    <div class="call-field"><label for="ctFollowDate">Callback / Check-In Date</label><input id="ctFollowDate" type="date"></div>
+                    <div class="call-field full"><label class="call-check"><input id="ctCallback" type="checkbox"> Callback required</label></div>
+                  </div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="6">
+                  <h3 class="call-wizard-question">Who owns the next step?</h3>
+                  <p class="call-wizard-help">Keep the current status separate from the exact action that needs to happen.</p>
+                  <div class="call-wizard-panel"><div class="call-grid">
+                    <div class="call-field"><label for="ctAssigned">Assigned To</label><input id="ctAssigned" list="ctAssignedList" value="Dylan"><datalist id="ctAssignedList"><option value="Dylan"></option><option value="Lynn"></option><option value="Cindy"></option></datalist></div>
+                    <div class="call-field"><label for="ctStatus">Status</label><select id="ctStatus"><option>Open</option><option>Needs Callback</option><option>In Progress</option><option>Waiting on Lynn</option><option>Waiting on Someone</option><option>Waiting on Client</option><option>Waiting on Third Party</option><option>Completed</option></select></div>
+                    <div class="call-field full"><label for="ctNext">Next Action</label><textarea id="ctNext" placeholder="What needs to happen next?"></textarea></div>
+                    <div class="call-field full"><label for="ctOutcome">Final Outcome</label><textarea id="ctOutcome" placeholder="Use this when the item is resolved."></textarea></div>
+                  </div></div>
+                </section>
+
+                <section class="call-wizard-step" data-call-step="7">
+                  <h3 class="call-wizard-question">Review and save the call</h3>
+                  <p class="call-wizard-help">Check the important details below. Use Back to correct anything before saving.</p>
+                  <div class="call-wizard-panel"><div id="callWizardReview" class="call-wizard-review"></div></div>
+                  <section id="callHistorySection" class="call-section call-history-in-wizard" style="display:none"><h3>Running Call History</h3><div id="callHistory" class="call-history"></div><div class="call-history-add"><input id="callHistoryText" placeholder="Add an update, callback result, email sent, document received…"><button id="addCallHistory" type="button" class="call-btn">Add Update</button></div></section>
+                </section>
+              </div>
+              <footer class="call-modal-actions">
+                <div><button id="deleteCallButton" type="button" class="call-btn danger" style="display:none">Delete</button><button id="printCallButton" type="button" class="call-btn secondary" style="display:none">Print Call Sheet</button></div>
+                <div class="right call-wizard-actions"><button id="cancelCallButton" type="button" class="call-btn secondary">Cancel</button><button id="callWizardBack" type="button" class="call-btn secondary">Back</button><button id="callWizardNext" type="button" class="call-btn">Continue</button><button id="saveCallButton" type="button" class="call-btn call-save-finish" style="display:none">Save Call</button></div>
+              </footer>
+            </section>`;
+            document.body.appendChild(wrap);
+            document.getElementById("callEditorClose").addEventListener("click",closeEditor);
+            document.getElementById("cancelCallButton").addEventListener("click",closeEditor);
+            document.getElementById("callWizardBack").addEventListener("click",callWizardBack);
+            document.getElementById("callWizardNext").addEventListener("click",callWizardNext);
+            document.getElementById("saveCallButton").addEventListener("click",saveEditor);
+            document.getElementById("deleteCallButton").addEventListener("click",deleteCurrent);
+            document.getElementById("printCallButton").addEventListener("click",function(){if(editingId)printRecord(editingId);});
+            document.getElementById("addCallHistory").addEventListener("click",addHistory);
+            document.getElementById("callHistoryText").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addHistory();}});
+            document.getElementById("ctFollowType").addEventListener("change",function(){if(this.value==="Callback")document.getElementById("ctCallback").checked=true;});
+            wrap.addEventListener("click",function(e){if(e.target===wrap)closeEditor();});
+          }'''
+
+          modal_start = js.index('function installModal(){')
+          modal_end = js.index('\n\nvar FILTERS=', modal_start)
+          js = js[:modal_start] + new_modal + js[modal_end:]
+
+          wizard_logic = r'''/* CALL WIZARD START */
+          var CALL_WIZARD_STEPS=[
+            {title:"What file is this call connected to?",help:"Enter the file number and property address if available."},
+            {title:"Who is calling?",help:"Add the caller and the best callback information."},
+            {title:"What is the call about?",help:"Capture the reason for the call and the important notes."},
+            {title:"What did you promise to do?",help:"Record any commitment made during the call."},
+            {title:"Does anything need to happen after this call?",help:"Set the follow-up type and date."},
+            {title:"Who owns the next step?",help:"Choose the status, assignee, and exact next action."},
+            {title:"Review and save",help:"Check the details before saving the record."}
+          ];
+          function updateCallWizardReview(){
+            var data=values();
+            var rows=[
+              ["File Number",data.fileNumber||"Not entered"],["Property Address",data.address||"Not entered"],
+              ["Caller",data.caller||"Not entered"],["Company / Role",data.companyRole||"Not entered"],
+              ["Callback Number",data.phone||"Not entered"],["Reason / Issue",data.issueType||"Not entered"],
+              ["Call Notes",data.notes||"Not entered","wide"],["Commitment",data.promise||"None entered","wide"],
+              ["Follow-Up",data.followUpType+(data.callbackRequired?" · Callback required":"")],
+              ["Follow-Up Date",data.followUpDate?localDate(data.followUpDate):"No date"],
+              ["Assigned To",data.assignedTo||"Dylan"],["Status",data.status||"Open"],
+              ["Next Action",data.nextAction||"Not entered","wide"],["Final Outcome",data.finalOutcome||"Not entered","wide"]
+            ];
+            field("callWizardReview").innerHTML=rows.map(function(row){return'<div class="call-review-item '+(row[2]||'')+'"><span>'+esc(row[0])+'</span><strong>'+esc(row[1])+'</strong></div>';}).join("");
+          }
+          function renderCallWizard(){
+            var total=CALL_WIZARD_STEPS.length;
+            if(callWizardStep<1)callWizardStep=1;
+            if(callWizardStep>total)callWizardStep=total;
+            document.querySelectorAll("#callEditorWrap .call-wizard-step").forEach(function(step){step.classList.toggle("active",Number(step.dataset.callStep)===callWizardStep);});
+            var pct=Math.round(callWizardStep/total*100);
+            field("callWizardStepText").textContent="Step "+callWizardStep+" of "+total;
+            field("callWizardPercent").textContent=pct+"%";
+            field("callWizardBar").style.width=pct+"%";
+            field("callWizardBack").disabled=callWizardStep===1;
+            field("callWizardNext").style.display=callWizardStep===total?"none":"inline-block";
+            field("saveCallButton").style.display=callWizardStep===total?"inline-block":"none";
+            var existing=!!editingId;
+            field("deleteCallButton").style.display=existing&&callWizardStep===total?"inline-block":"none";
+            field("printCallButton").style.display=existing&&callWizardStep===total?"inline-block":"none";
+            field("callHistorySection").style.display=existing&&callWizardStep===total?"block":"none";
+            if(callWizardStep===total)updateCallWizardReview();
+            setTimeout(function(){
+              var active=document.querySelector('#callEditorWrap .call-wizard-step.active');
+              var focusable=active&&active.querySelector('input:not([type="checkbox"]),select,textarea');
+              if(focusable)focusable.focus();
+            },35);
+          }
+          function callWizardNext(){
+            if(callWizardStep<CALL_WIZARD_STEPS.length){callWizardStep++;renderCallWizard();}
+          }
+          function callWizardBack(){
+            if(callWizardStep>1){callWizardStep--;renderCallWizard();}
+          }
+          /* CALL WIZARD END */
+          '''
+
+          block_pattern = re.compile(r'/\* CALL WIZARD START \*/.*?/\* CALL WIZARD END \*/\n?', re.S)
+          js = block_pattern.sub('', js)
+          save_pos = js.index('function saveEditor()')
+          js = js[:save_pos] + wizard_logic + '\n' + js[save_pos:]
+
+          new_open = r'''function openEditor(recordId){
+            editingId=recordId||"";
+            callWizardStep=1;
+            clearForm();
+            var record=calls.find(function(r){return r.id===editingId;});
+            field("callEditorTitle").textContent=record?"Call / Follow-Up Record":"New Call";
+            field("callEditorSubtitle").textContent=record?(record.fileNumber||"No file number")+" · "+(record.caller||"No caller entered"):"Answer a few simple questions, one step at a time.";
+            if(record){
+              field("ctFile").value=record.fileNumber||"";field("ctAddress").value=record.address||"";field("ctCaller").value=record.caller||"";field("ctCompany").value=record.companyRole||"";field("ctPhone").value=record.phone||"";field("ctIssue").value=record.issueType||"";field("ctNotes").value=record.notes||"";field("ctPromise").value=record.promise||"";field("ctFollowType").value=record.followUpType||"No Follow-Up";field("ctAssigned").value=record.assignedTo||"Dylan";field("ctStatus").value=record.status||"Open";field("ctFollowDate").value=record.followUpDate||"";field("ctCallback").checked=!!record.callbackRequired;field("ctNext").value=record.nextAction||"";field("ctOutcome").value=record.finalOutcome||"";renderHistory(record);
+            }
+            field("callEditorWrap").classList.add("show");
+            renderCallWizard();
+          }'''
+          open_start = js.index('function openEditor(recordId)')
+          open_end = js.index('\nfunction closeEditor()', open_start)
+          js = js[:open_start] + new_open + js[open_end:]
+
+          close_start = js.index('function closeEditor()')
+          close_end = js.index('\nfunction values()', close_start)
+          js = js[:close_start] + 'function closeEditor(){field("callEditorWrap").classList.remove("show");editingId="";callWizardStep=1;}' + js[close_end:]
+
+          new_save = r'''function saveEditor(){
+            var data=values();
+            if(!data.fileNumber&&!data.caller&&!data.notes){alert("Enter at least a file number, caller, or call note before saving.");callWizardStep=1;renderCallWizard();return;}
+            var stamp=now(),record=calls.find(function(r){return r.id===editingId;});
+            if(!record){
+              record=Object.assign({id:id(),createdAt:stamp,updatedAt:stamp,history:[]},data);
+              record.history.push({id:id(),at:stamp,text:"Call record created"});
+              calls.unshift(record);
+            }else{
+              var changed=[];
+              Object.keys(data).forEach(function(k){if(String(record[k]||"")!==String(data[k]||""))changed.push(LABELS[k]||k);record[k]=data[k];});
+              record.updatedAt=stamp;
+              if(changed.length)record.history.push({id:id(),at:stamp,text:"Updated "+changed.join(", ")});
+            }
+            persist();
+            render();
+            closeEditor();
+          }'''
+          save_start = js.index('function saveEditor()')
+          save_end = js.index('\nfunction renderHistory', save_start)
+          js = js[:save_start] + new_save + js[save_end:]
+
           js_path.write_text(js, encoding='utf-8')
 
           html_path = Path('tracker/index.html')
           html = html_path.read_text(encoding='utf-8').replace('\r\n', '\n')
           html = re.sub(
-              r'<script src="case-import\.js[^\"]*"></script>',
-              '<script src="case-import.js?v=dylan-toolbox-fix-20260827-1"></script>',
+              r'<script src="call-tracker\.js[^\"]*"></script>',
+              '<script src="call-tracker.js?v=call-wizard-20260827-1"></script>',
               html,
               count=1
           )
           html_path.write_text(html, encoding='utf-8')
-      - name: Commit navigation fix
+
+      - name: Check JavaScript syntax
+        run: node --check tracker/call-tracker.js
+
+      - name: Commit wizard update
         run: |
           if git diff --quiet; then
             echo "No changes needed"
@@ -46,6 +265,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker/case-import.js tracker/index.html
-          git commit -m "Keep Dylan toolbox open after selection"
+          git add tracker/call-tracker.js tracker/index.html
+          git commit -m "Convert call entry to guided wizard"
           git push
