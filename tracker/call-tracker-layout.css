@@ -156,17 +156,19 @@
 .call-modal-wrap .call-modal-body{min-height:0!important;padding:13px 16px;overflow:auto}
 .call-modal-wrap .call-modal-actions{position:static;flex:0 0 auto;padding:11px 16px}
 
-#callEditorWrap .call-wizard-step.active[data-call-step="7"]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:14px}
-#callEditorWrap [data-call-step="7"]>.call-wizard-question,
-#callEditorWrap [data-call-step="7"]>.call-wizard-help,
-#callEditorWrap [data-call-step="7"]>#callWizardReview{grid-column:1/-1}
-#callEditorWrap [data-call-step="7"]>.call-wizard-question{margin-bottom:0;font-size:1.18rem}
-#callEditorWrap [data-call-step="7"]>.call-wizard-help{margin:-7px 0 0;font-size:.82rem}
-#callEditorWrap .call-wizard-review{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#callEditorWrap .call-wizard-step.active[data-call-step="5"]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:14px}
+#callEditorWrap [data-call-step="5"]>.call-wizard-question,
+#callEditorWrap [data-call-step="5"]>.call-wizard-help,
+#callEditorWrap [data-call-step="5"]>#callWizardReview{grid-column:1/-1}
+#callEditorWrap [data-call-step="5"]>.call-wizard-question{margin-bottom:0;font-size:1.18rem}
+#callEditorWrap [data-call-step="5"]>.call-wizard-help{margin:-7px 0 0;font-size:.82rem}
+#callEditorWrap .call-wizard-review{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 #callEditorWrap .call-review-item{min-width:0;padding:8px 9px;border-width:1px}
 #callEditorWrap .call-review-item.wide{grid-column:1/-1}
 #callEditorWrap .call-review-item span{margin-bottom:2px;font-size:.61rem}
 #callEditorWrap .call-review-item strong{font-size:.8rem;line-height:1.3}
+#callEditorWrap .call-review-item,#callEditorWrap .call-review-item:nth-child(n){background:#fff!important;border-color:#c8d7e6!important;box-shadow:none}
+#callEditorWrap .call-review-item.wide{background:#eef5fb!important;border-color:#afc8df!important}
 #callEditorWrap .call-todos-panel{height:100%;margin-top:0;padding:12px}
 #callEditorWrap .call-todos-head{margin-bottom:8px}
 #callEditorWrap .call-todo-empty{padding:10px}
@@ -175,14 +177,24 @@
 #callEditorWrap .call-history{max-height:150px}
 #callEditorWrap .call-history-item{padding:7px 9px}
 #callEditorWrap .call-history-add{margin-top:8px}
+.call-follow-choice{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.call-follow-choice button{min-height:54px;padding:9px 10px;border:2px solid #b9cadd;border-radius:11px;background:#fff;color:#294564;font-weight:900;cursor:pointer}
+.call-follow-choice button:hover{border-color:#17345e;background:#f1f6fb}
+.call-follow-choice button.active{border-color:#17345e;background:#17345e;color:#fff;box-shadow:0 4px 12px rgba(23,52,94,.16)}
+.call-use-advice{width:max-content;margin-top:3px;padding:7px 10px;border:1px solid #c59b2b;border-radius:8px;background:#fff8df;color:#60470a;font-size:.74rem;font-weight:900;cursor:pointer}
+.call-use-advice:hover{background:#d5aa39;color:#172033}
+.call-viewing-details .call-wizard-progress{display:none!important}
+.call-viewing-details #printCallButton{order:1}
+.call-viewing-details #callWizardBack{order:2}
+.call-viewing-details #cancelCallButton{order:3}
 
 @media(max-width:800px){
   .call-modal-wrap{align-items:flex-start;padding:8px}
   .call-modal-wrap .call-modal{width:100%!important;max-height:calc(100vh - 16px)}
-  #callEditorWrap .call-wizard-step.active[data-call-step="7"]{grid-template-columns:1fr}
-  #callEditorWrap [data-call-step="7"]>.call-wizard-question,
-  #callEditorWrap [data-call-step="7"]>.call-wizard-help,
-  #callEditorWrap [data-call-step="7"]>#callWizardReview{grid-column:1}
+  #callEditorWrap .call-wizard-step.active[data-call-step="5"]{grid-template-columns:1fr}
+  #callEditorWrap [data-call-step="5"]>.call-wizard-question,
+  #callEditorWrap [data-call-step="5"]>.call-wizard-help,
+  #callEditorWrap [data-call-step="5"]>#callWizardReview{grid-column:1}
   #callEditorWrap .call-wizard-review{grid-template-columns:1fr 1fr}
   #callEditorWrap .call-todos-panel,#callEditorWrap .call-history-in-wizard{height:auto}
 }
@@ -190,5 +202,6 @@
 @media(max-width:560px){
   #callEditorWrap .call-wizard-review{grid-template-columns:1fr}
   #callEditorWrap .call-review-item.wide{grid-column:1}
+  .call-follow-choice{grid-template-columns:1fr}
 }
 
