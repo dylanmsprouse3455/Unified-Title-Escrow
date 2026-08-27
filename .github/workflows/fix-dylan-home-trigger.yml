@@ -1,4 +1,4 @@
-name: Fix Dylan home trigger
+name: Fix Dylan toolbox navigation
 
 on:
   push:
@@ -15,23 +15,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Load Dylan call tracker
+      - name: Keep Dylan toolbox open
         shell: python
         run: |
           from pathlib import Path
+          import re
+
+          js_path = Path('tracker/case-import.js')
+          js = js_path.read_text(encoding='utf-8').replace('\r\n', '\n')
+          pattern = r'(  function openToolbox\(\)\{\n)(    var grid=)'
+          if not re.search(pattern, js):
+              raise SystemExit('Could not find openToolbox function')
+          js = re.sub(pattern, r'\1    trackerVisible=true;\n\2', js, count=1)
+          js_path.write_text(js, encoding='utf-8')
 
           html_path = Path('tracker/index.html')
           html = html_path.read_text(encoding='utf-8').replace('\r\n', '\n')
-          if '<script src="call-tracker.js' not in html:
-              anchor = '<script src="case-popout.js"></script>'
-              if anchor not in html:
-                  raise SystemExit('Could not find script anchor')
-              html = html.replace(anchor, '<script src="case-popout.js"></script>\n<script src="call-tracker.js?v=20260827-1"></script>', 1)
-          else:
-              import re
-              html = re.sub(r'<script src="call-tracker\.js[^\"]*"></script>', '<script src="call-tracker.js?v=20260827-1"></script>', html, count=1)
+          html = re.sub(
+              r'<script src="case-import\.js[^\"]*"></script>',
+              '<script src="case-import.js?v=dylan-toolbox-fix-20260827-1"></script>',
+              html,
+              count=1
+          )
           html_path.write_text(html, encoding='utf-8')
-      - name: Commit toolbox integration
+      - name: Commit navigation fix
         run: |
           if git diff --quiet; then
             echo "No changes needed"
@@ -39,6 +46,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker/index.html
-          git commit -m "Load Call and Follow-Up Tracker in Dylan toolbox"
+          git add tracker/case-import.js tracker/index.html
+          git commit -m "Keep Dylan toolbox open after selection"
           git push
