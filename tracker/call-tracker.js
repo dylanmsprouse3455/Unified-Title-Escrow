@@ -349,11 +349,11 @@ function updateCallWizardReview(){
     ["File Number",data.fileNumber||"Not entered"],["Property Address",data.address||"Not entered"],
     ["Caller",data.caller||"Not entered"],["Company / Role",data.companyRole||"Not entered"],
     ["Callback Number",data.phone||"Not entered"],["Reason / Issue",data.issueType||"Not entered"],
-    ["Call Notes",data.notes||"Not entered","wide"],["Commitment",data.promise||"None entered","wide"],
+    ["Call Notes",data.notes||"Not entered","wide"],["Commitment",data.promise||"None entered"],
     ["Follow-Up",data.followUpType+(data.callbackRequired?" · Callback required":"")],
     ["Follow-Up Date",data.followUpDate?localDate(data.followUpDate):"No date"],
     ["Assigned To",data.assignedTo||"Dylan"],["Status",data.status||"Open"],
-    ["Next Action",data.nextAction||"Not entered","wide"],["Final Outcome",data.finalOutcome||"Not entered","wide"]
+    ["Next Action",data.nextAction||"Not entered","wide"],["Final Outcome",data.finalOutcome||"Not entered"]
   ];
   var record=currentRecord();
   if(record)rows.push(["Created",localDateTime(record.createdAt)],["Last Updated",localDateTime(record.updatedAt||record.createdAt)]);
