@@ -238,6 +238,7 @@ installCaseImporter();
     var back=document.getElementById("dylanBackHome");if(back)back.classList.add("show");
   }
   function openToolbox(){
+    trackerVisible=true;
     var grid=document.getElementById("dylanHomeGrid"),panel=document.getElementById("dylanToolboxPanel");
     if(grid)grid.style.display="none";
     if(panel)panel.classList.add("show");
