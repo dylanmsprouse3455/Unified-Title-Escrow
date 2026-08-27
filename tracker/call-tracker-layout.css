@@ -71,6 +71,11 @@
 .call-table tbody td:nth-child(9)::before{content:"Last Update"}
 .call-table tbody td:nth-child(10){grid-area:next;border-bottom:0;background:#f8fafc;padding-top:15px;padding-bottom:17px}
 .call-table tbody td:nth-child(10)::before{content:"Next Action"}
+.call-next-action{white-space:pre-wrap}
+.call-view-todos{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:12px;padding:10px 12px;border:2px solid #17345e;border-radius:10px;background:#fff;color:#17345e;font-weight:900;cursor:pointer}
+.call-view-todos:hover,.call-view-todos:focus{background:#17345e;color:#fff;outline:0}
+.call-view-todos span{padding:3px 7px;border-radius:999px;background:#e8f0f8;color:#425873;font-size:.68rem;white-space:nowrap}
+.call-view-todos:hover span,.call-view-todos:focus span{background:#fff;color:#17345e}
 
 .call-table tbody td:nth-child(1),.call-table tbody td:nth-child(6){display:flex;flex-direction:column;justify-content:center}
 .call-main{font-size:1.03rem}
@@ -88,6 +93,25 @@
 .call-review-item:nth-child(4n+4){background:#f7f0fd;border-color:#d8c2e8}
 .call-review-item span{color:#53667f}
 .call-review-item strong{color:#17345e;font-size:.94rem}
+
+/* Full case details and a per-call working to-do list. */
+.call-todos-panel{margin-top:18px;padding:17px;border:2px solid #b8cde1;border-radius:15px;background:#f5f9fd;transition:box-shadow .2s ease,border-color .2s ease}
+.call-todos-panel.call-todos-highlight{border-color:#c58a18;box-shadow:0 0 0 5px rgba(197,138,24,.18)}
+.call-todos-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.call-todos-head span{display:block;color:#718096;font-size:.66rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+.call-todos-head h4{margin:3px 0 0;color:#17345e;font-size:1.08rem}
+.call-todos-head>strong{padding:6px 9px;border-radius:999px;background:#17345e;color:#fff;font-size:.72rem}
+.call-todo-list{display:grid;gap:8px}
+.call-todo-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border:1px solid #cad7e4;border-radius:10px;background:#fff}
+.call-todo-item label{display:flex;align-items:flex-start;gap:9px;min-width:0;color:#263d59;font-weight:800;line-height:1.4}
+.call-todo-item input{width:18px;height:18px;margin-top:1px;accent-color:#2e8a5c;flex:0 0 auto}
+.call-todo-item.complete label span{text-decoration:line-through;color:#728096}
+.call-todo-actions{display:flex;gap:6px;flex:0 0 auto}
+.call-todo-actions button{padding:6px 8px;border:1px solid #b7c7d8;border-radius:8px;background:#fff;color:#405671;font-size:.72rem;font-weight:900;cursor:pointer}
+.call-todo-actions button:last-child{color:#a52d25;border-color:#dfbbb7}
+.call-todo-empty{padding:15px;border:1px dashed #b7c7d8;border-radius:10px;background:#fff;color:#718096;text-align:center;font-weight:750}
+.call-todo-add{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:11px}
+.call-todo-add input{min-height:44px;padding:10px 11px;border:2px solid #b8c8d8;border-radius:10px;background:#fff;font:inherit}
 
 /* Make browser suggestion menus feel intentional. */
 .call-contact-hint{margin-top:7px;padding:8px 10px;border-radius:9px;background:#eef4fa;color:#4b607a;font-size:.76rem;font-weight:750;line-height:1.4}
@@ -111,6 +135,10 @@
     "next"}
   .call-table tbody td:nth-child(1),.call-table tbody td:nth-child(6){background:#eef4fa}
   .call-stat{padding:18px}
+  .call-todo-item{align-items:flex-start;flex-direction:column}
+  .call-todo-actions{width:100%}
+  .call-todo-actions button{flex:1}
+  .call-todo-add{grid-template-columns:1fr}
 }
 
 
@@ -119,3 +147,4 @@
 .call-contact-chip:hover{background:#edf5fd;border-color:#8daac5;filter:none}
 .call-contact-chip strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
 .call-contact-chip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6d7d92;font-size:.68rem;font-weight:750}
+
