@@ -497,17 +497,41 @@ openEditor=function(recordId){
 };
 /* CALL WIZARD END */
 
-/* Put callback urgency directly in the card's top-right status badge. */
-var renderCallbackBadgeBase=render;
+/* Purpose-built cards matching the approved visual concept. */
+function callCardIcon(name){
+  var paths={
+    pin:'<path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/>',
+    phone:'<path d="M7.2 3.5 10 7.8 7.9 10c1.2 2.7 3.4 4.9 6.1 6.1l2.2-2.1 4.3 2.8-.7 3c-.2.8-.9 1.3-1.7 1.3C9.8 21.1 2.9 14.2 2.9 5.9c0-.8.5-1.5 1.3-1.7l3-.7Z"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+    file:'<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 12h6M9 16h6"/>',
+    calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18M8 14h3M13 14h3M8 17h3"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/>'
+  };
+  return'<span class="call-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths[name]+'</svg></span>';
+}
+function callbackCardLabel(record,remaining){
+  var status=record.status||"Open";
+  if(status!=="Needs Callback")return status;
+  var label=remaining.label.replace(/\bday\b/gi,"Day").replace(/\bdays\b/gi,"Days").replace(/\boverdue\b/gi,"Overdue");
+  return"Callback: "+label;
+}
 render=function(){
-  renderCallbackBadgeBase();
-  document.querySelectorAll("#callRows tr[data-id]").forEach(function(row){
-    var pill=row.querySelector(".call-pill");
-    var remaining=row.querySelector(".call-countdown");
-    if(!pill||!remaining||pill.textContent.trim()!=="Needs Callback")return;
-    var label=remaining.textContent.trim().replace(/\bday\b/gi,"Day").replace(/\bdays\b/gi,"Days").replace(/\boverdue\b/gi,"Overdue");
-    pill.textContent="Callback: "+label;
+  if(!document.getElementById("callRows"))return;
+  renderStats();
+  var q=String(document.getElementById("callSearch").value||"").trim().toLowerCase();
+  var rows=sortCalls(calls.filter(matchesFilter).filter(function(record){return matchesSearch(record,q);}));
+  var body=document.getElementById("callRows"),empty=document.getElementById("callEmpty");
+  body.innerHTML=rows.map(function(record){
+    var remaining=countdown(record),todos=todoSummary(record),status=callbackCardLabel(record,remaining);
+    var statusClass=(isWaiting(record)?" waiting":"")+(isCompleted(record)?" complete":"")+" "+remaining.kind;
+    return'<tr class="call-card-row" data-id="'+esc(record.id)+'" tabindex="0" aria-label="Open full details for '+esc(record.fileNumber||record.caller||"call record")+'"><td class="call-card-cell" colspan="10"><article class="call-card-v2"><header class="call-card-head"><div class="call-card-file"><span>File</span><strong>'+esc(record.fileNumber||"—")+'</strong></div><span class="call-card-status'+statusClass+'">'+esc(status)+'</span></header><section class="call-card-address">'+callCardIcon("pin")+'<strong>'+esc(record.address||"No property address entered")+'</strong></section><section class="call-card-people"><div class="call-card-block"><span class="call-card-label">Caller</span><div class="call-card-value">'+callCardIcon("phone")+'<div><strong>'+esc(record.caller||"—")+'</strong><small>'+esc(record.phone||"No callback number")+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Assigned To</span><div class="call-card-value">'+callCardIcon("user")+'<div><strong>'+esc(record.assignedTo||"—")+'</strong></div></div></div></section><section class="call-card-meta"><div class="call-card-block"><span class="call-card-label">Issue</span><div class="call-card-value">'+callCardIcon("file")+'<div><strong>'+esc(record.issueType||"—")+'</strong></div></div></div><div class="call-card-block call-card-callback"><span class="call-card-label">'+esc(record.followUpType||"Follow-Up")+'</span><div class="call-card-value">'+callCardIcon("calendar")+'<div><strong>'+esc(record.followUpDate?localDate(record.followUpDate):"No date")+'</strong><small class="call-countdown '+remaining.kind+'">'+esc(remaining.label)+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Last Update</span><div class="call-card-value">'+callCardIcon("clock")+'<div><strong>'+esc(localDateTime(record.updatedAt||record.createdAt))+'</strong></div></div></div></section><section class="call-card-next"><span class="call-card-label">Next Action</span><p>'+esc(record.nextAction||"No next action entered")+'</p></section><button type="button" class="call-view-todos" data-todo-id="'+esc(record.id)+'"><strong>View To-Do List</strong><span>'+esc(todos.label)+'</span></button></article></td></tr>';
+  }).join("");
+  empty.style.display=rows.length?"none":"block";
+  body.querySelectorAll("tr[data-id]").forEach(function(row){
+    row.addEventListener("click",function(){openEditor(row.dataset.id);});
+    row.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(row.dataset.id);}});
   });
+  body.querySelectorAll(".call-view-todos").forEach(function(button){button.addEventListener("click",function(event){event.preventDefault();event.stopPropagation();openTodoList(button.dataset.todoId);});});
 };
 
 function boot(){if(installed||!ownerSignedIn())return;addStyles();if(!installToolboxEntry())return;installApp();load();render();installed=true;}
