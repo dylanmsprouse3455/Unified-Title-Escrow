@@ -61,6 +61,7 @@ function loadContacts(){
   }catch(error){contacts=[];}
   calls.forEach(function(record){upsertContact(record,false);});
   persistContacts();
+  refreshCallerOptions();
 }
 function findContact(name){
   var key=contactKey(name);
