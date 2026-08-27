@@ -3,6 +3,7 @@
 .call-shell{width:min(1320px,100%)}
 
 .call-stats{gap:14px}
+.call-tracker-app .call-stats{grid-template-columns:repeat(3,1fr)}
 .call-stat{position:relative;overflow:hidden;padding:20px 20px 18px;border-width:2px;box-shadow:0 9px 24px rgba(23,52,94,.08)}
 .call-stat::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#3978bb}
 .call-stat:nth-child(1){background:#fffaf0;border-color:#ead59b}
@@ -140,6 +141,8 @@
   .call-todo-actions button{flex:1}
   .call-todo-add{grid-template-columns:1fr}
 }
+
+@media(max-width:700px){.call-tracker-app .call-stats{grid-template-columns:1fr}}
 
 
 .call-contact-quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
