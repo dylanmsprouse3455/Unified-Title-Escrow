@@ -257,5 +257,6 @@ installCaseImporter();
       checkSession();
     }else if(attempts>200){clearInterval(timer);}
   },100);
+  setInterval(checkSession,1000);
 })();
 })();
