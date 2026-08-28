@@ -32,6 +32,8 @@
 
     var title=existing.querySelector('strong');
     if(title)title.textContent='Callback Request Details';
+    var description=existing.querySelector('small');
+    if(description)description.textContent='Track callbacks, check-ins, next actions, documents, and personal follow-ups.';
 
     var list=existing.closest('.toolbox-card-list');
     if(!list)return;
@@ -41,7 +43,7 @@
       hub.id='openDylanCallHub';
       hub.type='button';
       hub.className='call-tool-card';
-      hub.innerHTML='<span class="call-tool-icon">☏</span><span><strong>Call Tracker</strong><small>Log every call, keep call history separate from your personal follow-ups, and see everything in one place.</small></span><span class="call-tool-arrow">›</span>';
+      hub.innerHTML='<span class="call-tool-icon">☏</span><span><strong>Call Tracker</strong><small>Log every incoming and outgoing call, search call history, and connect calls to files and follow-ups.</small></span><span class="call-tool-arrow">›</span>';
       hub.addEventListener('click',openPrototype);
       list.appendChild(hub);
     }
@@ -62,3 +64,4 @@
   setInterval(install,500);
   setTimeout(install,0);
 })();
+
