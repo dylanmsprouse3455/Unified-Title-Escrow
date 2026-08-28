@@ -511,16 +511,33 @@ function callbackCardLabel(record,remaining){
   var label=remaining.label.replace(/\bday\b/gi,"Day").replace(/\bdays\b/gi,"Days").replace(/\boverdue\b/gi,"Overdue");
   return"Callback: "+label;
 }
+function setCallCompleted(recordId,completed){
+  var record=calls.find(function(item){return item.id===recordId;});
+  if(!record)return;
+  var stamp=now();
+  record.status=completed?"Completed":"Open";
+  record.updatedAt=stamp;
+  record.history=record.history||[];
+  record.history.push({id:id(),at:stamp,text:completed?"Call / follow-up marked completed":"Call / follow-up reopened"});
+  persist();
+  render();
+}
+function visibleCallRecords(query){
+  return sortCalls(calls.filter(function(record){
+    if(query)return matchesSearch(record,query);
+    return !isCompleted(record)&&matchesFilter(record);
+  }));
+}
 render=function(){
   if(!document.getElementById("callRows"))return;
   renderStats();
   var q=String(document.getElementById("callSearch").value||"").trim().toLowerCase();
-  var rows=sortCalls(calls.filter(matchesFilter).filter(function(record){return matchesSearch(record,q);}));
+  var rows=visibleCallRecords(q);
   var body=document.getElementById("callRows"),empty=document.getElementById("callEmpty");
   body.innerHTML=rows.map(function(record){
     var remaining=countdown(record),todos=todoSummary(record),status=callbackCardLabel(record,remaining);
     var statusClass=(isWaiting(record)?" waiting":"")+(isCompleted(record)?" complete":"")+" "+remaining.kind;
-    return'<tr class="call-card-row" data-id="'+esc(record.id)+'" tabindex="0" aria-label="Open full details for '+esc(record.fileNumber||record.caller||"call record")+'"><td class="call-card-cell" colspan="10"><article class="call-card-v2"><header class="call-card-head"><div class="call-card-file"><span>File</span><strong>'+esc(record.fileNumber||"—")+'</strong></div><span class="call-card-status'+statusClass+'">'+esc(status)+'</span></header><section class="call-card-address">'+callCardIcon("pin")+'<strong>'+esc(record.address||"No property address entered")+'</strong></section><section class="call-card-people"><div class="call-card-block"><span class="call-card-label">Caller</span><div class="call-card-value">'+callCardIcon("phone")+'<div><strong>'+esc(record.caller||"—")+'</strong><small>'+esc(record.phone||"No callback number")+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Assigned To</span><div class="call-card-value">'+callCardIcon("user")+'<div><strong>'+esc(record.assignedTo||"—")+'</strong></div></div></div></section><section class="call-card-meta"><div class="call-card-block"><span class="call-card-label">Issue</span><div class="call-card-value">'+callCardIcon("file")+'<div><strong>'+esc(record.issueType||"—")+'</strong></div></div></div><div class="call-card-block call-card-callback"><span class="call-card-label">'+esc(record.followUpType||"Follow-Up")+'</span><div class="call-card-value">'+callCardIcon("calendar")+'<div><strong>'+esc(record.followUpDate?localDate(record.followUpDate):"No date")+'</strong><small class="call-countdown '+remaining.kind+'">'+esc(remaining.label)+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Last Update</span><div class="call-card-value">'+callCardIcon("clock")+'<div><strong>'+esc(localDateTime(record.updatedAt||record.createdAt))+'</strong></div></div></div></section><section class="call-card-next"><span class="call-card-label">Next Action</span><p>'+esc(record.nextAction||"No next action entered")+'</p></section><button type="button" class="call-view-todos" data-todo-id="'+esc(record.id)+'"><strong>View To-Do List</strong><span>'+esc(todos.label)+'</span></button></article></td></tr>';
+    return'<tr class="call-card-row" data-id="'+esc(record.id)+'" tabindex="0" aria-label="Open full details for '+esc(record.fileNumber||record.caller||"call record")+'"><td class="call-card-cell" colspan="10"><article class="call-card-v2"><header class="call-card-head"><div class="call-card-file"><span>File</span><strong>'+esc(record.fileNumber||"—")+'</strong></div><span class="call-card-status'+statusClass+'">'+esc(status)+'</span></header><section class="call-card-address">'+callCardIcon("pin")+'<strong>'+esc(record.address||"No property address entered")+'</strong></section><section class="call-card-people"><div class="call-card-block"><span class="call-card-label">Caller</span><div class="call-card-value">'+callCardIcon("phone")+'<div><strong>'+esc(record.caller||"—")+'</strong><small>'+esc(record.phone||"No callback number")+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Assigned To</span><div class="call-card-value">'+callCardIcon("user")+'<div><strong>'+esc(record.assignedTo||"—")+'</strong></div></div></div></section><section class="call-card-meta"><div class="call-card-block"><span class="call-card-label">Issue</span><div class="call-card-value">'+callCardIcon("file")+'<div><strong>'+esc(record.issueType||"—")+'</strong></div></div></div><div class="call-card-block call-card-callback"><span class="call-card-label">'+esc(record.followUpType||"Follow-Up")+'</span><div class="call-card-value">'+callCardIcon("calendar")+'<div><strong>'+esc(record.followUpDate?localDate(record.followUpDate):"No date")+'</strong><small class="call-countdown '+remaining.kind+'">'+esc(remaining.label)+'</small></div></div></div><div class="call-card-block"><span class="call-card-label">Last Update</span><div class="call-card-value">'+callCardIcon("clock")+'<div><strong>'+esc(localDateTime(record.updatedAt||record.createdAt))+'</strong></div></div></div></section><section class="call-card-next"><span class="call-card-label">Next Action</span><p>'+esc(record.nextAction||"No next action entered")+'</p></section><section class="call-card-actions"><button type="button" class="call-complete-card'+(isCompleted(record)?' reopen':'')+'" data-complete-id="'+esc(record.id)+'">'+(isCompleted(record)?'Reopen':'Mark Completed')+'</button><button type="button" class="call-view-todos" data-todo-id="'+esc(record.id)+'"><strong>View To-Do List</strong><span>'+esc(todos.label)+'</span></button></section></article></td></tr>';
   }).join("");
   empty.style.display=rows.length?"none":"block";
   body.querySelectorAll("tr[data-id]").forEach(function(row){
@@ -528,10 +545,12 @@ render=function(){
     row.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();openEditor(row.dataset.id);}});
   });
   body.querySelectorAll(".call-view-todos").forEach(function(button){button.addEventListener("click",function(event){event.preventDefault();event.stopPropagation();openTodoList(button.dataset.todoId);});});
+  body.querySelectorAll(".call-complete-card").forEach(function(button){button.addEventListener("click",function(event){event.preventDefault();event.stopPropagation();setCallCompleted(button.dataset.completeId,!button.classList.contains("reopen"));});});
 };
 
 function boot(){if(installed||!ownerSignedIn())return;addStyles();if(!installToolboxEntry())return;installApp();load();render();installed=true;}
 setInterval(boot,500);
 setTimeout(boot,0);
 })();
+
 
