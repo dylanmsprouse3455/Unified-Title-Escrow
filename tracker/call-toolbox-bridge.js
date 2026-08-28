@@ -31,9 +31,9 @@
     if(!panel||!existing)return;
 
     var title=existing.querySelector('strong');
-    if(title)title.textContent='Callback Request Details';
+    if(title&&title.textContent!=='Callback Request Details')title.textContent='Callback Request Details';
     var description=existing.querySelector('small');
-    if(description)description.textContent='Track callbacks, check-ins, next actions, documents, and personal follow-ups.';
+    if(description&&description.textContent!=='Track callbacks, check-ins, next actions, documents, and personal follow-ups.')description.textContent='Track callbacks, check-ins, next actions, documents, and personal follow-ups.';
 
     var list=existing.closest('.toolbox-card-list');
     if(!list)return;
