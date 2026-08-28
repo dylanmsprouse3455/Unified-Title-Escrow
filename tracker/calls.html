@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Calls &amp; Follow-Ups | Unified Title &amp; Escrow</title>
+  <link rel="stylesheet" href="calls.css?v=calls-consolidated-20260828-1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="accessGate" class="access-gate">
+    <section class="gate-card">
+      <div class="eyebrow">Unified Title &amp; Escrow</div>
+      <h1>Opening Calls &amp; Follow-Ups…</h1>
+      <p>Checking your existing tracker session.</p>
+    </section>
+  </div>
+
+  <main id="callsApp" class="app hidden">
+    <header class="app-header">
+      <div>
+        <a class="back-link" href="./">← Dylan's Workspace</a>
+        <div class="eyebrow">Personal Office Workspace</div>
+        <h1>Calls &amp; Follow-Ups</h1>
+        <p>One place for calls, open work, completed items, and office handoffs.</p>
+      </div>
+      <div class="header-actions">
+        <button id="exportCalls" type="button" class="button secondary">Download Backup</button>
+        <button id="importCalls" type="button" class="button secondary">Import Backup</button>
+        <input id="importCallsFile" type="file" accept="application/json,.json" hidden>
+        <button id="newCall" type="button" class="button gold">+ Add Call</button>
+      </div>
+    </header>
+
+    <section class="storage-note" aria-label="Storage notice">
+      <strong>Saved on this browser.</strong>
+      <span>Download a backup regularly. Printed handoffs do not replace the saved record.</span>
+    </section>
+
+    <section class="stats" aria-label="Call follow-up totals">
+      <button class="stat" data-stat-view="work"><strong id="statOpen">0</strong><span>My Open Work</span></button>
+      <button class="stat today" data-stat-filter="today"><strong id="statToday">0</strong><span>Due Today</span></button>
+      <button class="stat overdue" data-stat-filter="overdue"><strong id="statOverdue">0</strong><span>Overdue</span></button>
+      <button class="stat no-date" data-stat-filter="nodate"><strong id="statNoDate">0</strong><span>Needs a Date</span></button>
+    </section>
+
+    <section class="workspace">
+      <div class="toolbar">
+        <label class="search-field">
+          <span class="sr-only">Search calls and follow-ups</span>
+          <input id="callSearch" type="search" placeholder="Search caller, phone, file, address, results, or to-do items…">
+        </label>
+        <nav id="viewTabs" class="tabs" aria-label="Call tracker views">
+          <button type="button" data-view="work" class="active">My Work</button>
+          <button type="button" data-view="calls">Call History</button>
+          <button type="button" data-view="assigned">Assigned Out <span id="assignedCount">0</span></button>
+          <button type="button" data-view="completed">Completed</button>
+        </nav>
+      </div>
+      <div class="view-heading">
+        <div><h2 id="viewTitle">My Work</h2><p id="viewDescription">Open follow-ups that you still own.</p></div>
+        <span id="resultCount" class="result-count">0 records</span>
+      </div>
+      <section id="recordGrid" class="record-grid" aria-live="polite"></section>
+      <div id="emptyState" class="empty-state hidden"></div>
+    </section>
+  </main>
+
+  <div id="callModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <section class="modal">
+      <header class="modal-header">
+        <div><h2 id="modalTitle">Add Call</h2><p id="modalSubtitle">Capture the conversation, then decide what happens next.</p></div>
+        <button id="closeCallModal" type="button" class="icon-button" aria-label="Close call form">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="form-section">
+          <div class="section-heading"><span>1</span><div><h3>Who and which file?</h3><p>Enter what you know. A caller or file number is required.</p></div></div>
+          <div class="form-grid">
+            <label><span>Caller / Contact</span><input id="formCaller" autocomplete="off" list="contactOptions"></label>
+            <label><span>Phone</span><input id="formPhone" type="tel"></label>
+            <label class="wide"><span>Company / Relationship</span><input id="formCompany" placeholder="Realtor, lender, seller, vendor…"></label>
+            <label><span>File Number</span><input id="formFile" placeholder="G26-0000"></label>
+            <label><span>Property</span><input id="formAddress"></label>
+            <label><span>Direction</span><select id="formDirection"><option>Incoming</option><option>Outgoing</option></select></label>
+            <label><span>Call Outcome</span><select id="formOutcome"><option value="">Choose an outcome…</option><option>Reached and spoke</option><option>Information provided</option><option>Resolved</option><option>Left voicemail</option><option>No answer</option><option>Waiting for response</option></select></label>
+          </div>
+          <datalist id="contactOptions"></datalist>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading"><span>2</span><div><h3>What happened?</h3><p>The wording changes automatically for incoming and outgoing calls.</p></div></div>
+          <div class="form-grid one-column">
+            <label><span id="subjectLabel">What were they calling about?</span><input id="formSubject"></label>
+            <label><span id="resultsLabel">What happened on the call?</span><textarea id="formResults"></textarea></label>
+            <label><span id="advisedLabel">What did I tell or promise them?</span><textarea id="formAdvised"></textarea></label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading"><span>3</span><div><h3>Does anything happen next?</h3><p>Use the checklist as the single source of truth for next actions.</p></div></div>
+          <div class="follow-choice" role="group" aria-label="Follow-up choice">
+            <button id="noFollow" type="button" class="active">No Follow-Up</button>
+            <button id="yesFollow" type="button">Create Follow-Up</button>
+          </div>
+          <div id="followPanel" class="follow-panel hidden">
+            <div class="form-grid">
+              <label><span>Follow-Up Type</span><select id="formFollowType"><option>Callback</option><option>Check-In</option><option>Internal Follow-Up</option><option>Waiting on Client</option><option>Waiting on Third Party</option><option>Document Needed</option><option>Email Needed</option><option>Other</option></select></label>
+              <label><span>Status</span><select id="formStatus"><option>Open</option><option>Waiting</option><option>Completed</option></select></label>
+              <label><span>Due / Check-In Date</span><input id="formDueDate" type="date"></label>
+              <label><span>Owner</span><input id="formOwner" list="ownerOptions" value="Dylan"></label>
+              <label id="waitingOnField" class="wide hidden"><span>Waiting on whom?</span><input id="formWaitingOn"></label>
+            </div>
+            <datalist id="ownerOptions"><option>Dylan</option><option>Lynn</option><option>Cindy</option><option>Amy</option><option>Kim</option></datalist>
+
+            <section class="todo-panel">
+              <div class="todo-heading"><div><span>Next Action</span><h4>Follow-Up To-Do List</h4></div><strong id="todoSummary">No items yet</strong></div>
+              <p>The first open item automatically appears as the card's Next Action.</p>
+              <div class="todo-add"><input id="newTodoText" placeholder="Add the next step…"><button id="addTodo" type="button" class="button">+ Add</button></div>
+              <div id="todoList" class="todo-list"></div>
+              <div id="todoSaveNote" class="todo-save-note">Checklist changes save with this new call.</div>
+            </section>
+          </div>
+        </section>
+
+        <section id="historySection" class="form-section hidden">
+          <details>
+            <summary>Running Activity <strong id="historyCount">0 entries</strong></summary>
+            <div id="historyList" class="history-list"></div>
+          </details>
+        </section>
+      </div>
+      <footer class="modal-footer">
+        <button id="deleteCall" type="button" class="button danger hidden">Delete Call</button>
+        <div class="footer-actions">
+          <span id="unsavedStatus" class="unsaved-status hidden">Unsaved changes</span>
+          <button id="cancelCall" type="button" class="button secondary">Cancel</button>
+          <button id="savePrintCall" type="button" class="button secondary">Save &amp; Print Handoff</button>
+          <button id="saveCall" type="button" class="button">Save Call</button>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAction" type="button" class="hidden"></button></div>
+  <script src="calls.js?v=calls-consolidated-20260828-1"></script>
+</body>
+</html>
+
