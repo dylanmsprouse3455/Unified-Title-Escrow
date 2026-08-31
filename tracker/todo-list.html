@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice To-Do List | Unified Title &amp; Escrow</title>
+  <link rel="stylesheet" href="todo-list.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="todo-list.js" defer></script>
+</head>
+<body>
+  <div id="accessGate" class="todo-access-gate">
+    <section class="todo-gate-card" aria-live="polite">
+      <div class="todo-eyebrow">Dylan-only workspace</div>
+      <h1>Checking your secure session…</h1>
+      <p>This page uses your existing Unified Title tracker sign-in.</p>
+    </section>
+  </div>
+
+  <main id="todoApp" class="todo-app" hidden>
+    <header class="todo-topbar">
+      <div>
+        <a class="todo-back-link" href="./">← Dylan's Workspace</a>
+        <div class="todo-eyebrow">Unified Title &amp; Escrow · Dylan's Tool Box</div>
+        <h1>Voice To-Do List</h1>
+        <p>Talk through what you need to get done. We'll turn it into a list.</p>
+      </div>
+      <button id="addTaskButton" class="todo-button todo-button-secondary" type="button">+ Add Task</button>
+    </header>
+
+    <section class="todo-capture-card" aria-labelledby="captureHeading">
+      <div class="todo-capture-heading">
+        <div>
+          <h2 id="captureHeading">What do you need to get done?</h2>
+          <p>Talk naturally or type. Review the transcript before making your list.</p>
+        </div>
+        <div id="micState" class="todo-state" data-state="ready"><span></span>Ready</div>
+      </div>
+
+      <div class="todo-mic-row">
+        <button id="micButton" class="todo-mic-button" type="button" aria-pressed="false">
+          <span class="todo-mic-icon" aria-hidden="true">🎤</span>
+          <span id="micButtonLabel">Talk</span>
+        </button>
+        <p id="micHelp">Press Talk to begin. The microphone will not run in the background.</p>
+      </div>
+
+      <label class="todo-field todo-transcript-field" for="requestInput">
+        <span>Transcript or typed request</span>
+        <textarea id="requestInput" rows="5" maxlength="8000" placeholder="Tell me everything you need to get done..."></textarea>
+      </label>
+
+      <div class="todo-capture-actions">
+        <button id="parseButton" class="todo-button todo-button-primary" type="button">Make My To-Do List</button>
+        <span id="parseStatus" class="todo-inline-status" role="status"></span>
+      </div>
+    </section>
+
+    <section class="todo-list-section" aria-labelledby="listHeading">
+      <div class="todo-list-heading">
+        <div>
+          <h2 id="listHeading">My Tasks</h2>
+          <p id="taskSummary">Nothing here yet.</p>
+        </div>
+        <div class="todo-list-actions">
+          <span id="storageStatus" class="todo-storage-status" role="status"></span>
+          <button id="clearCompletedButton" class="todo-button todo-button-secondary" type="button">Clear Completed</button>
+        </div>
+      </div>
+      <div id="taskList" class="todo-task-list"></div>
+      <div id="emptyState" class="todo-empty-state">
+        <div aria-hidden="true">✓</div>
+        <h3>Your list is ready when you are.</h3>
+        <p>Use the microphone, type a request, or add a task manually.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="taskEditorWrap" class="todo-modal-wrap" hidden>
+    <section class="todo-modal" role="dialog" aria-modal="true" aria-labelledby="taskEditorTitle">
+      <header>
+        <div>
+          <div class="todo-eyebrow">Voice To-Do List</div>
+          <h2 id="taskEditorTitle">Add Task</h2>
+        </div>
+        <button id="closeEditorButton" class="todo-icon-button" type="button" aria-label="Close">×</button>
+      </header>
+      <form id="taskEditorForm">
+        <input id="taskId" type="hidden">
+        <label class="todo-field todo-span-two" for="taskTitle"><span>Task</span><input id="taskTitle" maxlength="500" required></label>
+        <label class="todo-field todo-span-two" for="taskDetails"><span>Details / Notes</span><textarea id="taskDetails" rows="3" maxlength="4000"></textarea></label>
+        <label class="todo-field" for="taskDueDate"><span>Due Date</span><input id="taskDueDate" type="date"></label>
+        <label class="todo-field" for="taskDueTime"><span>Due Time</span><input id="taskDueTime" type="time"></label>
+        <label class="todo-field" for="taskDueText"><span>Original Due Wording</span><input id="taskDueText" maxlength="200" placeholder="Before lunch, sometime this week…"></label>
+        <label class="todo-field" for="taskPriority"><span>Priority</span><select id="taskPriority"><option value="low">Low</option><option value="normal" selected>Normal</option><option value="high">High</option></select></label>
+        <div class="todo-modal-actions todo-span-two">
+          <button id="cancelEditorButton" class="todo-button todo-button-secondary" type="button">Cancel</button>
+          <button class="todo-button todo-button-primary" type="submit">Save Task</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</body>
+</html>
