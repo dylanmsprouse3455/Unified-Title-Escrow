@@ -5,6 +5,7 @@
   var SUPABASE_URL = "https://hdqmcjlpyjpfeltmxfax.supabase.co";
   var SUPABASE_KEY = "sb_publishable_lC2M8fZGmJQt6bWKgfiDnw_4Nx1TwHD";
   var STORAGE_KEY = "utei.dylan.voiceTodos.v1";
+  var TODO_COLUMNS = "id,user_id,title,details,due_date,due_time,due_text,priority,completed,original_request,created_at,updated_at";
   var cloud = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   var tasks = [];
   var session = null;
@@ -22,6 +23,8 @@
   function isDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(value || ""); }
   function isTime(value) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(value || ""); }
   function validPriority(value) { return ["low", "normal", "high"].includes(value) ? value : "normal"; }
+  function isDylanSession() { return Boolean(session && session.user && session.user.id && text(session.user.email).trim().toLowerCase() === DYLAN_EMAIL); }
+  function taskTime(task) { var value = Date.parse(task && (task.updated_at || task.created_at) || ""); return Number.isFinite(value) ? value : 0; }
 
   function normalizeTask(raw, originalRequest) {
     var stamp = nowIso();
@@ -82,24 +85,95 @@
   function setStorageStatus(message) { el("storageStatus").textContent = message || ""; }
 
   function saveLocal() {
+    if (!isDylanSession()) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }
 
   function loadLocal() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]").map(function (item) { return normalizeTask(item); }); }
+    if (!isDylanSession()) return [];
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      if (!Array.isArray(saved)) return [];
+      return saved.filter(function (item) {
+        return item && (!item.user_id || item.user_id === session.user.id);
+      }).map(function (item) { return normalizeTask(item); });
+    }
     catch (_error) { return []; }
   }
 
+  function mergeTaskLists(cloudItems, localItems) {
+    var byId = new Map();
+    (cloudItems || []).forEach(function (item) {
+      var task = normalizeTask(item);
+      byId.set(task.id, task);
+    });
+    (localItems || []).forEach(function (item) {
+      var task = normalizeTask(item), existing = byId.get(task.id);
+      if (!existing || taskTime(task) > taskTime(existing)) byId.set(task.id, task);
+    });
+    return Array.from(byId.values()).sort(function (a, b) { return taskTime(b) - taskTime(a); });
+  }
+
+  async function fetchCloudTasks() {
+    var result = await cloud.from("dylan_voice_todos").select(TODO_COLUMNS).order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    return (result.data || []).map(function (item) { return normalizeTask(item); });
+  }
+
+  async function migrateLocalToCloud(localItems, cloudItems) {
+    if (!isDylanSession()) throw new Error("Cloud migration requires Dylan's authenticated account.");
+    var localUnique = mergeTaskLists([], localItems);
+    var cloudById = new Map((cloudItems || []).map(function (task) { return [task.id, task]; }));
+    var localOnly = localUnique.filter(function (task) { return !cloudById.has(task.id); });
+
+    if (localOnly.length) {
+      var insertResult = await cloud.from("dylan_voice_todos").upsert(localOnly, { onConflict: "id", ignoreDuplicates: true });
+      if (insertResult.error) throw insertResult.error;
+    }
+
+    var currentCloud = localOnly.length ? await fetchCloudTasks() : (cloudItems || []);
+    cloudById = new Map(currentCloud.map(function (task) { return [task.id, task]; }));
+    var localNewer = localUnique.filter(function (task) {
+      var cloudTask = cloudById.get(task.id);
+      return cloudTask && taskTime(task) > taskTime(cloudTask);
+    });
+
+    for (var i = 0; i < localNewer.length; i++) {
+      var localTask = localNewer[i];
+      var updateResult = await cloud.from("dylan_voice_todos").update(localTask).eq("id", localTask.id).lt("updated_at", localTask.updated_at);
+      if (updateResult.error) throw updateResult.error;
+    }
+
+    var finalCloud = await fetchCloudTasks();
+    var finalIds = new Set(finalCloud.map(function (task) { return task.id; }));
+    var stillMissing = localUnique.filter(function (task) { return !finalIds.has(task.id); });
+    if (stillMissing.length) {
+      var retryInsert = await cloud.from("dylan_voice_todos").upsert(stillMissing, { onConflict: "id", ignoreDuplicates: true });
+      if (retryInsert.error) throw retryInsert.error;
+      finalCloud = await fetchCloudTasks();
+    }
+    return finalCloud;
+  }
+
   async function loadTasks() {
+    var localTasks = mergeTaskLists([], loadLocal());
     try {
-      var result = await cloud.from("dylan_voice_todos").select("id,user_id,title,details,due_date,due_time,due_text,priority,completed,original_request,created_at,updated_at").order("created_at", { ascending: false });
-      if (result.error) throw result.error;
-      storageMode = "cloud";
-      tasks = (result.data || []).map(function (item) { return normalizeTask(item); });
-      setStorageStatus("Saved securely to your account");
-    } catch (_error) {
+      if (!isDylanSession()) throw new Error("Dylan's authenticated session is required.");
+      var cloudTasks = await fetchCloudTasks();
+      try {
+        var reconciledCloud = localTasks.length ? await migrateLocalToCloud(localTasks, cloudTasks) : cloudTasks;
+        storageMode = "cloud";
+        tasks = mergeTaskLists(reconciledCloud, localTasks);
+        saveLocal();
+        setStorageStatus(localTasks.length ? "Cloud and local backup are synchronized" : "Saved securely to your account with a local backup");
+      } catch (_migrationError) {
+        storageMode = "local";
+        tasks = mergeTaskLists(cloudTasks, localTasks);
+        setStorageStatus("Cloud migration paused — your complete local list is still safe in this browser");
+      }
+    } catch (_cloudError) {
       storageMode = "local";
-      tasks = loadLocal();
+      tasks = localTasks;
       setStorageStatus("Saved in this browser until cloud setup is completed");
     }
     render();
@@ -238,6 +312,17 @@
     }
   }
 
+  /*
+   * Current transcription boundary:
+   * SpeechRecognition/webkitSpeechRecognition is supplied by the browser. This
+   * implementation does not send microphone audio to OpenAI for transcription.
+   *
+   * Future secure option (not implemented): record an explicit microphone clip,
+   * send it with the user's Supabase session to a dedicated Edge Function, have
+   * that server-side function call OpenAI audio transcription, return text to the
+   * editable requestInput field, then send the corrected text to parse-todos.
+   * Manual typing must remain available throughout that future flow.
+   */
   function setupSpeech() {
     var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
