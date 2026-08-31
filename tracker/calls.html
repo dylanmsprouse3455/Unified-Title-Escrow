@@ -142,7 +142,13 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAction" type="button" class="hidden"></button></div>
-  <script src="calls.js?v=calls-consolidated-20260828-1"></script>
+  <script src="calls-cloud-sync.js?v=20260831-1"></script>
+  <script>
+    Promise.resolve(window.__dylanCallCloudReady).catch(function(){return false;}).finally(function(){
+      var script=document.createElement("script");
+      script.src="calls.js?v=calls-consolidated-20260828-1";
+      document.body.appendChild(script);
+    });
+  </script>
 </body>
 </html>
-
