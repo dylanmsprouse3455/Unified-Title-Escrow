@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Dylan Assistant | Unified Title &amp; Escrow</title>
   <link rel="stylesheet" href="dylan-assistant.css?v=readonly-phase1-20260831-1">
+  <link rel="stylesheet" href="dylan-assistant-actions.css?v=approved-actions-20260831-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,11 +21,11 @@
     <header class="hero">
       <div>
         <a class="back-link" href="./">← Dylan's Workspace</a>
-        <div class="eyebrow">Phase 1 · Read Only</div>
+        <div class="eyebrow">Review &amp; Approve</div>
         <h1>Dylan Assistant</h1>
-        <p>Ask about a file, call, callback, or title search.</p>
+        <p>Pull up your work, talk through an update, and approve exactly what gets saved.</p>
       </div>
-      <div class="readonly-badge"><span aria-hidden="true">◉</span> Read-only access</div>
+      <div class="approval-badge"><span aria-hidden="true">◉</span> Approval required for changes</div>
     </header>
 
     <section class="ask-panel" aria-labelledby="askTitle">
@@ -99,16 +100,31 @@
       <section class="answer-card">
         <div class="section-head">
           <div><span class="section-kicker">Assistant</span><h2>Grounded Answer</h2></div>
-          <span class="source-pill safe">Deterministic · No OpenAI</span>
+          <span class="source-pill safe">Deterministic lookup</span>
         </div>
         <div id="answerQuestion" class="answer-question"></div>
         <p id="answerText" class="answer-text">Ask a question about the selected file.</p>
       </section>
+
+      <section class="update-card" aria-labelledby="updateTitle">
+        <div class="section-head">
+          <div><span class="section-kicker">Propose changes</span><h2 id="updateTitle">Tell me what happened</h2><p>I will prepare changes first. Nothing is saved until you review and approve them.</p></div>
+          <span class="source-pill">AI proposal · Approval required</span>
+        </div>
+        <div class="update-row">
+          <button id="updateMic" class="talk-button update-talk" type="button">Talk update</button>
+          <textarea id="updateInput" class="update-input" placeholder="Example: I talked to Wyndi. She is sending the payoff quote tomorrow. Add a note and remind me to check for it tomorrow afternoon."></textarea>
+          <button id="prepareProposal" class="search-button" type="button">Prepare Changes</button>
+        </div>
+        <div id="proposalStatus" class="proposal-status" role="status" aria-live="polite"></div>
+        <div id="proposalWrap" class="proposal-wrap" hidden></div>
+      </section>
     </section>
 
-    <footer class="phase-note">Updates and approvals will be added in a later phase. This page cannot change tracker, call, callback, or to-do data.</footer>
+    <footer class="phase-note">Dylan Assistant can now prepare limited case notes, next-step updates, personal to-dos, and callbacks. Every change requires your explicit approval and is recorded in an audit trail.</footer>
   </main>
 
   <script src="dylan-assistant-central-data.js?v=central-data-20260831-1"></script>
+  <script src="dylan-assistant-actions.js?v=approved-actions-20260831-1"></script>
 </body>
 </html>
