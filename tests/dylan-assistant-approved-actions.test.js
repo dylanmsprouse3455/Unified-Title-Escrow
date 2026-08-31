@@ -17,10 +17,11 @@ assert(browser.includes('cloud.functions.invoke("apply-assistant-actions"'),"bro
 [/\.(?:insert|update|upsert|delete)\s*\(/,/\.rpc\s*\(/,/service_role|SUPABASE_SERVICE_ROLE_KEY/i].forEach(pattern=>assert.equal(pattern.test(browser),false,"browser has no direct privileged database write path"));
 assert(browser.includes("Select at least one action to approve."),"approval requires selected actions");
 assert(browser.includes("expected_updated_at"),"approval carries optimistic-concurrency snapshot");
+assert(browser.includes("Nothing above has been saved yet."),"proposal clearly remains pending before approval");
 
 assert(proposal.includes("Dylan authentication is required."),"proposal function verifies Dylan");
 assert(proposal.includes("json_schema"),"proposal uses structured output");
-assert(proposal.includes("Never invent facts"),"proposal prompt forbids invention");
+assert(proposal.includes("Do not invent facts"),"proposal prompt forbids invention");
 assert.equal(/createClient\(|\.from\(|\.rpc\s*\(/.test(proposal),false,"proposal function cannot mutate application data");
 
 assert(apply.includes("Dylan authentication is required."),"apply function verifies Dylan");
