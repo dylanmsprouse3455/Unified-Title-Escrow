@@ -6,7 +6,7 @@
   <title>Dylan Assistant | Unified Title &amp; Escrow</title>
   <link rel="stylesheet" href="dylan-assistant.css?v=readonly-phase1-20260831-1">
   <link rel="stylesheet" href="dylan-assistant-actions.css?v=approved-actions-20260831-3">
-  <link rel="stylesheet" href="dylan-assistant-review-fields.css?v=review-fields-20260831-1">
+  <link rel="stylesheet" href="dylan-assistant-review-fields.css?v=review-fields-20260831-2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -68,65 +68,36 @@
             <div><span>Due</span><strong id="caseDue"></strong></div>
             <div><span>Last Touched</span><strong id="caseTouched"></strong></div>
           </div>
-          <div class="subsection">
-            <h3>Open Checklist</h3>
-            <div id="caseTodos" class="list-stack"></div>
-          </div>
-          <div class="subsection" id="notesSection">
-            <h3>Notes</h3>
-            <p id="caseNotes" class="notes-box"></p>
-          </div>
+          <div class="subsection"><h3>Open Checklist</h3><div id="caseTodos" class="list-stack"></div></div>
+          <div class="subsection" id="notesSection"><h3>Notes</h3><p id="caseNotes" class="notes-box"></p></div>
         </div>
       </section>
 
       <section class="calls-card">
-        <div class="section-head">
-          <div><span class="section-kicker">Calls &amp; callbacks</span><h2>Available activity</h2></div>
-          <span class="source-pill local">Calls · Central account</span>
-        </div>
+        <div class="section-head"><div><span class="section-kicker">Calls &amp; callbacks</span><h2>Available activity</h2></div><span class="source-pill local">Calls · Central account</span></div>
         <div id="callsNotice" class="source-notice"></div>
-        <div class="split-grid">
-          <div><h3>Recent Calls</h3><div id="recentCalls" class="list-stack"></div></div>
-          <div><h3>Open Callbacks / Follow-Ups</h3><div id="openCallbacks" class="list-stack"></div></div>
-        </div>
+        <div class="split-grid"><div><h3>Recent Calls</h3><div id="recentCalls" class="list-stack"></div></div><div><h3>Open Callbacks / Follow-Ups</h3><div id="openCallbacks" class="list-stack"></div></div></div>
       </section>
 
-      <section class="activity-card">
-        <div class="section-head">
-          <div><span class="section-kicker">Available sources</span><h2>Recent Activity</h2></div>
-        </div>
-        <div id="activityTimeline" class="timeline"></div>
-      </section>
+      <section class="activity-card"><div class="section-head"><div><span class="section-kicker">Available sources</span><h2>Recent Activity</h2></div></div><div id="activityTimeline" class="timeline"></div></section>
 
       <section class="answer-card">
-        <div class="section-head">
-          <div><span class="section-kicker">Assistant</span><h2>Grounded Answer</h2></div>
-          <span class="source-pill safe">Deterministic lookup</span>
-        </div>
-        <div id="answerQuestion" class="answer-question"></div>
-        <p id="answerText" class="answer-text">Ask a question about the selected file.</p>
+        <div class="section-head"><div><span class="section-kicker">Assistant</span><h2>Grounded Answer</h2></div><span class="source-pill safe">Deterministic lookup</span></div>
+        <div id="answerQuestion" class="answer-question"></div><p id="answerText" class="answer-text">Ask a question about the selected file.</p>
       </section>
 
       <section class="update-card" aria-labelledby="updateTitle">
-        <div class="section-head">
-          <div><span class="section-kicker">Propose changes</span><h2 id="updateTitle">Tell me what happened</h2><p>I will prepare changes first. Nothing is saved until you review and approve them.</p></div>
-          <span class="source-pill">AI proposal · Approval required</span>
-        </div>
-        <div class="update-row">
-          <button id="updateMic" class="talk-button update-talk" type="button">Talk update</button>
-          <textarea id="updateInput" class="update-input" placeholder="Example: I talked to Wyndi. She is sending the payoff quote tomorrow. Add a note and remind me to check for it tomorrow afternoon."></textarea>
-          <button id="prepareProposal" class="search-button" type="button">Prepare Changes</button>
-        </div>
-        <div id="proposalStatus" class="proposal-status" role="status" aria-live="polite"></div>
-        <div id="proposalWrap" class="proposal-wrap" hidden></div>
+        <div class="section-head"><div><span class="section-kicker">Propose changes</span><h2 id="updateTitle">Tell me what happened</h2><p>I will prepare changes first. Nothing is saved until you review and approve them.</p></div><span class="source-pill">AI proposal · Approval required</span></div>
+        <div class="update-row"><button id="updateMic" class="talk-button update-talk" type="button">Talk update</button><textarea id="updateInput" class="update-input" placeholder="Example: I talked to Wyndi. She is sending the payoff quote tomorrow. Add a note and remind me to check for it tomorrow afternoon."></textarea><button id="prepareProposal" class="search-button" type="button">Prepare Changes</button></div>
+        <div id="proposalStatus" class="proposal-status" role="status" aria-live="polite"></div><div id="proposalWrap" class="proposal-wrap" hidden></div>
       </section>
     </section>
 
-    <footer class="phase-note">Dylan Assistant can prepare limited case notes, next-step updates, personal to-dos, and callbacks. Every change requires your explicit approval and is recorded in an audit trail.</footer>
+    <footer class="phase-note">Dylan Assistant checks existing records before approving case notes, next-step updates, personal to-dos, and callbacks. Possible duplicates require a separate Add anyway confirmation.</footer>
   </main>
 
   <script src="dylan-assistant-central-data.js?v=central-data-20260831-1"></script>
   <script src="dylan-assistant-actions.js?v=approved-actions-20260831-3"></script>
-  <script src="dylan-assistant-actions-bootstrap.js?v=approved-actions-bootstrap-20260831-2"></script>
+  <script src="dylan-assistant-actions-bootstrap.js?v=approved-actions-bootstrap-20260831-3"></script>
 </body>
 </html>
