@@ -23,7 +23,15 @@
   function asArray(value) { return Array.isArray(value) ? value : []; }
   function timeValue(value) { var parsed = Date.parse(value || ""); return Number.isFinite(parsed) ? parsed : 0; }
   function dateLabel(value) { if (!value) return "Not available"; var parsed = new Date(value.length === 10 ? value + "T12:00:00" : value); return isNaN(parsed) ? value : parsed.toLocaleString(undefined, value.length === 10 ? { month: "short", day: "numeric", year: "numeric" } : { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }); }
-  function normalizeCaseNumber(value) { return clean(value).toUpperCase().replace(/[–—]/g, "-").replace(/\s+/g, ""); }
+  function normalizeCaseNumber(value) {
+    var compact = clean(value).toUpperCase().replace(/[–—]/g, "-").replace(/\s+/g, "");
+    var match = compact.match(/^([A-Z])(\d{2})-?(\d{4})$/);
+    return match ? match[1] + match[2] + "-" + match[3] : "";
+  }
+  function extractCaseNumber(value) {
+    var match = clean(value).match(/\b([A-Za-z])\s*(\d)\s*(\d)\s*[- ]?\s*(\d)\s*(\d)\s*(\d)\s*(\d)\b/);
+    return match ? normalizeCaseNumber(match.slice(1).join("")) : "";
+  }
   function normalizeAddress(value) {
     var suffixes = { road: "rd", street: "st", avenue: "ave", drive: "dr", lane: "ln", court: "ct", boulevard: "blvd", highway: "hwy", circle: "cir", terrace: "ter", trail: "trl", place: "pl" };
     return clean(value).toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim().split(" ").map(function (part) { return suffixes[part] || part; }).join(" ");
@@ -92,10 +100,8 @@
 
   function find_case_by_number(value) {
     var wanted = normalizeCaseNumber(value);
-    var exact = titleCases.filter(function (item) { return normalizeCaseNumber(item.case_number) === wanted; });
-    if (exact.length) return exact;
-    if (wanted.length < 4) return [];
-    return titleCases.filter(function (item) { return normalizeCaseNumber(item.case_number).indexOf(wanted) !== -1; });
+    if (!wanted) return [];
+    return titleCases.filter(function (item) { return normalizeCaseNumber(item.case_number) === wanted; });
   }
 
   function find_case_by_address(value) {
@@ -208,6 +214,13 @@
     el("answerText").textContent = context.case_record ? "The file is loaded. Ask what is going on, the next step, the latest call, or whether callbacks are open." : "The contact activity is loaded. Ask about the latest call or open follow-up.";
   }
 
+  function clearCurrentContext() {
+    currentContext = null;
+    el("contextPanel").hidden = true;
+    el("answerQuestion").textContent = "";
+    el("answerText").textContent = "";
+  }
+
   function showCaseChoices(items, message) {
     var panel = el("choicePanel");
     panel.hidden = false;
@@ -257,33 +270,44 @@
 
   function extractAddressQuestion(question) {
     var value = clean(question).replace(/[?.!]+$/g, "");
-    value = value.replace(/^(show me|pull up|find|open)\s+(the\s+)?(file\s+for\s+)?/i, "");
-    return /^\d+\s+/.test(value) ? value : "";
+    var patterns = [
+      /^(?:show me|pull up|find|open)\s+(?:the\s+)?(?:address|property)\s+(?:at\s+)?(.+)$/i,
+      /^(?:show me|pull up|find|open)\s+(?:the\s+)?file\s+(?:at|for)\s+(.+)$/i,
+      /^(?:show me|pull up|find|open)\s+(\d+\s+.+)$/i
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var match = value.match(patterns[i]), candidate = match && clean(match[1]);
+      if (candidate && /^\d{1,8}\s+[A-Za-z0-9]/.test(candidate) && /[A-Za-z]/.test(candidate)) return candidate;
+    }
+    return "";
   }
 
   function handleQuery(question) {
     var query = clean(question);
     if (!query) { setQueryStatus("Talk or type what you want to find.", true); el("questionInput").focus(); return; }
     el("choicePanel").hidden = true;
-    var caseMatch = query.match(/\b[A-Za-z]\d{2}[–—-]\d{4}\b/);
-    if (caseMatch) {
-      var casesByNumber = find_case_by_number(caseMatch[0]);
-      if (!casesByNumber.length) { setQueryStatus("I couldn't find " + normalizeCaseNumber(caseMatch[0]) + ".", true); return; }
+    var caseNumber = extractCaseNumber(query);
+    if (caseNumber) {
+      clearCurrentContext();
+      var casesByNumber = find_case_by_number(caseNumber);
+      if (!casesByNumber.length) { setQueryStatus("I couldn't find " + caseNumber + ". No file is currently active.", true); return; }
       if (casesByNumber.length > 1) { setQueryStatus("I found more than one possible file.", false); showCaseChoices(casesByNumber, "Choose the correct file."); return; }
       renderContext(makeCaseContext(casesByNumber[0])); maybeAnswerLoadedQuery(query); setQueryStatus(titleWarning || "Loaded " + casesByNumber[0].case_number + ".", Boolean(titleWarning)); return;
     }
     var contactMatch = query.match(/(?:find|show me|pull up)?\s*([A-Za-z][A-Za-z .'-]*?)(?:'s)?\s+(?:callback|calls?|follow.?up)/i) || query.match(/calls?\s+from\s+([A-Za-z][A-Za-z .'-]*)/i);
     if (contactMatch) {
+      clearCurrentContext();
       var contactCalls = find_contact_calls(contactMatch[1]);
-      if (!contactCalls.length) { setQueryStatus("I couldn't find a matching contact in this browser's Calls & Follow-Ups data.", true); return; }
+      if (!contactCalls.length) { setQueryStatus("I couldn't find a matching contact in this browser's Calls & Follow-Ups data. No file is currently active.", true); return; }
       var groups = contactGroups(contactCalls);
       if (groups.length > 1) { setQueryStatus("I found multiple matching contacts.", false); showContactChoices(groups); return; }
       renderContext(makeContactContext(groups[0].name, groups[0].calls)); setQueryStatus("Loaded " + groups[0].calls.length + " stored call" + (groups[0].calls.length === 1 ? "" : "s") + " for " + groups[0].name + ".", false); return;
     }
     var address = extractAddressQuestion(query);
     if (address) {
+      clearCurrentContext();
       var casesByAddress = find_case_by_address(address);
-      if (!casesByAddress.length) { setQueryStatus("I couldn't find a Title Search file matching that address.", true); return; }
+      if (!casesByAddress.length) { setQueryStatus("I couldn't find a Title Search file matching that address. No file is currently active.", true); return; }
       if (casesByAddress.length > 1) { setQueryStatus("I found " + casesByAddress.length + " possible address matches.", false); showCaseChoices(casesByAddress, "Choose the correct property."); return; }
       renderContext(makeCaseContext(casesByAddress[0])); maybeAnswerLoadedQuery(query); setQueryStatus(titleWarning || "Loaded " + casesByAddress[0].case_number + ".", Boolean(titleWarning)); return;
     }

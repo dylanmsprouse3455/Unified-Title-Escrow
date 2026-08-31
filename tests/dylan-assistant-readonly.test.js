@@ -110,7 +110,7 @@ function createHarness(options = {}) {
   };
   const instrumented = source.replace(
     "  initialize();\n}());",
-    "  window.__assistantTest={initialize:initialize,loadReadOnlyData:loadReadOnlyData,find_case_by_number:find_case_by_number,find_case_by_address:find_case_by_address,find_contact_calls:find_contact_calls,get_case_details:get_case_details,get_case_history:get_case_history,get_case_calls:get_case_calls,get_open_callbacks:get_open_callbacks,normalizedCaseModel:normalizedCaseModel,answerFromContext:answerFromContext,makeCaseContext:makeCaseContext,makeContactContext:makeContactContext,renderContext:renderContext,handleQuery:handleQuery,setData:function(caseItems,callItems){titleCases=caseItems.map(normalizeTitleCase).filter(function(item){return !item.is_deleted;});callRecords=callItems.map(normalizeCall);},getCurrentContext:function(){return currentContext;}};\n}());"
+    "  window.__assistantTest={initialize:initialize,loadReadOnlyData:loadReadOnlyData,normalizeCaseNumber:normalizeCaseNumber,extractCaseNumber:extractCaseNumber,extractAddressQuestion:extractAddressQuestion,find_case_by_number:find_case_by_number,find_case_by_address:find_case_by_address,find_contact_calls:find_contact_calls,get_case_details:get_case_details,get_case_history:get_case_history,get_case_calls:get_case_calls,get_open_callbacks:get_open_callbacks,normalizedCaseModel:normalizedCaseModel,answerFromContext:answerFromContext,makeCaseContext:makeCaseContext,makeContactContext:makeContactContext,renderContext:renderContext,clearCurrentContext:clearCurrentContext,handleQuery:handleQuery,setData:function(caseItems,callItems){titleCases=caseItems.map(normalizeTitleCase).filter(function(item){return !item.is_deleted;});callRecords=callItems.map(normalizeCall);},getCurrentContext:function(){return currentContext;}};\n}());"
   );
   vm.createContext(sandbox);
   vm.runInContext(instrumented, sandbox, { filename: jsPath });
@@ -122,6 +122,13 @@ function createHarness(options = {}) {
   harness.api.setData(fixtures.cases, fixtures.calls);
 
   assert.equal(harness.api.find_case_by_number("G26-0434")[0].case_number, "G26-0434", "exact case-number lookup finds G26-0434");
+  ["G 26 0434", "G 26 0 4 3 4", "G26 0434", "G 26-0434"].forEach(variant => {
+    assert.equal(harness.api.extractCaseNumber("Pull up " + variant + "."), "G26-0434", `speech variant ${variant} normalizes safely`);
+    assert.equal(harness.api.find_case_by_number(variant)[0].case_number, "G26-0434", `speech variant ${variant} finds the exact case`);
+    harness.api.handleQuery("Pull up " + variant + ".");
+    assert.equal(harness.api.getCurrentContext().case_record.case_number, "G26-0434", `speech variant ${variant} loads the exact case through the full query flow`);
+  });
+  assert.equal(harness.api.find_case_by_number("G26-043").length, 0, "partial case numbers are not fuzzy-matched");
   assert.equal(harness.api.find_case_by_address("1695 Jim Fox Road")[0].case_number, "G26-0434", "normalized address lookup finds 1695 Jim Fox Road");
   assert.equal(harness.api.find_case_by_number("g21-0483")[0].case_number, "G21-0483", "case-number lookup is case-insensitive");
   assert.equal(harness.api.find_case_by_address("230 Mohawk Creek Rd.")[0].case_number, "G21-0483", "address lookup tolerates punctuation and common suffix variations");
@@ -132,8 +139,6 @@ function createHarness(options = {}) {
   assert.match(harness.api.answerFromContext("What was the most recent call?"), /Nicole Smith/i, "most recent call answer is grounded in linked call data");
   assert.match(harness.api.answerFromContext("Are there any open callbacks?"), /1 open callback or follow-up/i, "open callback answer is grounded in linked follow-up data");
 
-  harness.api.handleQuery("Pull up G26-9998.");
-  assert.match(harness.elements.get("queryStatus").textContent, /couldn't find G26-9998/i, "invalid case number produces an explicit not-found result");
   harness.api.handleQuery("What is going on with G26-0434?");
   assert.match(harness.elements.get("answerText").textContent, /Title Search status: In Progress/i, "case-number question loads the file and answers from its context in one step");
   harness.api.handleQuery("Show me the most recent call for G21-0483.");
@@ -142,6 +147,36 @@ function createHarness(options = {}) {
   assert.equal(harness.elements.get("choicePanel").hidden, false, "partial address with multiple matches displays choices");
   assert.match(harness.elements.get("choicePanel").innerHTML, /G26-0434/);
   assert.match(harness.elements.get("choicePanel").innerHTML, /G26-0999/);
+
+  [
+    "Pull up the address 1695 Jim Fox Road.",
+    "Show me the file at 1695 Jim Fox Road.",
+    "Find the property at 1695 Jim Fox Road.",
+    "Pull up 1695 Jim Fox Road."
+  ].forEach(command => {
+    harness.api.handleQuery(command);
+    assert.equal(harness.api.getCurrentContext().case_record.case_number, "G26-0434", `${command} loads the exact normalized address`);
+  });
+  harness.api.clearCurrentContext();
+  harness.api.handleQuery("We should discuss 1695 Jim Fox Road tomorrow.");
+  assert.equal(harness.api.getCurrentContext(), null, "generic text containing a street address is not treated as an address command");
+
+  harness.api.handleQuery("Pull up G26-0434.");
+  assert.equal(harness.api.getCurrentContext().case_record.case_number, "G26-0434", "known case is active before the failed lookup regression");
+  harness.api.handleQuery("Pull up G26-9998.");
+  assert.equal(harness.api.getCurrentContext(), null, "failed explicit case lookup clears the previous case context");
+  assert.equal(harness.elements.get("contextPanel").hidden, true, "failed explicit lookup hides the previous current-file panel");
+  assert.match(harness.elements.get("queryStatus").textContent, /No file is currently active/i, "failed lookup explicitly reports that no file remains active");
+  harness.api.handleQuery("What is the next step?");
+  assert.equal(harness.api.getCurrentContext(), null, "follow-up after a failed lookup cannot silently restore the old case");
+  assert.doesNotMatch(harness.elements.get("answerText").textContent, /municipal lien search/i, "follow-up after a failed lookup cannot answer from stale case data");
+
+  harness.api.handleQuery("Pull up G26-0434.");
+  harness.api.handleQuery("Pull up 9999 Missing Road.");
+  assert.equal(harness.api.getCurrentContext(), null, "failed explicit address lookup clears the previous case context");
+  harness.api.handleQuery("Pull up G26-0434.");
+  harness.api.handleQuery("Find Nobody's callback.");
+  assert.equal(harness.api.getCurrentContext(), null, "failed explicit contact lookup clears the previous case context");
 
   harness.api.handleQuery("Find Nicole's callback.");
   assert.equal(harness.elements.get("choicePanel").hidden, false, "multiple matching contacts display choices");
@@ -171,6 +206,9 @@ function createHarness(options = {}) {
     [/\.(?:insert|update|upsert|delete)\s*\(/, "Supabase mutation"],
     [/localStorage\.(?:setItem|removeItem|clear)\s*\(/, "localStorage mutation"],
     [/functions\.invoke\s*\(/, "Edge Function invocation"],
+    [/\.rpc\s*\(/, "RPC invocation"],
+    [/\.storage\b/, "Storage API access"],
+    [/\.channel\s*\(/, "Realtime channel access"],
     [/\bfetch\s*\(/, "generic network request"],
     [/OPENAI_API_KEY|service_role/i, "server secret"]
   ];
