@@ -213,7 +213,7 @@
     if (!document.getElementById("callsLauncherStyles")) {
       var style = document.createElement("style");
       style.id = "callsLauncherStyles";
-      style.textContent = ".dylan-toolbox-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.dylan-toolbox-header h2{margin:0}.dylan-toolbox-header p{margin:5px 0 0}.dylan-toolbox-header button{flex:0 0 auto}.calls-tool-card{width:100%;text-align:left;border:1px solid #c8d8eb;border-radius:16px;background:#fff;padding:20px;cursor:pointer;box-shadow:0 8px 22px rgba(15,49,92,.08)}.calls-tool-card:hover{border-color:#347fc4;transform:translateY(-1px)}.calls-tool-card strong{display:block;color:#123b6b;font-size:18px;margin-bottom:6px}.calls-tool-card span{color:#5c7089;line-height:1.45}.calls-tool-card em{display:inline-block;margin-top:14px;color:#1667aa;font-style:normal;font-weight:800}.voice-todo-card{margin-top:12px}";
+      style.textContent = ".dylan-toolbox-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.dylan-toolbox-header h2{margin:0}.dylan-toolbox-header p{margin:5px 0 0}.dylan-toolbox-header button{flex:0 0 auto}.calls-tool-card{width:100%;text-align:left;border:1px solid #c8d8eb;border-radius:16px;background:#fff;padding:20px;cursor:pointer;box-shadow:0 8px 22px rgba(15,49,92,.08)}.calls-tool-card:hover{border-color:#347fc4;transform:translateY(-1px)}.calls-tool-card strong{display:block;color:#123b6b;font-size:18px;margin-bottom:6px}.calls-tool-card span{color:#5c7089;line-height:1.45}.calls-tool-card em{display:inline-block;margin-top:14px;color:#1667aa;font-style:normal;font-weight:800}.voice-todo-card,.assistant-tool-card{margin-top:12px}";
       document.head.appendChild(style);
     }
 
@@ -224,7 +224,7 @@
 
     toolboxButton.onclick = function () {
       grid.style.display = "none";
-      panel.innerHTML = '<div class="dylan-toolbox-header"><div><h2>Calls &amp; Follow-Ups</h2><p>One place for call history, open work, assigned items, and completed follow-ups.</p></div><button type="button" id="callsToolboxBack">Back</button></div><button type="button" class="calls-tool-card" id="openCallsTool"><strong>Open Calls &amp; Follow-Ups</strong><span>Record calls, manage the checklist that drives Next Action, finish or reopen work, search history, and print handoff sheets.</span><em>Open workspace &rarr;</em></button><button type="button" class="calls-tool-card voice-todo-card" id="openVoiceTodoTool"><strong>Voice To-Do List</strong><span>Talk through your tasks and turn them into an organized to-do list.</span><em>Open To-Do List &rarr;</em></button>';
+      panel.innerHTML = '<div class="dylan-toolbox-header"><div><h2>Dylan\'s Tool Box</h2><p>Quick access to your personal work tools.</p></div><button type="button" id="callsToolboxBack">Back</button></div><button type="button" class="calls-tool-card" id="openCallsTool"><strong>Open Calls &amp; Follow-Ups</strong><span>Record calls, manage the checklist that drives Next Action, finish or reopen work, search history, and print handoff sheets.</span><em>Open workspace &rarr;</em></button><button type="button" class="calls-tool-card voice-todo-card" id="openVoiceTodoTool"><strong>Voice To-Do List</strong><span>Talk through your tasks and turn them into an organized to-do list.</span><em>Open To-Do List &rarr;</em></button><button type="button" class="calls-tool-card assistant-tool-card" id="openDylanAssistantTool"><strong>Dylan Assistant</strong><span>Pull up Title Search files, calls, callbacks, and related activity from your central data.</span><em>Open Assistant &rarr;</em></button>';
       panel.classList.add("show");
       document.getElementById("callsToolboxBack").onclick = function () {
         panel.classList.remove("show");
@@ -235,6 +235,9 @@
       };
       document.getElementById("openVoiceTodoTool").onclick = function () {
         window.location.href = "todo-list.html";
+      };
+      document.getElementById("openDylanAssistantTool").onclick = function () {
+        window.location.href = "dylan-assistant.html";
       };
     };
 
