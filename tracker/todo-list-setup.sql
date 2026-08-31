@@ -13,8 +13,12 @@ create table if not exists public.dylan_voice_todos (
   completed boolean not null default false,
   original_request text check (original_request is null or char_length(original_request) <= 8000),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
+
+-- Additive and safe if the table was created before this revision is reviewed.
+alter table public.dylan_voice_todos add column if not exists deleted_at timestamptz;
 
 alter table public.dylan_voice_todos enable row level security;
 

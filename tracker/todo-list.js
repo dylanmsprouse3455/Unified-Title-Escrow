@@ -5,7 +5,7 @@
   var SUPABASE_URL = "https://hdqmcjlpyjpfeltmxfax.supabase.co";
   var SUPABASE_KEY = "sb_publishable_lC2M8fZGmJQt6bWKgfiDnw_4Nx1TwHD";
   var STORAGE_KEY = "utei.dylan.voiceTodos.v1";
-  var TODO_COLUMNS = "id,user_id,title,details,due_date,due_time,due_text,priority,completed,original_request,created_at,updated_at";
+  var TODO_COLUMNS = "id,user_id,title,details,due_date,due_time,due_text,priority,completed,original_request,created_at,updated_at,deleted_at";
   var cloud = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   var tasks = [];
   var session = null;
@@ -40,8 +40,13 @@
       completed: Boolean(raw && raw.completed),
       original_request: clean((raw && raw.original_request) || originalRequest, 8000) || null,
       created_at: raw && raw.created_at ? raw.created_at : stamp,
-      updated_at: raw && raw.updated_at ? raw.updated_at : stamp
+      updated_at: raw && raw.updated_at ? raw.updated_at : stamp,
+      deleted_at: raw && raw.deleted_at ? raw.deleted_at : null
     };
+  }
+
+  function visibleTasks() {
+    return tasks.filter(function (task) { return !task.deleted_at; });
   }
 
   function escapeHtml(value) {
@@ -201,24 +206,31 @@
     }
   }
 
-  async function removeTasks(ids) {
+  async function persistDeletions(tombstones) {
     saveLocal();
-    if (storageMode !== "cloud" || !ids.length) return;
-    var result = await cloud.from("dylan_voice_todos").delete().in("id", ids);
-    if (result.error) {
+    if (storageMode !== "cloud" || !tombstones.length) return;
+    try {
+      var cloudTasks = await fetchCloudTasks();
+      var reconciledCloud = await migrateLocalToCloud(tombstones, cloudTasks);
+      tasks = mergeTaskLists(reconciledCloud, tasks);
+      saveLocal();
+      setStorageStatus("Cloud and local backup are synchronized");
+      render();
+    } catch (error) {
       storageMode = "local";
-      setStorageStatus("Cloud delete unavailable — this browser has the current list");
-      throw result.error;
+      setStorageStatus("Deletion saved locally — cloud sync will retry when storage is available");
+      throw error;
     }
   }
 
   function render() {
-    var active = tasks.filter(function (task) { return !task.completed; }).length;
-    var completed = tasks.length - active;
-    el("taskSummary").textContent = tasks.length ? active + " open · " + completed + " completed" : "Nothing here yet.";
+    var shownTasks = visibleTasks();
+    var active = shownTasks.filter(function (task) { return !task.completed; }).length;
+    var completed = shownTasks.length - active;
+    el("taskSummary").textContent = shownTasks.length ? active + " open · " + completed + " completed" : "Nothing here yet.";
     el("clearCompletedButton").disabled = completed === 0;
-    el("emptyState").hidden = tasks.length > 0;
-    el("taskList").innerHTML = tasks.map(function (task) {
+    el("emptyState").hidden = shownTasks.length > 0;
+    el("taskList").innerHTML = shownTasks.map(function (task) {
       var due = dueLabel(task);
       var priority = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
       return '<article class="todo-task' + (task.completed ? " is-complete" : "") + '" data-id="' + escapeHtml(task.id) + '">' +
@@ -250,7 +262,7 @@
   async function saveEditor(event) {
     event.preventDefault();
     var id = el("taskId").value;
-    var existing = tasks.find(function (task) { return task.id === id; });
+    var existing = tasks.find(function (task) { return task.id === id && !task.deleted_at; });
     var task = normalizeTask({
       id: id || uuid(), title: el("taskTitle").value, details: el("taskDetails").value,
       due_date: el("taskDueDate").value, due_time: el("taskDueTime").value, due_text: el("taskDueText").value,
@@ -265,7 +277,7 @@
   }
 
   async function toggleTask(id, checked) {
-    var task = tasks.find(function (item) { return item.id === id; });
+    var task = tasks.find(function (item) { return item.id === id && !item.deleted_at; });
     if (!task) return;
     task.completed = checked;
     task.updated_at = nowIso();
@@ -274,19 +286,22 @@
   }
 
   async function deleteTask(id) {
-    var task = tasks.find(function (item) { return item.id === id; });
+    var task = tasks.find(function (item) { return item.id === id && !item.deleted_at; });
     if (!task || !window.confirm('Delete "' + task.title + '"?')) return;
-    tasks = tasks.filter(function (item) { return item.id !== id; });
+    var deletedAt = nowIso();
+    task.deleted_at = deletedAt;
+    task.updated_at = deletedAt;
     render();
-    try { await removeTasks([id]); } catch (_error) { /* local fallback is already saved */ }
+    try { await persistDeletions([task]); } catch (_error) { /* tombstone is already safe in the local backup */ }
   }
 
   async function clearCompleted() {
-    var ids = tasks.filter(function (task) { return task.completed; }).map(function (task) { return task.id; });
-    if (!ids.length || !window.confirm("Remove " + ids.length + " completed task" + (ids.length === 1 ? "" : "s") + " from the list?")) return;
-    tasks = tasks.filter(function (task) { return !task.completed; });
+    var completedTasks = tasks.filter(function (task) { return task.completed && !task.deleted_at; });
+    if (!completedTasks.length || !window.confirm("Remove " + completedTasks.length + " completed task" + (completedTasks.length === 1 ? "" : "s") + " from the list?")) return;
+    var deletedAt = nowIso();
+    completedTasks.forEach(function (task) { task.deleted_at = deletedAt; task.updated_at = deletedAt; });
     render();
-    try { await removeTasks(ids); } catch (_error) { /* local fallback is already saved */ }
+    try { await persistDeletions(completedTasks); } catch (_error) { /* tombstones are already safe in the local backup */ }
   }
 
   async function parseRequest() {
@@ -383,7 +398,7 @@
     });
     el("taskList").addEventListener("click", function (event) {
       var card = event.target.closest(".todo-task"); if (!card) return;
-      if (event.target.classList.contains("todo-edit")) openEditor(tasks.find(function (task) { return task.id === card.dataset.id; }));
+      if (event.target.classList.contains("todo-edit")) openEditor(tasks.find(function (task) { return task.id === card.dataset.id && !task.deleted_at; }));
       if (event.target.classList.contains("todo-delete")) deleteTask(card.dataset.id);
     });
     document.addEventListener("keydown", function (event) { if (event.key === "Escape" && !el("taskEditorWrap").hidden) closeEditor(); });
