@@ -1,0 +1,11 @@
+Dylan Assistant duplicate-safety behavior
+
+Before approval, proposed actions are compared against the current Title Search case, Dylan's open Voice To-Dos, and Dylan's open Call/Callback records.
+
+If an existing or very similar item is found:
+- the proposed action is marked as an existing/possible duplicate,
+- it is unchecked by default,
+- the existing item is shown to Dylan,
+- Dylan must explicitly choose Add anyway before that duplicate can be approved.
+
+The server-side approved-action executor also re-checks key exact duplicates immediately before writing, unless the action includes an explicit allow_duplicate approval.
