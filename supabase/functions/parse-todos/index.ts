@@ -39,17 +39,15 @@ const taskSchema = {
   properties: {
     tasks: {
       type: "array",
-      minItems: 1,
-      maxItems: 50,
       items: {
         type: "object",
         additionalProperties: false,
         properties: {
-          title: { type: "string", minLength: 1, maxLength: 500 },
-          details: { type: ["string", "null"], maxLength: 4000 },
-          due_date: { type: ["string", "null"], pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
-          due_time: { type: ["string", "null"], pattern: "^([01]\\d|2[0-3]):[0-5]\\d$" },
-          due_text: { type: ["string", "null"], maxLength: 200 },
+          title: { type: "string" },
+          details: { type: ["string", "null"] },
+          due_date: { type: ["string", "null"] },
+          due_time: { type: ["string", "null"] },
+          due_text: { type: ["string", "null"] },
           priority: { type: "string", enum: ["low", "normal", "high"] },
         },
         required: ["title", "details", "due_date", "due_time", "due_text", "priority"],
@@ -58,6 +56,43 @@ const taskSchema = {
   },
   required: ["tasks"],
 };
+
+function extractOutputText(body: any) {
+  if (typeof body?.output_text === "string" && body.output_text.trim()) return body.output_text.trim();
+  const pieces: string[] = [];
+  for (const item of Array.isArray(body?.output) ? body.output : []) {
+    for (const content of Array.isArray(item?.content) ? item.content : []) {
+      if (typeof content?.text === "string" && content.text.trim()) pieces.push(content.text);
+    }
+  }
+  return pieces.join("\n").trim();
+}
+
+function cleanNullable(value: unknown, max: number) {
+  if (value == null) return null;
+  const result = String(value).trim().slice(0, max);
+  return result || null;
+}
+
+function normalizeParsed(parsed: any) {
+  if (!parsed || !Array.isArray(parsed.tasks) || !parsed.tasks.length) throw new Error("No tasks returned");
+  const tasks = parsed.tasks.slice(0, 50).map((task: any) => {
+    const title = String(task?.title || "").trim().slice(0, 500);
+    if (!title) throw new Error("Task title missing");
+    const dueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(task?.due_date || "")) ? String(task.due_date) : null;
+    const dueTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(String(task?.due_time || "")) ? String(task.due_time) : null;
+    const priority = ["low", "normal", "high"].includes(String(task?.priority)) ? String(task.priority) : "normal";
+    return {
+      title,
+      details: cleanNullable(task?.details, 4000),
+      due_date: dueDate,
+      due_time: dueTime,
+      due_text: cleanNullable(task?.due_text, 200),
+      priority,
+    };
+  });
+  return { tasks };
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -94,7 +129,9 @@ Deno.serve(async (req: Request) => {
         "Turn the user's natural-language request into a complete list of distinct actionable tasks.",
         "Preserve every name, file or case number, phone number, and material detail exactly. Never invent any of them.",
         "Never invent a deadline. Resolve clear relative dates using the supplied local date and timezone.",
-        "For ambiguous time wording such as before lunch, end of day, or sometime this week, keep due_date or due_time null when a precise value is not certain and preserve the wording in due_text.",
+        "Use YYYY-MM-DD for due_date only when the date is clear. Otherwise set due_date to null.",
+        "Use HH:MM 24-hour time for due_time only when the time is clear. Otherwise set due_time to null.",
+        "For ambiguous wording such as before lunch, end of day, or sometime this week, preserve that wording in due_text and do not invent a precise time.",
         "Use high or low priority only when the user clearly signals urgency or low importance; otherwise use normal.",
         "Keep task titles concise, put supporting context in details, and include every action the user requested.",
       ].join(" "),
@@ -103,17 +140,30 @@ Deno.serve(async (req: Request) => {
     }),
   });
 
-  const responseBody = await openAIResponse.json();
+  let responseBody: any;
+  try { responseBody = await openAIResponse.json(); }
+  catch {
+    console.error("OpenAI returned a non-JSON response", openAIResponse.status);
+    return json({ error: "The AI parser returned an unreadable response. Please try again." }, 502);
+  }
+
   if (!openAIResponse.ok) {
-    console.error("OpenAI request failed", openAIResponse.status, responseBody?.error?.code || "unknown");
-    return json({ error: "The AI parser is temporarily unavailable. You can still add tasks manually." }, 502);
+    console.error(
+      "OpenAI request failed",
+      openAIResponse.status,
+      responseBody?.error?.code || "unknown",
+      responseBody?.error?.param || "no-param",
+      responseBody?.error?.message || "no-message",
+    );
+    return json({ error: "The AI parser is temporarily unavailable. Please try again in a moment." }, 502);
   }
 
   try {
-    const parsed = JSON.parse(responseBody.output_text);
-    return json(parsed);
-  } catch {
-    console.error("OpenAI returned an unusable structured response");
+    const outputText = extractOutputText(responseBody);
+    if (!outputText) throw new Error("No output text");
+    return json(normalizeParsed(JSON.parse(outputText)));
+  } catch (error) {
+    console.error("OpenAI returned an unusable structured response", error instanceof Error ? error.message : "unknown");
     return json({ error: "The AI response could not be read. Please try again or add tasks manually." }, 502);
   }
 });
