@@ -1,2 +1,8 @@
 [functions.parse-todos]
 verify_jwt = true
+
+[functions.propose-assistant-actions]
+verify_jwt = true
+
+[functions.apply-assistant-actions]
+verify_jwt = true
