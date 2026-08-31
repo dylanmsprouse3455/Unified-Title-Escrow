@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="dylan-assistant.css?v=readonly-phase1-20260831-1">
   <link rel="stylesheet" href="dylan-assistant-actions.css?v=approved-actions-20260831-3">
   <link rel="stylesheet" href="dylan-assistant-review-fields.css?v=review-fields-20260831-2">
+  <link rel="stylesheet" href="dylan-assistant-duplicate-guard.css?v=duplicate-guard-20260831-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -36,10 +37,7 @@
       </div>
       <div class="ask-row">
         <button id="micButton" class="talk-button" type="button" aria-pressed="false"><span aria-hidden="true">🎙</span><strong id="micButtonLabel">Talk</strong></button>
-        <label class="question-field" for="questionInput">
-          <span class="sr-only">Ask Dylan Assistant</span>
-          <textarea id="questionInput" rows="3" placeholder="Ask Dylan Assistant…"></textarea>
-        </label>
+        <label class="question-field" for="questionInput"><span class="sr-only">Ask Dylan Assistant</span><textarea id="questionInput" rows="3" placeholder="Ask Dylan Assistant…"></textarea></label>
         <button id="searchButton" class="search-button" type="button">Find Information</button>
       </div>
       <p id="micHelp" class="help">Voice uses this browser's speech-recognition service. Review the editable transcript before searching.</p>
@@ -48,43 +46,23 @@
         <button type="button" data-example="Show me 1695 Jim Fox Road.">Show me 1695 Jim Fox Road</button>
         <button type="button" data-example="Find Nicole's callback.">Find Nicole's callback</button>
       </div>
-      <div id="queryStatus" class="query-status" role="status" aria-live="polite"></div>
-      <div id="choicePanel" class="choice-panel" hidden></div>
+      <div id="queryStatus" class="query-status" role="status" aria-live="polite"></div><div id="choicePanel" class="choice-panel" hidden></div>
     </section>
 
     <section id="contextPanel" class="context-panel" hidden>
       <section class="current-card">
-        <div class="section-head">
-          <div><span id="contextLabel" class="section-kicker">Current file</span><h2 id="caseNumber"></h2><p id="caseAddress"></p></div>
-          <span id="titleSource" class="source-pill">Title Search</span>
-        </div>
+        <div class="section-head"><div><span id="contextLabel" class="section-kicker">Current file</span><h2 id="caseNumber"></h2><p id="caseAddress"></p></div><span id="titleSource" class="source-pill">Title Search</span></div>
         <div id="titleUnavailable" class="empty-note" hidden></div>
         <div id="titleDetails">
-          <div class="detail-grid">
-            <div><span>Status</span><strong id="caseStatus"></strong></div>
-            <div><span>Next Step</span><strong id="caseNextStep"></strong></div>
-            <div><span>Title Searcher</span><strong id="caseSearcher"></strong></div>
-            <div><span>Priority</span><strong id="casePriority"></strong></div>
-            <div><span>Due</span><strong id="caseDue"></strong></div>
-            <div><span>Last Touched</span><strong id="caseTouched"></strong></div>
-          </div>
+          <div class="detail-grid"><div><span>Status</span><strong id="caseStatus"></strong></div><div><span>Next Step</span><strong id="caseNextStep"></strong></div><div><span>Title Searcher</span><strong id="caseSearcher"></strong></div><div><span>Priority</span><strong id="casePriority"></strong></div><div><span>Due</span><strong id="caseDue"></strong></div><div><span>Last Touched</span><strong id="caseTouched"></strong></div></div>
           <div class="subsection"><h3>Open Checklist</h3><div id="caseTodos" class="list-stack"></div></div>
           <div class="subsection" id="notesSection"><h3>Notes</h3><p id="caseNotes" class="notes-box"></p></div>
         </div>
       </section>
 
-      <section class="calls-card">
-        <div class="section-head"><div><span class="section-kicker">Calls &amp; callbacks</span><h2>Available activity</h2></div><span class="source-pill local">Calls · Central account</span></div>
-        <div id="callsNotice" class="source-notice"></div>
-        <div class="split-grid"><div><h3>Recent Calls</h3><div id="recentCalls" class="list-stack"></div></div><div><h3>Open Callbacks / Follow-Ups</h3><div id="openCallbacks" class="list-stack"></div></div></div>
-      </section>
-
+      <section class="calls-card"><div class="section-head"><div><span class="section-kicker">Calls &amp; callbacks</span><h2>Available activity</h2></div><span class="source-pill local">Calls · Central account</span></div><div id="callsNotice" class="source-notice"></div><div class="split-grid"><div><h3>Recent Calls</h3><div id="recentCalls" class="list-stack"></div></div><div><h3>Open Callbacks / Follow-Ups</h3><div id="openCallbacks" class="list-stack"></div></div></div></section>
       <section class="activity-card"><div class="section-head"><div><span class="section-kicker">Available sources</span><h2>Recent Activity</h2></div></div><div id="activityTimeline" class="timeline"></div></section>
-
-      <section class="answer-card">
-        <div class="section-head"><div><span class="section-kicker">Assistant</span><h2>Grounded Answer</h2></div><span class="source-pill safe">Deterministic lookup</span></div>
-        <div id="answerQuestion" class="answer-question"></div><p id="answerText" class="answer-text">Ask a question about the selected file.</p>
-      </section>
+      <section class="answer-card"><div class="section-head"><div><span class="section-kicker">Assistant</span><h2>Grounded Answer</h2></div><span class="source-pill safe">Deterministic lookup</span></div><div id="answerQuestion" class="answer-question"></div><p id="answerText" class="answer-text">Ask a question about the selected file.</p></section>
 
       <section class="update-card" aria-labelledby="updateTitle">
         <div class="section-head"><div><span class="section-kicker">Propose changes</span><h2 id="updateTitle">Tell me what happened</h2><p>I will prepare changes first. Nothing is saved until you review and approve them.</p></div><span class="source-pill">AI proposal · Approval required</span></div>
@@ -99,5 +77,6 @@
   <script src="dylan-assistant-central-data.js?v=central-data-20260831-1"></script>
   <script src="dylan-assistant-actions.js?v=approved-actions-20260831-3"></script>
   <script src="dylan-assistant-actions-bootstrap.js?v=approved-actions-bootstrap-20260831-3"></script>
+  <script src="dylan-assistant-duplicate-guard.js?v=duplicate-guard-20260831-1"></script>
 </body>
 </html>
