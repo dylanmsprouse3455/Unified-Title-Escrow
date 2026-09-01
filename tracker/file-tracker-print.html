@@ -7,38 +7,39 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#ececec;color:#111;font-family:Arial,Helvetica,sans-serif}.toolbar{position:sticky;top:0;z-index:10;display:flex;justify-content:center;padding:14px;background:#fff;border-bottom:1px solid #ccc}.toolbar button{border:0;border-radius:8px;background:#111;color:#fff;font-weight:700;font-size:16px;padding:11px 22px;cursor:pointer}.sheet{width:8.5in;min-height:11in;margin:18px auto;background:#fff;border:1px solid #111;padding:.18in .16in .14in;box-shadow:0 4px 20px #0002}.top{display:grid;grid-template-columns:1fr .75fr;gap:8px 24px;font-size:12px;font-weight:700}.row{display:flex;align-items:flex-end;gap:8px}.full{grid-column:1/-1}.line{flex:1;height:18px;border-bottom:1px solid #222}.types{grid-column:1/-1;display:flex;align-items:center;gap:18px;font-size:11px;flex-wrap:nowrap}.box{display:inline-block;width:12px;height:12px;border:1px solid #111;margin-right:5px;vertical-align:-1px}.otherline{display:inline-block;width:120px;height:14px;border-bottom:1px solid #222;vertical-align:bottom}.status{display:flex;gap:8px;align-items:flex-end;margin-top:7px;font-size:12px;font-weight:700}.split{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #111;border-bottom:1px solid #111;margin-top:4px}.col{padding:0 10px 7px}.col+.col{border-left:1px solid #111}.title{text-align:center;font-weight:700;font-size:11px;margin:6px 0 4px}.wline{height:19px;border-bottom:1px solid #555}.bottom{display:grid;grid-template-columns:30% 37% 33%;border:1px solid #111}.bottom>div{padding:4px 10px 8px;min-height:2.55in}.bottom>div+div{border-left:1px solid #111}.mini{text-align:center;font-size:10px;font-weight:700;margin-bottom:8px}.money{display:flex;gap:6px;align-items:flex-end;font-size:8.5px;margin:6px 0}.money span:last-child{flex:1;height:12px;border-bottom:1px solid #555}.todo{display:flex;gap:8px;align-items:center;margin:4px 0}.todo .check{width:10px;height:10px;border:1px solid #111}.todo .tline{flex:1;height:13px;border-bottom:1px solid #555}.miss{border:1px solid #333;padding:7px 9px;height:2.08in}.handoff{text-align:center;font-size:10px;font-weight:700;margin:6px 0 4px}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8px}th,td{border:1px solid #333;height:18px;padding:2px 4px;font-weight:400}th{text-align:center}
 @media print{
-  @page{size:Letter portrait;margin:.1in}
-  html,body{width:8.5in;height:11in;background:#fff;overflow:hidden}
+  @page{size:Letter portrait;margin:.16in}
+  html,body{margin:0!important;width:auto!important;height:auto!important;min-height:0!important;background:#fff!important;overflow:visible!important}
   .toolbar{display:none!important}
-  .sheet{margin:0;width:8.3in;min-height:0;height:auto;box-shadow:none;padding:.08in .1in;border:1px solid #000;page-break-inside:avoid;break-inside:avoid}
-  .top{gap:5px 20px;font-size:11px}
-  .line{height:15px}
-  .types{gap:14px;font-size:10px}
-  .box{width:10px;height:10px}
-  .otherline{height:12px}
-  .status{margin-top:4px;font-size:11px}
-  .split{margin-top:2px}
-  .col{padding:0 9px 4px}
-  .title{font-size:10px;margin:3px 0 2px}
-  .wline{height:15px}
-  .bottom>div{padding:3px 9px 5px;min-height:2.1in}
-  .mini{font-size:9px;margin-bottom:4px}
-  .money{font-size:7.5px;margin:4px 0}
-  .money span:last-child{height:10px}
-  .todo{margin:2px 0;gap:7px}
-  .todo .check{width:9px;height:9px}
-  .todo .tline{height:11px}
-  .miss{height:1.72in;padding:5px 8px}
-  .miss .wline{height:14px}
-  .handoff{font-size:9px;margin:3px 0 2px}
-  table{font-size:7px;break-inside:avoid;page-break-inside:avoid}
-  th,td{height:14px;padding:1px 3px}
+  .sheet{margin:0!important;width:8.16in!important;min-height:0!important;height:auto!important;max-height:10.55in!important;overflow:hidden!important;box-shadow:none!important;padding:.06in .08in!important;border:1px solid #000!important;page-break-before:avoid!important;page-break-after:avoid!important;page-break-inside:avoid!important;break-before:avoid!important;break-after:avoid!important;break-inside:avoid!important}
+  .top{gap:4px 18px;font-size:10px}
+  .line{height:13px}
+  .types{gap:12px;font-size:9px}
+  .box{width:9px;height:9px;margin-right:4px}
+  .otherline{height:10px;width:105px}
+  .status{margin-top:3px;font-size:10px}
+  .split{margin-top:1px}
+  .col{padding:0 8px 3px}
+  .title{font-size:9px;margin:2px 0 1px}
+  .wline{height:13px}
+  .bottom{page-break-inside:avoid!important;break-inside:avoid!important}
+  .bottom>div{padding:2px 8px 4px;min-height:1.9in}
+  .mini{font-size:8px;margin-bottom:3px}
+  .money{font-size:7px;margin:3px 0}
+  .money span:last-child{height:9px}
+  .todo{margin:1px 0;gap:6px}
+  .todo .check{width:8px;height:8px}
+  .todo .tline{height:10px}
+  .miss{height:1.55in;padding:4px 7px}
+  .miss .wline{height:12px}
+  .handoff{font-size:8px;margin:2px 0 1px;page-break-before:avoid!important;break-before:avoid!important}
+  table{font-size:6.5px;page-break-inside:avoid!important;break-inside:avoid!important}
+  th,td{height:12px;padding:1px 3px}
 }
 @media(max-width:900px){.sheet{transform:scale(.82);transform-origin:top left;margin-left:8px;margin-bottom:-2in}}
 </style>
 </head>
 <body>
-<div class="toolbar"><button onclick="window.print()">PRINT FILE TRACKER</button></div>
+<div class="toolbar"><button onclick="window.print()">PRINT ONE-PAGE FILE TRACKER</button></div>
 <main class="sheet">
 <section class="top">
 <div class="row"><span>FILE #:</span><span class="line"></span></div><div class="row"><span>DATE OPENED:</span><span class="line"></span></div>
