@@ -3,108 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>File Tracker - Inside File Working Sheet</title>
+<title>Inside File Working Notes</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#ececec;color:#111;font-family:Arial,Helvetica,sans-serif}
 .toolbar{position:sticky;top:0;z-index:10;display:flex;justify-content:center;padding:14px;background:#fff;border-bottom:1px solid #ccc}
 .toolbar button{border:0;border-radius:8px;background:#111;color:#fff;font-weight:700;font-size:16px;padding:11px 22px;cursor:pointer}
-.sheet{width:8.5in;min-height:11in;margin:18px auto;background:#fff;border:1px solid #111;padding:.2in;box-shadow:0 4px 20px #0002}
-.header-title{text-align:center;font-size:15px;font-weight:800;letter-spacing:.5px;margin:0 0 8px}
-.top{display:grid;grid-template-columns:1fr .72fr;gap:8px 22px;font-size:12px;font-weight:700}
-.row{display:flex;align-items:flex-end;gap:8px;min-width:0}.full{grid-column:1/-1}.line{flex:1;height:19px;border-bottom:1.3px solid #222}.types{grid-column:1/-1;display:flex;align-items:center;gap:15px;font-size:10.5px;flex-wrap:nowrap}.box{display:inline-block;width:12px;height:12px;border:1.2px solid #111;margin-right:5px;vertical-align:-1px}.otherline{display:inline-block;width:100px;height:14px;border-bottom:1px solid #222;vertical-align:bottom}
-.section{border:1.2px solid #111;margin-top:8px}.section-title{text-align:center;font-size:11px;font-weight:800;letter-spacing:.25px;padding:4px 6px;border-bottom:1.2px solid #111;background:#f7f7f7}
-.party-grid{display:grid;grid-template-columns:1fr 1fr}.party{padding:0 10px 8px}.party+.party{border-left:1.2px solid #111}.party-name{text-align:center;font-size:10.5px;font-weight:800;padding:5px 0 2px}.write-line{height:29px;border-bottom:1px solid #555}
-.notes{padding:0 12px 8px}.notes .write-line{height:28px}
-.todo-wrap{padding:4px 12px 8px}.todo-row{display:flex;align-items:center;gap:10px;height:34px;border-bottom:1px solid #555}.todo-row:last-child{border-bottom:0}.todo-box{width:15px;height:15px;border:1.3px solid #111;flex:0 0 auto}
-.important{padding:0 12px 8px}.important .write-line{height:29px}
-.handoff{margin-top:8px}.handoff-title{text-align:center;font-size:10.5px;font-weight:800;padding:4px 6px;border:1.2px solid #111;border-bottom:0;background:#f7f7f7}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8.5px}th,td{border:1.1px solid #333;height:25px;padding:2px 4px;font-weight:400}th{text-align:center;font-weight:700}
+.sheet{width:8.5in;min-height:11in;margin:18px auto;background:#fff;border:1px solid #111;padding:.22in;box-shadow:0 4px 20px #0002}
+.header{text-align:center;font-size:15px;font-weight:800;letter-spacing:.4px;margin:0 0 10px}
+.section{border:1.3px solid #111;margin-top:9px}
+.section-title{text-align:center;font-size:12px;font-weight:800;letter-spacing:.25px;padding:5px 8px;border-bottom:1.3px solid #111;background:#f7f7f7}
+.lines{padding:0 12px 10px}.write-line{height:34px;border-bottom:1px solid #555}
+.checklist{padding:4px 12px 9px}.check-row{height:38px;border-bottom:1px solid #555;display:flex;align-items:center;gap:10px}.check-row:last-child{border-bottom:0}.box{width:16px;height:16px;border:1.3px solid #111;flex:0 0 auto}
 @media print{
   @page{size:Letter portrait;margin:.16in}
   html,body{margin:0!important;background:#fff!important}
   .toolbar{display:none!important}
-  .sheet{margin:0!important;width:8.16in!important;min-height:0!important;height:auto!important;box-shadow:none!important;padding:.12in!important;border:1px solid #000!important;page-break-inside:avoid!important;break-inside:avoid!important}
-  .header-title{font-size:13px;margin-bottom:5px}
-  .top{gap:6px 18px;font-size:10.5px}
-  .line{height:16px}
-  .types{gap:11px;font-size:9px}
-  .box{width:10px;height:10px}
-  .otherline{width:85px;height:11px}
+  .sheet{margin:0!important;width:8.16in!important;min-height:0!important;height:auto!important;box-shadow:none!important;padding:.14in!important;border:1px solid #000!important;page-break-inside:avoid!important;break-inside:avoid!important}
+  .header{font-size:13px;margin-bottom:6px}
   .section{margin-top:6px}
-  .section-title{font-size:9.5px;padding:3px 5px}
-  .party{padding:0 8px 5px}
-  .party-name{font-size:9.5px;padding:3px 0 1px}
-  .write-line{height:23px}
-  .notes{padding:0 10px 5px}.notes .write-line{height:22px}
-  .todo-wrap{padding:2px 10px 5px}.todo-row{height:27px;gap:8px}.todo-box{width:12px;height:12px}
-  .important{padding:0 10px 5px}.important .write-line{height:23px}
-  .handoff{margin-top:6px}.handoff-title{font-size:9px;padding:3px 5px}
-  table{font-size:7px}th,td{height:19px;padding:1px 3px}
+  .section-title{font-size:10px;padding:4px 6px}
+  .lines{padding:0 10px 6px}.write-line{height:27px}
+  .checklist{padding:2px 10px 6px}.check-row{height:31px;gap:8px}.box{width:13px;height:13px}
 }
 @media(max-width:900px){.sheet{transform:scale(.82);transform-origin:top left;margin-left:8px;margin-bottom:-2in}}
 </style>
 </head>
 <body>
-<div class="toolbar"><button onclick="window.print()">PRINT INSIDE-FILE TRACKER</button></div>
+<div class="toolbar"><button onclick="window.print()">PRINT WORKING NOTES</button></div>
 <main class="sheet">
-  <div class="header-title">FILE TRACKER — INSIDE FILE WORKING SHEET</div>
-
-  <section class="top">
-    <div class="row"><span>FILE #:</span><span class="line"></span></div>
-    <div class="row"><span>DATE OPENED:</span><span class="line"></span></div>
-    <div class="row full"><span>PROPERTY / ADDRESS:</span><span class="line"></span></div>
-    <div class="types"><strong>FILE TYPE:</strong><span><i class="box"></i>PURCHASE</span><span><i class="box"></i>REFINANCE</span><span><i class="box"></i>TITLE SEARCH ONLY</span><span><i class="box"></i>CASH</span><span><i class="box"></i>OTHER: <i class="otherline"></i></span></div>
-    <div class="row"><span>CURRENTLY WITH:</span><span class="line"></span></div>
-    <div class="row"><span>NEXT STEP / DUE:</span><span class="line"></span></div>
-    <div class="row full"><span>STATUS / STAGE:</span><span class="line"></span></div>
-  </section>
+  <div class="header">INSIDE FILE WORKING NOTES</div>
 
   <section class="section">
-    <div class="section-title">PEOPLE / PARTIES / CONTACTS</div>
-    <div class="party-grid">
-      <div class="party">
-        <div class="party-name">SIDE / PARTY 1</div>
-        <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
-      </div>
-      <div class="party">
-        <div class="party-name">SIDE / PARTY 2</div>
-        <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-title">PROPERTY / TITLE / LOAN / MONEY / GENERAL FILE NOTES</div>
-    <div class="notes">
-      <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-title">TO DO / WAITING ON / ACTION ITEMS</div>
-    <div class="todo-wrap">
-      <div class="todo-row"><span class="todo-box"></span></div>
-      <div class="todo-row"><span class="todo-box"></span></div>
-      <div class="todo-row"><span class="todo-box"></span></div>
-      <div class="todo-row"><span class="todo-box"></span></div>
-      <div class="todo-row"><span class="todo-box"></span></div>
-      <div class="todo-row"><span class="todo-box"></span></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-title">IMPORTANT / DON'T MISS</div>
-    <div class="important">
+    <div class="section-title">GENERAL FILE NOTES</div>
+    <div class="lines">
+      <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
       <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
     </div>
   </section>
 
-  <section class="handoff">
-    <div class="handoff-title">HANDOFF / FILE MOVEMENT LOG</div>
-    <table>
-      <thead><tr><th style="width:12%">DATE</th><th style="width:22%">FROM</th><th style="width:18%">TO</th><th>REASON / NOTES</th></tr></thead>
-      <tbody><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></tbody>
-    </table>
+  <section class="section">
+    <div class="section-title">TO DO LIST</div>
+    <div class="checklist">
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">WAITING ON / ACTION ITEMS</div>
+    <div class="checklist">
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+      <div class="check-row"><span class="box"></span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">IMPORTANT / DO NOT MISS</div>
+    <div class="lines">
+      <div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>
+    </div>
   </section>
 </main>
 </body>
