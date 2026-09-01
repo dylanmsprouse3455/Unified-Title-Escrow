@@ -16,10 +16,29 @@ body{margin:0;background:#ececec;color:#111;font-family:Arial,Helvetica,sans-ser
 .lines{padding:0 12px 10px}.write-line{height:34px;border-bottom:1px solid #555}
 .checklist{padding:4px 12px 9px}.check-row{height:38px;border-bottom:1px solid #555;display:flex;align-items:center;gap:10px}.check-row:last-child{border-bottom:0}.box{width:16px;height:16px;border:1.3px solid #111;flex:0 0 auto}
 @media print{
-  @page{size:Letter portrait;margin:.16in}
-  html,body{margin:0!important;background:#fff!important}
+  @page{size:Letter portrait;margin:.10in}
+  html,body{
+    margin:0!important;
+    padding:0!important;
+    width:100%!important;
+    min-height:0!important;
+    background:#fff!important;
+  }
+  body{
+    display:block!important;
+  }
   .toolbar{display:none!important}
-  .sheet{margin:0!important;width:8.16in!important;min-height:0!important;height:auto!important;box-shadow:none!important;padding:.14in!important;border:1px solid #000!important;page-break-inside:avoid!important;break-inside:avoid!important}
+  .sheet{
+    width:7.20in!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:.08in auto 0 auto!important;
+    padding:.13in!important;
+    border:1px solid #000!important;
+    box-shadow:none!important;
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
+  }
   .header{font-size:13px;margin-bottom:6px}
   .section{margin-top:6px}
   .section-title{font-size:10px;padding:4px 6px}
