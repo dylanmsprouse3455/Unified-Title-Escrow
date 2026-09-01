@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outbound Calls</title>
+  <style>
+    :root{--navy:#173a67;--gold:#d2aa3d;--border:#d9e1ea;--text:#1f2937;--muted:#6b7280;--bg:#f4f7fb}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    .page{max-width:850px;margin:32px auto;padding:0 18px}.card{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(23,58,103,.08);overflow:hidden}
+    .header{padding:24px 26px 18px;border-bottom:4px solid var(--gold)}.header h1{margin:0;color:var(--navy);font-size:30px}.header p{margin:6px 0 0;color:var(--muted);font-size:14px}
+    .form{padding:24px 26px 26px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}
+    label{font-weight:700;color:var(--navy);font-size:14px}input,textarea{width:100%;border:1px solid #bfc9d6;border-radius:10px;padding:12px 13px;font:inherit;color:var(--text);background:#fff;outline:none}
+    input:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(23,58,103,.10)}textarea{min-height:260px;resize:vertical;line-height:1.45}
+    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:12px 18px;font-weight:700;font-size:15px;cursor:pointer}.print-btn{background:var(--navy);color:#fff}.clear-btn{background:#fff;color:#a32626;border:1px solid #e0b8b8}
+    .saved-note{margin-top:12px;text-align:right;color:var(--muted);font-size:12px}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.page{margin:16px auto}.header,.form{padding-left:18px;padding-right:18px}}
+    @media print{@page{size:letter;margin:.55in}body{background:#fff}.page{max-width:none;margin:0;padding:0}.card{border:none;box-shadow:none;border-radius:0}.header{padding:0 0 14px;border-bottom:3px solid #000}.header h1{color:#000;font-size:24px}.header p{color:#444}.form{padding:18px 0 0}label{color:#000}input,textarea{border:1px solid #777;border-radius:5px;color:#000;box-shadow:none!important}textarea{min-height:330px}.actions,.saved-note{display:none!important}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <header class="header"><h1>Outbound Calls</h1><p>Simple call sheet for case information and notes.</p></header>
+      <form class="form" id="callForm" onsubmit="return false;">
+        <div class="grid">
+          <div class="field"><label for="caseNumber">Case Number</label><input id="caseNumber" autocomplete="off" placeholder="Example: G26-0455"></div>
+          <div class="field"><label for="phoneNumber">Number I'm Calling</label><input id="phoneNumber" type="tel" autocomplete="off" placeholder="Example: (423) 555-1234"></div>
+          <div class="field full"><label for="address">Property Address</label><input id="address" autocomplete="off" placeholder="Enter property address"></div>
+          <div class="field full"><label for="notes">Notes</label><textarea id="notes" placeholder="Type your call notes here..."></textarea></div>
+        </div>
+        <div class="actions"><button class="clear-btn" id="clearBtn" type="button">Clear</button><button class="print-btn" id="printBtn" type="button">Print Call Sheet</button></div>
+        <div class="saved-note">Your entries save automatically on this computer.</div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const fields=["caseNumber","phoneNumber","address","notes"],storageKey="outboundCalls.current.v1";
+    function saveForm(){const data={};fields.forEach(id=>data[id]=document.getElementById(id).value);localStorage.setItem(storageKey,JSON.stringify(data))}
+    function loadForm(){try{const saved=JSON.parse(localStorage.getItem(storageKey)||"{}");fields.forEach(id=>{if(saved[id])document.getElementById(id).value=saved[id]})}catch(e){}}
+    fields.forEach(id=>document.getElementById(id).addEventListener("input",saveForm));
+    document.getElementById("printBtn").addEventListener("click",()=>window.print());
+    document.getElementById("clearBtn").addEventListener("click",()=>{const hasContent=fields.some(id=>document.getElementById(id).value.trim());if(hasContent&&!confirm("Clear this outbound call sheet?"))return;fields.forEach(id=>document.getElementById(id).value="");localStorage.removeItem(storageKey);document.getElementById("caseNumber").focus()});
+    loadForm();
+  </script>
+</body>
+</html>
