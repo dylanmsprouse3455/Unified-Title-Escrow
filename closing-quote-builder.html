@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#092947">
   <title>Closing Quote Builder | Unified Title &amp; Escrow</title>
   <meta name="description" content="A guided closing quote workflow for Unified Title & Escrow.">
-  <link rel="stylesheet" href="closing-quote-builder.css">
+  <link rel="stylesheet" href="closing-quote-builder.css?v=20260902-4">
 </head>
 <body>
   <header class="topbar">
@@ -18,7 +18,7 @@
     <header class="wizard-header">
       <div class="eyebrow">Closing Quote Builder</div>
       <h1>Let's build the right quote.</h1>
-      <p>Answer one question at a time. The builder will choose the correct fee schedule and only ask for what applies.</p>
+      <p>Answer one question at a time. The builder will choose the correct fee schedule and walk you through the RateCalculator steps that apply.</p>
     </header>
 
     <nav class="stage-track" aria-label="Quote progress">
@@ -33,13 +33,10 @@
         <button id="backButton" class="back-button" type="button" hidden>&larr; Back</button>
         <span id="stepLabel" class="step-label"></span>
       </div>
-
       <div id="resolvedPath" class="resolved-path" hidden></div>
       <h2 id="questionTitle"></h2>
       <p id="questionHint" class="question-hint"></p>
-
       <div id="answerArea" class="answer-area"></div>
-
       <button id="helpButton" class="help-button" type="button" hidden>I'm not sure what this means</button>
       <div id="helpPanel" class="help-panel" hidden></div>
       <div id="validationMessage" class="validation-message" role="alert" hidden></div>
@@ -47,6 +44,6 @@
   </main>
 
   <footer class="page-footer">Unified Title &amp; Escrow</footer>
-  <script src="closing-quote-builder.js"></script>
+  <script src="closing-quote-builder.js?v=20260902-4"></script>
 </body>
 </html>
