@@ -8,20 +8,20 @@
   };
 
   var TYPES=[
-    {id:'loan-purchase',name:'Loan Purchase',group:'Standard',icon:'LP',basis:['salesPrice','loanAmount'],fields:['lenderPolicy','deedTax','mortgageTax','ownerTitle'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
+    {id:'loan-purchase',name:'Loan Purchase',group:'Standard',icon:'LP',basis:['salesPrice','loanAmount'],fields:['lenderPolicy','ownerTitle','deedTax','mortgageTax'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
     {id:'refinance',name:'Refinance',group:'Standard',icon:'RF',basis:['loanAmount'],fields:['lenderPolicy','mortgageTax'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',103,'est']],notices:['documentPreparation','manufacturedHome','remoteNotary']},
     {id:'reverse',name:'Reverse Mortgage',group:'Standard',icon:'RM',basis:['appraisedValue'],fields:['lenderPolicy'],fees:[['Closing Fee',500],['Title Search Fee',300],['CPL Fee',50],['Mortgage Recording Fee',159,'est'],['Mortgage Tax','N/A']],notices:['documentPreparation','manufacturedHome','remoteNotary']},
     {id:'cash-purchase',name:'Cash Purchase',group:'Standard',icon:'CP',basis:['salesPrice'],fields:['ownerInsurance','deedTax'],decisions:['payoffNeeded'],fees:[['Buyer Closing Fee',175],['Title Search Fee',300],['Deed Recording Fee',13],['Seller Closing Fee',175],['Deed Preparation Fee',150]],notices:['manufacturedHome']},
-    {id:'apex-purchase',name:'APEX Loan Purchase',group:'In-house lender',icon:'AP',inHouse:true,basis:['salesPrice','loanAmount'],fields:['lenderPolicy','deedTax','mortgageTax','ownerTitle'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',400],['Title - Title Search Fee',250],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
+    {id:'apex-purchase',name:'APEX Loan Purchase',group:'In-house lender',icon:'AP',inHouse:true,basis:['salesPrice','loanAmount'],fields:['lenderPolicy','ownerTitle','deedTax','mortgageTax'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',400],['Title - Title Search Fee',250],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
     {id:'apex-refinance',name:'APEX Refinance',group:'In-house lender',icon:'AR',inHouse:true,basis:['loanAmount'],decisions:['apexClosing'],fields:['lenderPolicy','mortgageTax'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',350],['Title - Title Search Fee',250],['Recording Fee',103,'est']],notices:['documentPreparation','manufacturedHome','remoteNotary']},
-    {id:'ccu-hcb-purchase',name:'CCU / HCB Loan Purchase',group:'In-house lender',icon:'CH',inHouse:true,basis:['salesPrice','loanAmount'],decisions:['cplRequired','lenderPolicyRequired','simultaneousIssue'],fields:['lenderPolicy','deedTax','mortgageTax','ownerTitle'],fees:[['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
+    {id:'ccu-hcb-purchase',name:'CCU / HCB Loan Purchase',group:'In-house lender',icon:'CH',inHouse:true,basis:['salesPrice','loanAmount'],decisions:['cplRequired','lenderPolicyRequired','simultaneousIssue'],fields:['lenderPolicy','ownerTitle','deedTax','mortgageTax'],fees:[['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est']],notices:['manufacturedHome','remoteNotary']},
     {id:'ccu-hcb-refinance',name:'CCU / HCB Refinance',group:'In-house lender',icon:'CR',inHouse:true,basis:['loanAmount'],decisions:['cplRequired','settlementRequired','lenderPolicyRequired'],fields:['lenderPolicy','mortgageTax'],fees:[['Title - Title Search Fee',300],['Recording Fee',103,'est']],notices:['documentPreparation','manufacturedHome','remoteNotary']},
-    {id:'fsbo-purchase',name:'FSBO Loan Purchase',group:'Other',icon:'FS',basis:['salesPrice','loanAmount'],decisions:['payoffNeeded'],fields:['lenderPolicy','deedTax','mortgageTax','ownerTitle'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est'],['Seller Closing Fee',175],['Deed Preparation Fee',150]],notices:['manufacturedHome','remoteNotary']}
+    {id:'fsbo-purchase',name:'FSBO Loan Purchase',group:'Other',icon:'FS',basis:['salesPrice','loanAmount'],decisions:['payoffNeeded'],fields:['lenderPolicy','ownerTitle','deedTax','mortgageTax'],fees:[['Title - CPL Fee',50],['Title - Settlement Fee',450],['Title - Title Search Fee',300],['Recording Fee',116,'est'],['Seller Closing Fee',175],['Deed Preparation Fee',150]],notices:['manufacturedHome','remoteNotary']}
   ];
 
   var FIELD_DEFS={
-    salesPrice:{label:'Sales Price'},loanAmount:{label:'Loan Amount'},appraisedValue:{label:'Appraised Value'},
-    lenderPolicy:{label:"Lender's Title Policy"},ownerInsurance:{label:"Owner's Title Insurance"},ownerTitle:{label:"Owner's Title Quote"},
+    salesPrice:{label:'Purchase Price'},loanAmount:{label:'Loan Amount'},appraisedValue:{label:'Appraised Value'},
+    lenderPolicy:{label:"Lender's Policy"},ownerInsurance:{label:"Owner's Title Insurance"},ownerTitle:{label:"Owner's Policy"},
     deedTax:{label:'Transfer Taxes (Deed)'},mortgageTax:{label:'Transfer Taxes (Mtg)'}
   };
   var DECISIONS={
@@ -147,7 +147,7 @@
     return '<div class="decision-group"><span>'+escapeHtml(def.label)+' <b class="required" aria-hidden="true">*</b></span><div class="choice-row">'+def.choices.map(function(choice){return '<button type="button" class="choice-button" data-decision="'+key+'" data-value="'+choice[0]+'" aria-pressed="'+(current===choice[0])+'">'+escapeHtml(choice[1])+'</button>';}).join('')+'</div></div>';
   }
   function fieldLabel(type,key){
-    if(type.id==='ccu-hcb-purchase'&&key==='ownerTitle')return state.decisions.simultaneousIssue==='yes'?"Owner's Title Quote - with simultaneous issue discount":"Owner's Title Quote - without simultaneous issue discount";
+    if(type.id==='ccu-hcb-purchase'&&key==='ownerTitle')return state.decisions.simultaneousIssue==='yes'?"Owner's Policy - with simultaneous issue discount":"Owner's Policy - without simultaneous issue discount";
     return FIELD_DEFS[key].label;
   }
   function renderForm(){
@@ -199,6 +199,6 @@
     document.getElementById('editButton').addEventListener('click',function(){document.querySelector('.details-card').scrollIntoView({behavior:'smooth',block:'start'});var first=document.querySelector('#amountFields input');if(first)first.focus();});
     document.getElementById('resetButton').addEventListener('click',resetQuote);
   }
-  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,typeById:typeById,money:money,_setState:function(next){state=next;},buildQuote:buildQuote,missingItems:missingItems};
+  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,FIELD_DEFS:FIELD_DEFS,typeById:typeById,money:money,_setState:function(next){state=next;},_activeFields:activeFields,buildQuote:buildQuote,missingItems:missingItems};
   if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',init);
 })();

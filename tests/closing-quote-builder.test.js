@@ -51,9 +51,24 @@ test('unknown premiums and taxes stay user-entered',()=>{
   assert.equal((output.match(/\$\[ENTER AMOUNT\]/g)||[]).length,4);
 });
 
+test('form labels are agent-friendly and transfer taxes are last',()=>{
+  assert.equal(quote.FIELD_DEFS.salesPrice.label,'Purchase Price');
+  assert.equal(quote.FIELD_DEFS.lenderPolicy.label,"Lender's Policy");
+  assert.equal(quote.FIELD_DEFS.ownerTitle.label,"Owner's Policy");
+  quote._setState({typeId:'loan-purchase',values:{},decisions:{}});
+  assert.deepEqual(quote._activeFields(quote.typeById('loan-purchase')),['salesPrice','loanAmount','lenderPolicy','ownerTitle','deedTax','mortgageTax']);
+});
+
+test('ready-to-send email wording stays unchanged',()=>{
+  const output=render('loan-purchase');
+  assert.match(output,/Based on a Sales Price/);
+  assert.match(output,/Title - Lender's Title Policy/);
+  assert.match(output,/Title - Owner's Title Quote/);
+});
+
 test('blank or invalid amounts keep a quote incomplete',()=>{
   quote._setState({typeId:'refinance',values:{loanAmount:'200000',lenderPolicy:'.',mortgageTax:'-1'},decisions:{}});
-  assert.deepEqual(quote.missingItems(quote.typeById('refinance')),["Lender's Title Policy",'Transfer Taxes (Mtg)']);
+  assert.deepEqual(quote.missingItems(quote.typeById('refinance')),["Lender's Policy",'Transfer Taxes (Mtg)']);
 });
 
 test('the PDF notices are preserved on their applicable quote types',()=>{
