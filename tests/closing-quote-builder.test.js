@@ -59,7 +59,7 @@ test('blank or invalid amounts keep a quote incomplete',()=>{
 
 test('CCU/HCB purchase requires the owner policy path',()=>{
   quote._setState({typeId:'ccu-hcb-purchase',values:{salesPrice:'250000',loanAmount:'200000',ownerTitle:'900',deedTax:'925',mortgageTax:'750'},decisions:{cplRequired:'no',lenderPolicyRequired:'no'}});
-  assert.ok(quote.missingItems(quote.typeById('ccu-hcb-purchase')).includes("Owner's policy quote"));
+  assert.ok(quote.missingItems(quote.typeById('ccu-hcb-purchase')).includes("Which owner's policy quote are you using?"));
 });
 
 test('PDF notices are preserved on applicable quotes',()=>{
