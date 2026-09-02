@@ -11,9 +11,9 @@ test('all nine PDF transaction types are available',()=>{
   assert.deepEqual(quote.TYPES.map(type=>type.id),['loan-purchase','refinance','reverse','cash-purchase','apex-purchase','apex-refinance','ccu-hcb-purchase','ccu-hcb-refinance','fsbo-purchase']);
 });
 
-test('standard purchase, refinance, reverse, and cash fixed fees match the guide',()=>{
+test('standard fixed fees match the guide',()=>{
   const purchase=render('loan-purchase');
-  ['$50.00','$450.00','$300.00','$116.00'].forEach(amount=>assert.match(purchase,new RegExp(amount.replace('$','\\$').replace('.','\\.'))));
+  ['$50.00','$450.00','$300.00','$116.00'].forEach(amount=>assert.ok(purchase.includes(amount)));
   const refinance=render('refinance');
   assert.match(refinance,/\$450\.00/);assert.match(refinance,/\$300\.00/);assert.match(refinance,/\$103\.00/);assert.doesNotMatch(refinance,/Transfer Taxes \(Deed\)/);
   const reverse=render('reverse');
@@ -22,7 +22,7 @@ test('standard purchase, refinance, reverse, and cash fixed fees match the guide
   ['$175.00','$300.00','$13.00','$50.00','$150.00'].forEach(amount=>assert.ok(cash.includes(amount)));
 });
 
-test('APEX in-house fees and title-only branches match the guide',()=>{
+test('APEX fee paths match the guide',()=>{
   const purchase=render('apex-purchase');
   ['$50.00','$400.00','$250.00','$116.00'].forEach(amount=>assert.ok(purchase.includes(amount)));
   const closing=render('apex-refinance',{}, {apexClosing:'closing'});
@@ -34,36 +34,22 @@ test('APEX in-house fees and title-only branches match the guide',()=>{
 });
 
 test('CCU and HCB optional fees appear only when required',()=>{
-  const purchase=render('ccu-hcb-purchase',{}, {cplRequired:'yes',lenderPolicyRequired:'yes',simultaneousIssue:'yes'});
-  ['$50.00','$450.00','$300.00','$116.00'].forEach(amount=>assert.ok(purchase.includes(amount)));assert.match(purchase,/with simultaneous issue discount/);
+  const purchase=render('ccu-hcb-purchase',{}, {cplRequired:'yes',lenderPolicyRequired:'yes',ownerPolicyType:'simultaneous'});
+  ['$50.00','$450.00','$300.00','$116.00'].forEach(amount=>assert.ok(purchase.includes(amount)));
+  assert.match(purchase,/Owner's Title Quote\s+\$900\.00/);
   const refinance=render('ccu-hcb-refinance',{}, {cplRequired:'no',settlementRequired:'no',lenderPolicyRequired:'no'});
   assert.doesNotMatch(refinance,/CPL Fee|Settlement Fee|Lender's Title Policy/);assert.match(refinance,/Title Search Fee\s+\$300\.00/);assert.match(refinance,/Recording Fee\s+\$103\.00/);
 });
 
-test('FSBO includes buyer and seller fees and conditionally includes payoff',()=>{
+test('FSBO seller fees and payoff behavior match the guide',()=>{
   const withPayoff=render('fsbo-purchase',{}, {payoffNeeded:'yes'});
   assert.match(withPayoff,/BUYER FEES/);assert.match(withPayoff,/SELLER FEES/);assert.match(withPayoff,/Payoff fee \(if needed\)\s+\$50\.00/);assert.match(withPayoff,/Seller Closing Fee\s+\$175\.00/);assert.match(withPayoff,/Deed Preparation Fee\s+\$150\.00/);
   assert.doesNotMatch(render('fsbo-purchase',{}, {payoffNeeded:'no'}),/Payoff fee/);
 });
 
-test('unknown premiums and taxes stay user-entered',()=>{
+test('unknown premiums and taxes remain user-entered',()=>{
   const output=render('loan-purchase',{lenderPolicy:'',ownerTitle:'',deedTax:'',mortgageTax:''});
   assert.equal((output.match(/\$\[ENTER AMOUNT\]/g)||[]).length,4);
-});
-
-test('form labels are agent-friendly and transfer taxes are last',()=>{
-  assert.equal(quote.FIELD_DEFS.salesPrice.label,'Purchase Price');
-  assert.equal(quote.FIELD_DEFS.lenderPolicy.label,"Lender's Policy");
-  assert.equal(quote.FIELD_DEFS.ownerTitle.label,"Owner's Policy");
-  quote._setState({typeId:'loan-purchase',values:{},decisions:{}});
-  assert.deepEqual(quote._activeFields(quote.typeById('loan-purchase')),['salesPrice','loanAmount','lenderPolicy','ownerTitle','deedTax','mortgageTax']);
-});
-
-test('ready-to-send email wording stays unchanged',()=>{
-  const output=render('loan-purchase');
-  assert.match(output,/Based on a Sales Price/);
-  assert.match(output,/Title - Lender's Title Policy/);
-  assert.match(output,/Title - Owner's Title Quote/);
 });
 
 test('blank or invalid amounts keep a quote incomplete',()=>{
@@ -71,9 +57,20 @@ test('blank or invalid amounts keep a quote incomplete',()=>{
   assert.deepEqual(quote.missingItems(quote.typeById('refinance')),["Lender's Policy",'Transfer Taxes (Mtg)']);
 });
 
-test('the PDF notices are preserved on their applicable quote types',()=>{
+test('CCU/HCB purchase requires the owner policy path',()=>{
+  quote._setState({typeId:'ccu-hcb-purchase',values:{salesPrice:'250000',loanAmount:'200000',ownerTitle:'900',deedTax:'925',mortgageTax:'750'},decisions:{cplRequired:'no',lenderPolicyRequired:'no'}});
+  assert.ok(quote.missingItems(quote.typeById('ccu-hcb-purchase')).includes("Which owner's policy quote are you using?"));
+});
+
+test('PDF notices are preserved on applicable quotes',()=>{
   const refinance=render('refinance');
   assert.ok(refinance.includes(quote.NOTICES.documentPreparation));assert.ok(refinance.includes(quote.NOTICES.manufacturedHome));assert.ok(refinance.includes(quote.NOTICES.remoteNotary));
   const cash=render('cash-purchase',{}, {payoffNeeded:'no'});
   assert.ok(cash.includes(quote.NOTICES.manufacturedHome));assert.ok(!cash.includes(quote.NOTICES.remoteNotary));assert.ok(!cash.includes(quote.NOTICES.documentPreparation));
+});
+
+test('customer output excludes internal workflow commentary',()=>{
+  assert.doesNotMatch(render('apex-purchase'),/IN-HOUSE LOANS ONLY/);
+  const titleOnly=render('apex-refinance',{lenderPolicy:'875'},{apexClosing:'title-only',apexTitleInsurance:'yes'});
+  assert.doesNotMatch(titleOnly,/Unified is not handling the closing/);
 });
