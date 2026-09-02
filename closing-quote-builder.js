@@ -22,7 +22,7 @@
   ];
 
   var FIELD_DEFS={
-    salesPrice:{label:'What is the purchase price?',short:'Purchase Price',help:'Use the sales price shown on the purchase contract.'},
+    salesPrice:{label:'What is the purchase price?',short:'Purchase Price',help:'Use the sales price from the initial email for the order. It should be included in that email.'},
     loanAmount:{label:'What is the loan amount?',short:'Loan Amount',help:'Use the loan amount provided by the lender for this transaction.'},
     appraisedValue:{label:'What is the appraised value?',short:'Appraised Value',help:'For a reverse mortgage quote, the fee guide bases the quote on the appraised value.'},
     lenderPolicy:{label:"What lender's title policy premium did RateCalculator give you?",short:"Lender's Policy",help:'Enter the lender policy premium shown by RateCalculator after following the Basic policy instructions in the previous step.'},
@@ -57,12 +57,27 @@
   var wizardStep=0;
 
   function typeById(id){return TYPES.filter(function(type){return type.id===id;})[0];}
-  function money(value){if(value==='N/A')return 'N/A';var number=Number(value);return isFinite(number)?'$'+number.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';}
-  function validAmount(value){return value!==undefined&&value!==''&&isFinite(Number(value))&&Number(value)>=0;}
+  function cleanAmount(value){
+    var clean=String(value===undefined||value===null?'':value).replace(/,/g,'').replace(/[^0-9.]/g,'');
+    var parts=clean.split('.');
+    if(parts.length>2)clean=parts.shift()+'.'+parts.join('');
+    parts=clean.split('.');
+    if(parts.length===2)clean=parts[0]+'.'+parts[1].slice(0,2);
+    return clean;
+  }
+  function formatAmountEntry(value){
+    var clean=cleanAmount(value);if(!clean)return '';
+    var parts=clean.split('.'),whole=parts[0]||'0';
+    whole=whole.replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    return parts.length>1?whole+'.'+parts[1]:whole;
+  }
+  function money(value){if(value==='N/A')return 'N/A';var clean=cleanAmount(value),number=Number(clean);return clean!==''&&isFinite(number)?'$'+number.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';}
+  function validAmount(value){var clean=cleanAmount(value);return clean!==''&&isFinite(Number(clean))&&Number(clean)>=0;}
   function valueLine(key){return validAmount(state.values[key])?money(state.values[key]):'$[ENTER AMOUNT]';}
   function addFee(lines,label,value,note){lines.push(label+' '+money(value)+(note?' ('+note+')':''));}
   function addEntered(lines,label,key){lines.push(label+' '+valueLine(key));}
   function addNotices(lines,type){type.notices.forEach(function(key){lines.push('',NOTICES[key]);});}
+  function displayDate(value){var parts=String(value||'').split('-');return parts.length===3?parts[1]+'/'+parts[2]+'/'+parts[0]:value;}
 
   function basisSentence(type){
     if(type.basis.length===2)return 'Based on a Sales Price of '+valueLine('salesPrice')+' and Loan Amount of '+valueLine('loanAmount')+':';
@@ -186,7 +201,7 @@
     if(screen.kind==='detail'){
       var detail=DETAIL_DEFS[screen.key],current=(state.details&&state.details[screen.key])||'';title.textContent=detail.label;hint.textContent=detail.hint;setHelp(detail.help);
       var inputType=screen.key==='closingDate'?'date':'text';var placeholder=screen.key==='county'?'Example: Greene':'';
-      area.innerHTML='<div class="input-wrap"><input class="detail-input" id="detailInput" type="'+inputType+'" autocomplete="off" placeholder="'+placeholder+'" value="'+escapeHtml(current)+'"><button id="continueButton" class="continue-button" type="button">Continue</button></div>';
+      area.innerHTML='<div class="input-wrap detail-wrap"><input class="detail-input" id="detailInput" type="'+inputType+'" autocomplete="off" placeholder="'+placeholder+'" value="'+escapeHtml(current)+'"><button id="continueButton" class="continue-button" type="button">Continue</button></div>';
       var detailInput=document.getElementById('detailInput');detailInput.focus();
       function saveDetail(){var value=detailInput.value.trim();if(!value){validation.textContent='Enter this information to continue.';validation.hidden=false;detailInput.focus();return;}state.details=state.details||{};state.details[screen.key]=value;wizardStep++;render();}
       document.getElementById('continueButton').addEventListener('click',saveDetail);detailInput.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();saveDetail();}});return;
@@ -195,14 +210,14 @@
     if(screen.kind==='calculator'){
       var typeForCalc=typeById(state.typeId),guide=calculatorInstructions(typeForCalc);title.textContent='Now use RateCalculator.';hint.textContent='Keep this page open. Enter these exact selections in RateCalculator, then come back here with the premium amount(s).';setHelp('These selections come from the RateCalculator process you were trained to use. The builder chooses the policy group and Basic policy types from the transaction you already entered.');
       var policyRows=guide.policies.map(function(row){return '<div class="calculator-row"><span>'+escapeHtml(row[0])+'</span><strong>'+escapeHtml(row[1])+'</strong></div>';}).join('');
-      area.innerHTML='<div class="calculator-guide"><div class="calculator-row"><span>State</span><strong>TENNESSEE</strong></div><div class="calculator-row"><span>County</span><strong>'+escapeHtml(state.details.county)+'</strong></div><div class="calculator-row"><span>Estimated Closing Date</span><strong>'+escapeHtml(state.details.closingDate)+'</strong></div><div class="calculator-row"><span>Policy Group</span><strong>'+escapeHtml(guide.policyGroup)+'</strong></div><div class="calculator-row"><span>Agency</span><strong>A41516</strong></div><div class="calculator-row"><span>Calculate Fees Due ORT</span><strong>No</strong></div>'+policyRows+'</div><div class="calculator-actions"><a class="calculator-link" href="'+RATE_CALCULATOR_URL+'" target="_blank" rel="noopener">Open RateCalculator</a><button id="calculatorDone" class="continue-button" type="button">I have the results</button></div>';
+      area.innerHTML='<div class="calculator-guide"><div class="calculator-row"><span>State</span><strong>TENNESSEE</strong></div><div class="calculator-row"><span>County</span><strong>'+escapeHtml(state.details.county)+'</strong></div><div class="calculator-row"><span>Estimated Closing Date</span><strong>'+escapeHtml(displayDate(state.details.closingDate))+'</strong></div><div class="calculator-row"><span>Policy Group</span><strong>'+escapeHtml(guide.policyGroup)+'</strong></div><div class="calculator-row"><span>Agency</span><strong>A41516</strong></div><div class="calculator-row"><span>Calculate Fees Due ORT</span><strong>No</strong></div>'+policyRows+'</div><div class="calculator-actions"><a class="calculator-link" href="'+RATE_CALCULATOR_URL+'" target="_blank" rel="noopener">Open RateCalculator</a><button id="calculatorDone" class="continue-button" type="button">I have the results</button></div>';
       document.getElementById('calculatorDone').addEventListener('click',function(){wizardStep++;render();});return;
     }
 
     if(screen.kind==='field'){
-      var field=FIELD_DEFS[screen.key];title.textContent=field.label;hint.textContent=typeById(state.typeId)&&calculatorInstructions(typeById(state.typeId))&&['lenderPolicy','ownerInsurance','ownerTitle'].indexOf(screen.key)!==-1?'Enter the premium shown in RateCalculator.':'Enter the confirmed amount for this file.';setHelp(field.help);var current=state.values[screen.key]||'';area.innerHTML='<div class="input-wrap"><div class="money-input"><span>$</span><input id="amountInput" inputmode="decimal" autocomplete="off" placeholder="0.00" value="'+escapeHtml(current)+'"></div><button id="continueButton" class="continue-button" type="button">Continue</button></div>';
-      var input=document.getElementById('amountInput');input.focus();input.addEventListener('input',function(){var clean=input.value.replace(/[^0-9.]/g,'');var parts=clean.split('.');if(parts.length>2)clean=parts.shift()+'.'+parts.join('');input.value=clean;});
-      function save(){if(!validAmount(input.value)){validation.textContent='Enter a valid amount to continue.';validation.hidden=false;input.focus();return;}state.values[screen.key]=input.value;wizardStep++;render();}
+      var field=FIELD_DEFS[screen.key];title.textContent=field.label;hint.textContent=typeById(state.typeId)&&calculatorInstructions(typeById(state.typeId))&&['lenderPolicy','ownerInsurance','ownerTitle'].indexOf(screen.key)!==-1?'Enter the premium shown in RateCalculator.':'Enter the confirmed amount for this file.';setHelp(field.help);var current=formatAmountEntry(state.values[screen.key]||'');area.innerHTML='<div class="input-wrap"><div class="money-input"><span>$</span><input id="amountInput" inputmode="decimal" autocomplete="off" placeholder="0.00" value="'+escapeHtml(current)+'"></div><button id="continueButton" class="continue-button" type="button">Continue</button></div>';
+      var input=document.getElementById('amountInput');input.focus();input.addEventListener('input',function(){input.value=formatAmountEntry(input.value);});
+      function save(){var normalized=cleanAmount(input.value);if(!validAmount(normalized)){validation.textContent='Enter a valid amount to continue.';validation.hidden=false;input.focus();return;}state.values[screen.key]=normalized;wizardStep++;render();}
       document.getElementById('continueButton').addEventListener('click',save);input.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();save();}});return;
     }
 
@@ -218,6 +233,6 @@
 
   function init(){document.getElementById('backButton').addEventListener('click',function(){if(wizardStep>0){wizardStep--;render();}});document.getElementById('helpButton').addEventListener('click',function(){var panel=document.getElementById('helpPanel');panel.hidden=!panel.hidden;this.textContent=panel.hidden?"I'm not sure what this means":'Hide explanation';});render();}
 
-  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,typeById:typeById,money:money,_setState:function(next){state=Object.assign({details:{}},next);},buildQuote:buildQuote,missingItems:missingItems,calculatorInstructions:calculatorInstructions};
+  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,typeById:typeById,money:money,_setState:function(next){state=Object.assign({details:{}},next);},buildQuote:buildQuote,missingItems:missingItems,calculatorInstructions:calculatorInstructions,cleanAmount:cleanAmount,formatAmountEntry:formatAmountEntry};
   if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',init);
 })();
