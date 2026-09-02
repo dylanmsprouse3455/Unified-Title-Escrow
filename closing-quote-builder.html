@@ -5,46 +5,48 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#092947">
   <title>Closing Quote Builder | Unified Title &amp; Escrow</title>
-  <meta name="description" content="Build a ready-to-send closing quote using Unified Title & Escrow's approved fee guide.">
+  <meta name="description" content="Build and copy Unified Title & Escrow closing quotes from the office fee guide.">
   <link rel="stylesheet" href="closing-quote-builder.css">
 </head>
 <body>
   <header class="quote-topbar">
     <div class="quote-topbar-inner">
-      <a class="quote-back" href="index.html">&larr; Training Wizard</a>
+      <a class="quote-back" href="index.html">&larr; Home</a>
       <div class="quote-top-title">Unified Title &amp; Escrow</div>
     </div>
   </header>
 
   <main class="quote-shell">
     <section class="quote-intro" aria-labelledby="pageTitle">
-      <div>
-        <div class="quote-eyebrow">Interactive Tools</div>
-        <h1 id="pageTitle">Closing Quote Builder</h1>
-        <p>Choose the transaction, enter the amounts that vary by file, and copy a complete quote email. Fixed fees come directly from the approved quote guide.</p>
-      </div>
-      <div class="source-badge" aria-label="Fee source notice"><span>Fee source</span><strong>Closing Quote for emails.pdf</strong></div>
+      <div class="quote-eyebrow">Work Tools</div>
+      <h1 id="pageTitle">Closing Quote Builder</h1>
+      <p>Pick the transaction, enter the amounts that vary by file, then copy the finished quote into your email. Fixed fees are filled in automatically.</p>
     </section>
 
-    <div class="quote-notice" role="note">
-      <strong>No guessing.</strong> Title premiums and taxes are never calculated by this tool. Enter the confirmed amounts for the file.
-    </div>
-
-    <section class="builder-card" aria-labelledby="transactionHeading">
+    <section class="builder-card transaction-card" aria-labelledby="transactionHeading">
       <div class="section-heading">
-        <span class="step-number">1</span>
-        <div><h2 id="transactionHeading">What are we quoting?</h2><p>Select one transaction type.</p></div>
+        <div>
+          <h2 id="transactionHeading">Transaction</h2>
+          <p>Choose the fee schedule that applies to this file.</p>
+        </div>
       </div>
-      <div id="transactionGrid" class="transaction-grid" role="radiogroup" aria-label="Transaction type"></div>
+      <div id="transactionGrid" class="transaction-groups" aria-label="Transaction type"></div>
     </section>
 
     <div id="builderWorkspace" class="builder-workspace" hidden>
       <section class="builder-card details-card" aria-labelledby="detailsHeading">
         <div class="section-heading">
-          <span class="step-number">2</span>
-          <div><h2 id="detailsHeading">Enter the file details</h2><p id="detailsHelp">Only the amounts that vary by file need to be entered.</p></div>
+          <div>
+            <h2 id="detailsHeading">Quote details</h2>
+            <p id="detailsHelp">Enter the confirmed title premiums, taxes, and transaction amounts.</p>
+          </div>
         </div>
-        <div id="inHouseNotice" class="in-house-notice" hidden><strong>In-house loans only</strong><span>This fee structure applies only to the named lender.</span></div>
+
+        <div id="inHouseNotice" class="in-house-notice" hidden>
+          <strong>In-house fee schedule</strong>
+          <span>Use this only for the named lender's in-house loan.</span>
+        </div>
+
         <form id="quoteForm" novalidate>
           <div id="decisionFields" class="decision-fields"></div>
           <div id="amountFields" class="amount-grid"></div>
@@ -54,22 +56,26 @@
 
       <aside class="preview-card" aria-labelledby="previewHeading">
         <div class="preview-head">
-          <div><div class="quote-eyebrow">Live Preview</div><h2 id="previewHeading">Ready-to-send email</h2></div>
+          <div>
+            <div class="quote-eyebrow">Preview</div>
+            <h2 id="previewHeading">Email quote</h2>
+          </div>
           <span id="completionPill" class="completion-pill">Needs details</span>
         </div>
+
         <pre id="quotePreview" class="quote-preview" aria-live="polite"></pre>
+
         <div class="preview-actions">
-          <button id="copyButton" class="button primary" type="button">Copy Email</button>
+          <button id="copyButton" class="button primary" type="button">Copy Quote</button>
           <button id="printButton" class="button secondary" type="button">Print</button>
-          <button id="editButton" class="button secondary" type="button">Edit Quote</button>
-          <button id="resetButton" class="button quiet" type="button">Start New Quote</button>
+          <button id="resetButton" class="button quiet" type="button">Start Over</button>
         </div>
         <p id="actionStatus" class="action-status" role="status" aria-live="polite"></p>
       </aside>
     </div>
   </main>
 
-  <footer class="quote-footer">Unified Title &amp; Escrow &middot; Internal working tool</footer>
+  <footer class="quote-footer">Unified Title &amp; Escrow</footer>
   <script src="closing-quote-builder.js"></script>
 </body>
 </html>
