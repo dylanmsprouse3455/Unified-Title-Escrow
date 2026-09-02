@@ -3,11 +3,11 @@ const assert=require('node:assert/strict');
 const quote=require('../closing-quote-builder.js');
 
 function render(typeId,values={},decisions={}){
-  quote._setState({typeId,values:Object.assign({salesPrice:'250000',loanAmount:'200000',appraisedValue:'300000',lenderPolicy:'1000',ownerInsurance:'900',ownerTitle:'900',deedTax:'925',mortgageTax:'750'},values),decisions});
+  quote._setState({typeId,values:Object.assign({salesPrice:'250000',loanAmount:'200000',appraisedValue:'300000',lenderPolicy:'1000',ownerInsurance:'900',ownerTitle:'900',deedTax:'925',mortgageTax:'750'},values),decisions,details:{}});
   return quote.buildQuote(quote.typeById(typeId));
 }
 
-test('all nine PDF transaction types are available',()=>{
+test('all nine transaction types are available',()=>{
   assert.deepEqual(quote.TYPES.map(type=>type.id),['loan-purchase','refinance','reverse','cash-purchase','apex-purchase','apex-refinance','ccu-hcb-purchase','ccu-hcb-refinance','fsbo-purchase']);
 });
 
@@ -33,12 +33,27 @@ test('APEX fee paths match the guide',()=>{
   assert.match(noInsurance,/Final Update Fee\s+\$50\.00/);assert.doesNotMatch(noInsurance,/Lender's Title Policy/);
 });
 
-test('CCU and HCB optional fees appear only when required',()=>{
-  const purchase=render('ccu-hcb-purchase',{}, {cplRequired:'yes',lenderPolicyRequired:'yes',ownerPolicyType:'simultaneous'});
-  ['$50.00','$450.00','$300.00','$116.00'].forEach(amount=>assert.ok(purchase.includes(amount)));
+test('CCU and HCB trained workflow always collects lender policy premium',()=>{
+  const purchase=render('ccu-hcb-purchase',{}, {cplRequired:'yes'});
+  assert.match(purchase,/Lender's Title Policy\s+\$1,000\.00/);
   assert.match(purchase,/Owner's Title Quote\s+\$900\.00/);
-  const refinance=render('ccu-hcb-refinance',{}, {cplRequired:'no',settlementRequired:'no',lenderPolicyRequired:'no'});
-  assert.doesNotMatch(refinance,/CPL Fee|Settlement Fee|Lender's Title Policy/);assert.match(refinance,/Title Search Fee\s+\$300\.00/);assert.match(refinance,/Recording Fee\s+\$103\.00/);
+  const refinance=render('ccu-hcb-refinance',{}, {cplRequired:'no',settlementRequired:'no'});
+  assert.match(refinance,/Lender's Title Policy\s+\$1,000\.00/);
+  assert.doesNotMatch(refinance,/CPL Fee|Settlement Fee/);
+  assert.match(refinance,/Title Search Fee\s+\$300\.00/);
+  assert.match(refinance,/Recording Fee\s+\$103\.00/);
+});
+
+test('RateCalculator instructions match trained policy selections',()=>{
+  const purchase=quote.calculatorInstructions(quote.typeById('loan-purchase'));
+  assert.equal(purchase.policyGroup,'SIMULTANEOUS LOAN & OWNERS - 2021');
+  assert.deepEqual(purchase.policies,[["Owner's Type",'OWNERS - BASIC'],["Lender's Type",'SIMUL LENDERS - BASIC']]);
+  const refinance=quote.calculatorInstructions(quote.typeById('refinance'));
+  assert.equal(refinance.policyGroup,'LOAN - 2021');
+  assert.deepEqual(refinance.policies,[["Lender's Type",'LENDERS - BASIC']]);
+  const cash=quote.calculatorInstructions(quote.typeById('cash-purchase'));
+  assert.equal(cash.policyGroup,'OWNERS - 2021');
+  assert.deepEqual(cash.policies,[["Owner's Type",'OWNERS - BASIC']]);
 });
 
 test('FSBO seller fees and payoff behavior match the guide',()=>{
@@ -53,16 +68,11 @@ test('unknown premiums and taxes remain user-entered',()=>{
 });
 
 test('blank or invalid amounts keep a quote incomplete',()=>{
-  quote._setState({typeId:'refinance',values:{loanAmount:'200000',lenderPolicy:'.',mortgageTax:'-1'},decisions:{}});
+  quote._setState({typeId:'refinance',values:{loanAmount:'200000',lenderPolicy:'.',mortgageTax:'-1'},decisions:{},details:{}});
   assert.deepEqual(quote.missingItems(quote.typeById('refinance')),["Lender's Policy",'Transfer Taxes (Mtg)']);
 });
 
-test('CCU/HCB purchase requires the owner policy path',()=>{
-  quote._setState({typeId:'ccu-hcb-purchase',values:{salesPrice:'250000',loanAmount:'200000',ownerTitle:'900',deedTax:'925',mortgageTax:'750'},decisions:{cplRequired:'no',lenderPolicyRequired:'no'}});
-  assert.ok(quote.missingItems(quote.typeById('ccu-hcb-purchase')).includes("Which owner's policy quote are you using?"));
-});
-
-test('PDF notices are preserved on applicable quotes',()=>{
+test('notices are preserved on applicable quotes',()=>{
   const refinance=render('refinance');
   assert.ok(refinance.includes(quote.NOTICES.documentPreparation));assert.ok(refinance.includes(quote.NOTICES.manufacturedHome));assert.ok(refinance.includes(quote.NOTICES.remoteNotary));
   const cash=render('cash-purchase',{}, {payoffNeeded:'no'});
