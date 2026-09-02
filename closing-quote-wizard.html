@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#092947">
+  <title>Closing Quote Builder | Unified Title &amp; Escrow</title>
+  <meta name="description" content="A guided closing quote workflow for Unified Title & Escrow.">
+  <link rel="stylesheet" href="closing-quote-builder.css?v=20260902-2">
+</head>
+<body>
+  <header class="topbar">
+    <a class="back-home" href="index.html">&larr; Home</a>
+    <span>Unified Title &amp; Escrow</span>
+  </header>
+
+  <main class="wizard-shell">
+    <header class="wizard-header">
+      <div class="eyebrow">Closing Quote Builder</div>
+      <h1>Let's build the right quote.</h1>
+      <p>Answer one question at a time. The builder will choose the correct fee schedule and only ask for what applies.</p>
+    </header>
+
+    <nav class="stage-track" aria-label="Quote progress">
+      <div class="stage" data-stage="1"><span>1</span><b>Transaction</b></div>
+      <div class="stage" data-stage="2"><span>2</span><b>Fee questions</b></div>
+      <div class="stage" data-stage="3"><span>3</span><b>Amounts</b></div>
+      <div class="stage" data-stage="4"><span>4</span><b>Quote</b></div>
+    </nav>
+
+    <section class="wizard-card" id="wizardCard" aria-live="polite">
+      <div class="step-topline">
+        <button id="backButton" class="back-button" type="button" hidden>&larr; Back</button>
+        <span id="stepLabel" class="step-label"></span>
+      </div>
+      <div id="resolvedPath" class="resolved-path" hidden></div>
+      <h2 id="questionTitle"></h2>
+      <p id="questionHint" class="question-hint"></p>
+      <div id="answerArea" class="answer-area"></div>
+      <button id="helpButton" class="help-button" type="button" hidden>I'm not sure what this means</button>
+      <div id="helpPanel" class="help-panel" hidden></div>
+      <div id="validationMessage" class="validation-message" role="alert" hidden></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">Unified Title &amp; Escrow</footer>
+  <script src="closing-quote-builder.js?v=20260902-2"></script>
+</body>
+</html>
