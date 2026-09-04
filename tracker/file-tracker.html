@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>File Tracker & Print Sheet | Unified Title & Escrow</title>
+<style>
+:root{
+  --navy:#0b3a70;
+  --navy2:#153f70;
+  --gold:#c9961a;
+  --bg:#f3f6fa;
+  --panel:#ffffff;
+  --line:#c9d8e8;
+  --text:#17304d;
+  --muted:#66798f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.app{max-width:1120px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}
+.brand-kicker{font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+h1{margin:5px 0 4px;color:var(--navy);font-size:32px}
+.subtitle{margin:0;color:var(--muted)}
+.btn{appearance:none;border:0;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer;background:var(--navy);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn.secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.builder{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(20,53,89,.08);padding:20px}
+.panel h2{margin:0 0 4px;color:var(--navy);font-size:20px}
+.panel .hint{margin:0 0 17px;color:var(--muted);font-size:14px;line-height:1.45}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:12px;font-weight:900;color:#36536f}
+input,select{width:100%;border:1px solid #bacce0;border-radius:10px;padding:11px 12px;background:#fff;color:#17304d;font:inherit}
+input:focus,select:focus{outline:3px solid rgba(49,119,186,.14);border-color:#3177ba}
+.transaction-note{margin-top:12px;padding:11px 12px;border-radius:10px;background:#eef5fc;border:1px solid #c5dbee;color:#355a7c;font-size:13px;line-height:1.45}
+.custom-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.custom-list{display:grid;gap:7px;margin-top:10px}
+.custom-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid #d8e2ed;border-radius:9px;padding:8px 10px;background:#fbfdff;font-size:13px}
+.remove{border:0;background:transparent;color:#a42b2b;font-weight:900;cursor:pointer}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.preview-wrap{overflow:auto}
+.sheet{width:8.5in;min-height:11in;background:#fff;color:#111;border:1px solid #777;margin:0 auto;padding:.28in;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.sheet-header{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;border-bottom:2px solid #111;padding-bottom:7px}
+.sheet-brand{font-size:20px;font-weight:900;letter-spacing:.1px}
+.sheet-title{text-align:right;font-size:13px;font-weight:900;text-transform:uppercase}
+.sheet-subtitle{text-align:right;font-size:11px;margin-top:2px}
+.info-grid{display:grid;grid-template-columns:1fr 1.35fr 1fr 1fr;gap:6px 12px;margin-top:9px;font-size:11px}
+.info{display:flex;gap:5px;min-width:0}
+.info strong{white-space:nowrap}
+.info span{border-bottom:1px solid #666;min-height:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section{margin-top:9px;border:1px solid #222}
+.section-title{background:#f2f2f2;border-bottom:1px solid #222;padding:4px 7px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:3px;padding:7px 8px}
+.check-item{display:grid;grid-template-columns:13px 1fr 34px 44px;gap:5px;align-items:center;min-height:20px;font-size:9.5px;line-height:1.15}
+.box{width:12px;height:12px;border:1px solid #111}
+.initials,.date{border-bottom:1px solid #999;height:14px}
+.mini-head{font-size:7.5px;color:#555;text-align:center;margin-bottom:-2px}
+.rule-lines{padding:0 8px 7px}
+.rule{height:27px;border-bottom:1px solid #777}
+.twocol-notes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+.twocol-notes .section{margin-top:0}
+.important .section-title{background:#e9e9e9}
+.footer-line{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;font-size:9px}
+.footer-line div{display:flex;gap:5px}
+.footer-line span{border-bottom:1px solid #777;flex:1;min-height:14px}
+.empty-checklist{padding:14px;font-size:11px;color:#555;text-align:center}
+@media(max-width:980px){.builder{grid-template-columns:1fr}.preview-wrap{padding-bottom:8px}.sheet{transform:scale(.78);transform-origin:top left;margin-bottom:-2.3in}}
+@media(max-width:700px){.app{padding:14px}.topbar{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.sheet{transform:scale(.53);margin-bottom:-5in}}
+@media print{
+  @page{size:Letter portrait;margin:.12in}
+  body{background:#fff}
+  .no-print{display:none!important}
+  .app{max-width:none;margin:0;padding:0}
+  .builder{display:block}
+  .preview-wrap{overflow:visible}
+  .sheet{width:8.1in;min-height:0;height:auto;margin:0 auto;padding:.18in;border:1px solid #000;box-shadow:none;transform:none!important;break-inside:avoid;page-break-inside:avoid}
+  .sheet-brand{font-size:17px}.sheet-title{font-size:11px}.sheet-subtitle{font-size:9px}
+  .info-grid{font-size:9px;margin-top:6px;gap:4px 9px}
+  .section{margin-top:6px}.section-title{font-size:8.5px;padding:3px 6px}
+  .check-grid{row-gap:1px;padding:5px 6px;column-gap:12px}
+  .check-item{font-size:8px;min-height:17px;grid-template-columns:11px 1fr 30px 38px}.box{width:10px;height:10px}.initials,.date{height:12px}.mini-head{font-size:6.5px}
+  .rule-lines{padding:0 6px 5px}.rule{height:22px}.twocol-notes{gap:6px;margin-top:6px}
+  .footer-line{margin-top:6px;font-size:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar no-print">
+    <div>
+      <div class="brand-kicker">Unified Title &amp; Escrow</div>
+      <h1>File Tracker &amp; Print Sheet</h1>
+      <p class="subtitle">Choose the transaction type and the physical file sheet updates automatically.</p>
+    </div>
+    <a class="btn secondary" href="index.html">Back to Workspace</a>
+  </div>
+
+  <div class="builder">
+    <section class="panel no-print">
+      <h2>Build the file sheet</h2>
+      <p class="hint">Only the tasks that make sense for the selected transaction type will print. Add anything unusual as a file-specific item.</p>
+      <div class="grid">
+        <div class="field"><label for="fileNumber">File #</label><input id="fileNumber" placeholder="G26-0456"></div>
+        <div class="field"><label for="closeDate">Close / Due Date</label><input id="closeDate" type="date"></div>
+        <div class="field full"><label for="property">Property Address</label><input id="property" placeholder="Property address"></div>
+        <div class="field"><label for="owner">Escrow Officer / Owner</label><input id="owner" placeholder="Cindy, Lynn, Amy..."></div>
+        <div class="field"><label for="transaction">Transaction Type</label>
+          <select id="transaction">
+            <option value="purchase-loan">Purchase - Loan</option>
+            <option value="purchase-cash">Purchase - Cash</option>
+            <option value="refinance">Refinance</option>
+            <option value="seller-side">Seller Side Only</option>
+            <option value="title-search">Title Search Only</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="transaction-note" id="transactionNote"></div>
+
+      <h2 style="margin-top:20px">File-specific items</h2>
+      <p class="hint">Use this for the weird stuff: mobile-home title, affidavit of fixation, LLC docs, original note return, special lender instruction, and so on.</p>
+      <div class="custom-row">
+        <input id="customItem" placeholder="Add a custom checklist item">
+        <button class="btn" type="button" id="addCustom">Add</button>
+      </div>
+      <div class="custom-list" id="customList"></div>
+      <div class="actions">
+        <button class="btn" type="button" id="printBtn">Print File Sheet</button>
+        <button class="btn secondary" type="button" id="clearBtn">Clear Form</button>
+      </div>
+    </section>
+
+    <div class="preview-wrap">
+      <main class="sheet" id="sheet">
+        <header class="sheet-header">
+          <div class="sheet-brand">UNIFIED TITLE &amp; ESCROW</div>
+          <div>
+            <div class="sheet-title">File Tracker</div>
+            <div class="sheet-subtitle" id="sheetTransaction">Purchase - Loan</div>
+          </div>
+        </header>
+
+        <div class="info-grid">
+          <div class="info"><strong>File #:</strong><span id="pFile"></span></div>
+          <div class="info"><strong>Property:</strong><span id="pProperty"></span></div>
+          <div class="info"><strong>Close / Due:</strong><span id="pDate"></span></div>
+          <div class="info"><strong>Officer / Owner:</strong><span id="pOwner"></span></div>
+        </div>
+
+        <section class="section">
+          <div class="section-title">Transaction Checklist</div>
+          <div class="check-grid" id="checkGrid"></div>
+        </section>
+
+        <div class="twocol-notes">
+          <section class="section">
+            <div class="section-title">General File Notes</div>
+            <div class="rule-lines"><div class="rule"></div><div class="rule"></div><div class="rule"></div><div class="rule"></div></div>
+          </section>
+          <section class="section">
+            <div class="section-title">To-Do List</div>
+            <div class="rule-lines"><div class="rule"></div><div class="rule"></div><div class="rule"></div><div class="rule"></div></div>
+          </section>
+        </div>
+
+        <div class="twocol-notes">
+          <section class="section">
+            <div class="section-title">Waiting On / Action Items</div>
+            <div class="rule-lines"><div class="rule"></div><div class="rule"></div><div class="rule"></div></div>
+          </section>
+          <section class="section important">
+            <div class="section-title">Important - Do Not Miss</div>
+            <div class="rule-lines"><div class="rule"></div><div class="rule"></div><div class="rule"></div></div>
+          </section>
+        </div>
+
+        <div class="footer-line">
+          <div><strong>Reviewed by:</strong><span></span></div>
+          <div><strong>Date:</strong><span></span></div>
+          <div><strong>File complete:</strong><span></span></div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+
+  var transactionLabels={
+    'purchase-loan':'Purchase - Loan',
+    'purchase-cash':'Purchase - Cash',
+    'refinance':'Refinance',
+    'seller-side':'Seller Side Only',
+    'title-search':'Title Search Only',
+    'other':'Other'
+  };
+
+  var notes={
+    'purchase-loan':'Includes EMD, lender, payoff, balancing, recording and final-policy steps.',
+    'purchase-cash':'Removes lender-only steps but keeps purchase, payoff, recording and final-policy work.',
+    'refinance':'Removes EMD and purchase-specific items; focuses on payoff, lender, recording, releases and final policy.',
+    'seller-side':'Short seller-side workflow for seller documents, payoff/release work, proceeds and file completion.',
+    'title-search':'No disbursement, recording or final-policy tasks unless you add them as file-specific items.',
+    'other':'Starts with a short universal completion list. Add the exact tasks this file needs.'
+  };
+
+  var tasks={
+    'purchase-loan':[
+      'All parties contacted','Earnest money received / accounted for','EMD receipt sent','Title work ordered','Title exam received / reviewed','Commitment completed','Payoffs ordered','Payoffs received / confirmed','Lender requirements / post-closing instructions reviewed','Clear to Close received','File balanced','File disbursed','Documents submitted for recording','Recording accepted','Recorded documents received','Recorded documents uploaded to Qualia','Required originals sent to lender / appropriate party','Releases / satisfactions received or tracked','Final policy issued','Final policy delivered','Qualia tasks / status updated','File ready to close / archive'
+    ],
+    'purchase-cash':[
+      'All parties contacted','Earnest money received / accounted for','EMD receipt sent','Title work ordered','Title exam received / reviewed','Commitment completed','Payoffs ordered, if applicable','Payoffs received / confirmed','File balanced','File disbursed','Documents submitted for recording','Recording accepted','Recorded documents received','Recorded documents uploaded to Qualia','Releases / satisfactions received or tracked','Final policy issued','Final policy delivered','Qualia tasks / status updated','File ready to close / archive'
+    ],
+    'refinance':[
+      'Borrower contacted','Title work ordered','Title exam received / reviewed','Commitment completed','Existing loan payoff ordered','Payoff received / confirmed','Lender instructions reviewed','Clear to Close received','File balanced','File disbursed','Payoffs sent','New mortgage / deed of trust submitted for recording','Recording accepted','Recorded documents received','Recorded documents uploaded to Qualia','Required originals returned / sent to lender','Existing lien release / satisfaction tracked','Final policy issued','Final policy delivered','Qualia tasks / status updated','File ready to close / archive'
+    ],
+    'seller-side':[
+      'Seller contacted','Seller documents / information received','Payoff ordered, if applicable','Payoff confirmed','Required seller documents completed','Documents provided to closing side','Seller proceeds handled / confirmed, if applicable','Recorded / final copies received, if applicable','Releases / satisfactions handled or tracked','Documents uploaded to Qualia','Outstanding items resolved','Qualia tasks / status updated','File complete / archive ready'
+    ],
+    'title-search':[
+      'Title work ordered / assigned','Search received','Search reviewed','Issues / exceptions identified','Requested report / documents prepared','Results delivered to requesting party','Requested corrections / additional work completed','Invoice / payment handled, if applicable','Final documents saved to Qualia','Request completed','Qualia tasks / status updated','File ready to close / archive'
+    ],
+    'other':[
+      'Required documents reviewed','Requested work completed','Results / documents delivered to appropriate party','Documents saved to Qualia','Outstanding items resolved','Qualia tasks / status updated','File ready to close / archive'
+    ]
+  };
+
+  var customItems=[];
+  var $=function(id){return document.getElementById(id)};
+
+  function esc(value){
+    return String(value||'').replace(/[&<>"']/g,function(ch){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]});
+  }
+
+  function displayDate(value){
+    if(!value)return '';
+    var parts=value.split('-');
+    return parts.length===3 ? parts[1]+'/'+parts[2]+'/'+parts[0] : value;
+  }
+
+  function renderCustom(){
+    $('customList').innerHTML=customItems.map(function(item,index){
+      return '<div class="custom-item"><span>'+esc(item)+'</span><button type="button" class="remove" data-remove="'+index+'" aria-label="Remove item">Remove</button></div>';
+    }).join('');
+    Array.from(document.querySelectorAll('[data-remove]')).forEach(function(button){
+      button.onclick=function(){customItems.splice(Number(button.getAttribute('data-remove')),1);renderCustom();renderPreview();};
+    });
+  }
+
+  function renderChecklist(list){
+    if(!list.length){$('checkGrid').innerHTML='<div class="empty-checklist">Add file-specific checklist items before printing.</div>';return;}
+    $('checkGrid').innerHTML=list.map(function(item){
+      return '<div class="check-item"><span class="box"></span><span>'+esc(item)+'</span><span><div class="mini-head">Init.</div><div class="initials"></div></span><span><div class="mini-head">Date</div><div class="date"></div></span></div>';
+    }).join('');
+  }
+
+  function renderPreview(){
+    var type=$('transaction').value;
+    $('transactionNote').textContent=notes[type]||'';
+    $('sheetTransaction').textContent=transactionLabels[type]||'File Tracker';
+    $('pFile').textContent=$('fileNumber').value||'';
+    $('pProperty').textContent=$('property').value||'';
+    $('pDate').textContent=displayDate($('closeDate').value);
+    $('pOwner').textContent=$('owner').value||'';
+    renderChecklist((tasks[type]||[]).concat(customItems));
+  }
+
+  ['fileNumber','property','closeDate','owner','transaction'].forEach(function(id){
+    $(id).addEventListener(id==='transaction'?'change':'input',renderPreview);
+  });
+
+  $('addCustom').onclick=function(){
+    var value=$('customItem').value.trim();
+    if(!value)return;
+    customItems.push(value);
+    $('customItem').value='';
+    renderCustom();renderPreview();$('customItem').focus();
+  };
+
+  $('customItem').addEventListener('keydown',function(event){
+    if(event.key==='Enter'){event.preventDefault();$('addCustom').click();}
+  });
+
+  $('printBtn').onclick=function(){renderPreview();window.print();};
+  $('clearBtn').onclick=function(){
+    $('fileNumber').value='';$('property').value='';$('closeDate').value='';$('owner').value='';$('transaction').value='purchase-loan';customItems=[];renderCustom();renderPreview();
+  };
+
+  renderCustom();
+  renderPreview();
+}());
+</script>
+</body>
+</html>
