@@ -2,6 +2,9 @@
   'use strict';
 
   var RATE_CALCULATOR_URL='https://ratecalculator.oldrepublictitle.com/quotes/create';
+  var DEED_TAX_RATE=3.70;
+  var MORTGAGE_TAX_RATE=1.15;
+  var MORTGAGE_TAX_EXEMPTION=2000;
 
   var NOTICES={
     documentPreparation:'FYI - DOCUMENT PREPARATION FEES NECESSARY TO CLEAR TITLE MAY BE CHARGED, BUT UNKNOWN UNTIL TITLE SEARCH IS COMPLETED',
@@ -28,8 +31,8 @@
     lenderPolicy:{label:"What lender's title policy premium did RateCalculator give you?",short:"Lender's Policy",help:'Enter the lender policy premium shown by RateCalculator after following the Basic policy instructions in the previous step.'},
     ownerInsurance:{label:"What owner's title policy premium did RateCalculator give you?",short:"Owner's Title Insurance",help:'Enter the owner policy premium shown by RateCalculator for this cash purchase.'},
     ownerTitle:{label:"What owner's title policy premium did RateCalculator give you?",short:"Owner's Policy",help:'Enter the owner policy premium shown by RateCalculator for the simultaneous loan and owner policy quote.'},
-    deedTax:{label:'What is the deed transfer tax?',short:'Transfer Taxes (Deed)',help:'Enter the confirmed deed transfer tax for the file. The builder intentionally does not calculate this amount.'},
-    mortgageTax:{label:'What is the mortgage transfer tax?',short:'Transfer Taxes (Mtg)',help:'Enter the confirmed mortgage transfer tax for the file. The builder intentionally does not calculate this amount.'}
+    deedTax:{label:'Deed transfer tax',short:'Transfer Taxes (Deed)',help:'Calculated automatically at $3.70 per $1,000 of the sales price.'},
+    mortgageTax:{label:'Mortgage transfer tax',short:'Transfer Taxes (Mtg)',help:'Calculated automatically at $1.15 per $1,000 of the loan amount after subtracting the first $2,000.'}
   };
 
   var DETAIL_DEFS={
@@ -78,6 +81,12 @@
   function addEntered(lines,label,key){lines.push(label+' '+valueLine(key));}
   function addNotices(lines,type){type.notices.forEach(function(key){lines.push('',NOTICES[key]);});}
   function displayDate(value){var parts=String(value||'').split('-');return parts.length===3?parts[1]+'/'+parts[2]+'/'+parts[0]:value;}
+  function calculateDeedTax(salesPrice){var amount=Number(cleanAmount(salesPrice));return isFinite(amount)&&amount>=0?Math.round((amount/1000)*DEED_TAX_RATE*100)/100:null;}
+  function calculateMortgageTax(loanAmount){var amount=Number(cleanAmount(loanAmount));if(!isFinite(amount)||amount<0)return null;var taxable=Math.max(amount-MORTGAGE_TAX_EXEMPTION,0);return Math.round((taxable/1000)*MORTGAGE_TAX_RATE*100)/100;}
+  function syncComputedTaxes(){
+    var deed=calculateDeedTax(state.values.salesPrice);if(deed!==null)state.values.deedTax=deed;else delete state.values.deedTax;
+    var mortgage=calculateMortgageTax(state.values.loanAmount);if(mortgage!==null)state.values.mortgageTax=mortgage;else delete state.values.mortgageTax;
+  }
 
   function basisSentence(type){
     if(type.basis.length===2)return 'Based on a Sales Price of '+valueLine('salesPrice')+' and Loan Amount of '+valueLine('loanAmount')+':';
@@ -88,6 +97,7 @@
 
   function buildQuote(type){
     type=type||typeById(state.typeId);if(!type)return '';
+    syncComputedTaxes();
     var lines=[];
     if(type.id==='apex-refinance'&&state.decisions.apexClosing==='title-only'){
       lines.push(basisSentence(type),'');addFee(lines,'Title - Title Search Fee',250);
@@ -127,7 +137,7 @@
   }
 
   function activeDecisions(type){var decisions=(type.decisions||[]).slice();if(type.id==='apex-refinance'&&state.decisions.apexClosing==='title-only')decisions.push('apexTitleInsurance');return decisions;}
-  function activeFields(type){var fields=type.basis.slice();if(type.id==='apex-refinance'&&state.decisions.apexClosing==='title-only'){if(state.decisions.apexTitleInsurance==='yes')fields.push('lenderPolicy');return fields;}type.fields.forEach(function(field){fields.push(field);});return fields;}
+  function activeFields(type){var fields=type.basis.slice();if(type.id==='apex-refinance'&&state.decisions.apexClosing==='title-only'){if(state.decisions.apexTitleInsurance==='yes')fields.push('lenderPolicy');return fields;}type.fields.forEach(function(field){if(field!=='deedTax'&&field!=='mortgageTax')fields.push(field);});return fields;}
   function missingItems(type){var missing=[];if(!type)return missing;activeDecisions(type).forEach(function(key){if(!state.decisions[key])missing.push(DECISIONS[key].label);});activeFields(type).forEach(function(key){if(!validAmount(state.values[key]))missing.push(FIELD_DEFS[key].short);});return missing;}
   function escapeHtml(value){return String(value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
 
@@ -217,11 +227,11 @@
     if(screen.kind==='field'){
       var field=FIELD_DEFS[screen.key];title.textContent=field.label;hint.textContent=typeById(state.typeId)&&calculatorInstructions(typeById(state.typeId))&&['lenderPolicy','ownerInsurance','ownerTitle'].indexOf(screen.key)!==-1?'Enter the premium shown in RateCalculator.':'Enter the confirmed amount for this file.';setHelp(field.help);var current=formatAmountEntry(state.values[screen.key]||'');area.innerHTML='<div class="input-wrap"><div class="money-input"><span>$</span><input id="amountInput" inputmode="decimal" autocomplete="off" placeholder="0.00" value="'+escapeHtml(current)+'"></div><button id="continueButton" class="continue-button" type="button">Continue</button></div>';
       var input=document.getElementById('amountInput');input.focus();input.addEventListener('input',function(){input.value=formatAmountEntry(input.value);});
-      function save(){var normalized=cleanAmount(input.value);if(!validAmount(normalized)){validation.textContent='Enter a valid amount to continue.';validation.hidden=false;input.focus();return;}state.values[screen.key]=normalized;wizardStep++;render();}
+      function save(){var normalized=cleanAmount(input.value);if(!validAmount(normalized)){validation.textContent='Enter a valid amount to continue.';validation.hidden=false;input.focus();return;}state.values[screen.key]=normalized;syncComputedTaxes();wizardStep++;render();}
       document.getElementById('continueButton').addEventListener('click',save);input.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();save();}});return;
     }
 
-    var type=typeById(state.typeId);title.textContent='Your quote is ready.';hint.textContent='Review it once, then copy it into your email.';setHelp('If something is wrong, use Back to return to that answer. Changing an earlier transaction answer will clear information that no longer applies.');
+    var type=typeById(state.typeId);syncComputedTaxes();title.textContent='Your quote is ready.';hint.textContent='Review it once, then copy it into your email.';setHelp('Deed tax is calculated at $3.70 per $1,000 of the sales price. Mortgage tax is calculated at $1.15 per $1,000 after subtracting the first $2,000 of the loan amount. If something else is wrong, use Back to return to that answer.');
     var summary='<div class="summary"><div class="summary-row"><span>Fee schedule</span><strong>'+escapeHtml(type.name)+'</strong></div></div>';
     area.innerHTML=summary+'<div class="quote-box" id="quoteBox">'+escapeHtml(buildQuote(type))+'</div><div class="final-actions"><button type="button" id="copyFinal" class="copy-final">Copy Quote</button><button type="button" id="printFinal" class="secondary-final">Print</button><button type="button" id="startOver" class="quiet-final">Start Over</button></div><p id="actionStatus" class="action-status" role="status"></p>';
     document.getElementById('copyFinal').addEventListener('click',copyQuote);document.getElementById('printFinal').addEventListener('click',function(){window.print();});document.getElementById('startOver').addEventListener('click',resetAll);
@@ -233,6 +243,6 @@
 
   function init(){document.getElementById('backButton').addEventListener('click',function(){if(wizardStep>0){wizardStep--;render();}});document.getElementById('helpButton').addEventListener('click',function(){var panel=document.getElementById('helpPanel');panel.hidden=!panel.hidden;this.textContent=panel.hidden?"I'm not sure what this means":'Hide explanation';});render();}
 
-  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,typeById:typeById,money:money,_setState:function(next){state=Object.assign({details:{}},next);},buildQuote:buildQuote,missingItems:missingItems,calculatorInstructions:calculatorInstructions,cleanAmount:cleanAmount,formatAmountEntry:formatAmountEntry};
+  if(typeof module!=='undefined'&&module.exports)module.exports={TYPES:TYPES,NOTICES:NOTICES,typeById:typeById,money:money,_setState:function(next){state=Object.assign({details:{}},next);syncComputedTaxes();},buildQuote:buildQuote,missingItems:missingItems,calculatorInstructions:calculatorInstructions,cleanAmount:cleanAmount,formatAmountEntry:formatAmountEntry,calculateDeedTax:calculateDeedTax,calculateMortgageTax:calculateMortgageTax};
   if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',init);
 })();
