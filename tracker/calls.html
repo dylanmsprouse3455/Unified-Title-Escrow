@@ -67,6 +67,18 @@
     </section>
   </main>
 
+  <!-- Kept only so older stored workspace payloads remain readable by the legacy migration code. These controls are intentionally not part of the tracker UI. -->
+  <div class="hidden" aria-hidden="true">
+    <button id="addIdentifierButton" type="button"></button>
+    <div id="identifierList"></div>
+    <div id="identifierEditor" class="hidden">
+      <input id="identifierLabel">
+      <input id="identifierValue">
+      <button id="cancelIdentifier" type="button"></button>
+      <button id="saveIdentifier" type="button"></button>
+    </div>
+  </div>
+
   <div id="caseModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
     <section class="modal case-modal">
       <header class="modal-header">
