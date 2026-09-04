@@ -30,6 +30,7 @@
         <button id="exportWorkspace" type="button" class="button secondary">Download Backup</button>
         <button id="importWorkspace" type="button" class="button secondary">Import Backup</button>
         <input id="importFile" type="file" accept="application/json,.json" hidden>
+        <button id="printAllCases" type="button" class="button secondary">Print All</button>
         <button id="newFile" type="button" class="button gold">+ New File</button>
       </div>
     </header>
@@ -203,6 +204,11 @@
       script.onload=function(){
         var streamline=document.createElement("script");
         streamline.src="case-workspace-streamline.js?v=20260904-1";
+        streamline.onload=function(){
+          var printAll=document.createElement("script");
+          printAll.src="case-workspace-print-all.js?v=20260904-1";
+          document.body.appendChild(printAll);
+        };
         document.body.appendChild(streamline);
         document.querySelectorAll(".case-stats .stat[data-view]").forEach(function(button){
           button.addEventListener("click",function(){
