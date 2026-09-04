@@ -155,8 +155,28 @@
   <script src="calls-cloud-sync.js?v=20260831-1"></script>
   <script>
     Promise.resolve(window.__dylanCallCloudReady).catch(function(){return false;}).finally(function(){
+      try {
+        var backupKey="utei.dylan.callTracker.v1.preCaseWorkspace.20260904";
+        if(!localStorage.getItem(backupKey)){
+          var beforeMigration=localStorage.getItem("utei.dylan.callTracker.v1");
+          if(beforeMigration)localStorage.setItem(backupKey,beforeMigration);
+        }
+      } catch(_backupError) {}
+
       var script=document.createElement("script");
-      script.src="case-workspace.js?v=20260904-1";
+      script.src="case-workspace.js?v=20260904-2";
+      script.onload=function(){
+        document.querySelectorAll(".case-stats .stat[data-view]").forEach(function(button){
+          button.addEventListener("click",function(){
+            var target=document.querySelector('#viewTabs button[data-view="'+button.dataset.view+'"]');
+            if(target)target.click();
+          });
+        });
+      };
+      script.onerror=function(){
+        var gate=document.getElementById("accessGate");
+        if(gate){gate.classList.remove("hidden");gate.innerHTML='<section class="gate-card"><div class="eyebrow">Dylan-only workspace</div><h1>Case Workspace could not load</h1><p>Your stored records were not deleted. Refresh the page or return to the tracker and try again.</p><a class="button" href="./">Return to Tracker</a></section>';}
+      };
       document.body.appendChild(script);
     });
   </script>
