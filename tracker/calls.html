@@ -6,6 +6,7 @@
   <title>Dylan's Case Workspace | Unified Title &amp; Escrow</title>
   <link rel="stylesheet" href="calls.css?v=calls-consolidated-20260828-1">
   <link rel="stylesheet" href="case-workspace.css?v=20260904-1">
+  <link rel="stylesheet" href="case-workspace-streamline.css?v=20260904-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -23,7 +24,7 @@
         <a class="back-link" href="./">← Dylan's Workspace</a>
         <div class="eyebrow">Personal Office Workspace</div>
         <h1>Dylan's Case Workspace</h1>
-        <p>Keep the file at the center. Attach people, searchable identifiers, notes, and to-dos as the case changes.</p>
+        <p>Keep the file at the center. Attach people, notes, and to-dos as the case changes.</p>
       </div>
       <div class="header-actions">
         <button id="exportWorkspace" type="button" class="button secondary">Download Backup</button>
@@ -49,7 +50,7 @@
       <div class="toolbar">
         <label class="search-field">
           <span class="sr-only">Search files</span>
-          <input id="caseSearch" type="search" placeholder="Search file, address, last four, account/reference number, person, phone, note, or to-do…">
+          <input id="caseSearch" type="search" placeholder="Search file number, address, person, phone, note, or to-do…">
         </label>
         <nav id="viewTabs" class="tabs" aria-label="Case workspace views">
           <button type="button" data-view="tracked" class="active">Tracked Files</button>
@@ -66,17 +67,29 @@
     </section>
   </main>
 
+  <!-- Kept only so older stored workspace payloads remain readable by the legacy migration code. These controls are intentionally not part of the tracker UI. -->
+  <div class="hidden" aria-hidden="true">
+    <button id="addIdentifierButton" type="button"></button>
+    <div id="identifierList"></div>
+    <div id="identifierEditor" class="hidden">
+      <input id="identifierLabel">
+      <input id="identifierValue">
+      <button id="cancelIdentifier" type="button"></button>
+      <button id="saveIdentifier" type="button"></button>
+    </div>
+  </div>
+
   <div id="caseModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
     <section class="modal case-modal">
       <header class="modal-header">
-        <div><h2 id="caseModalTitle">File Workspace</h2><p id="caseModalSubtitle">People, notes, identifiers, and to-dos.</p></div>
+        <div><h2 id="caseModalTitle">File Workspace</h2><p id="caseModalSubtitle">People, notes, and to-dos.</p></div>
         <button id="closeCaseModal" type="button" class="icon-button" aria-label="Close file workspace">×</button>
       </header>
 
       <div class="modal-body">
         <section class="form-section">
           <div class="section-toolbar">
-            <div><h3>File</h3><p>The file is the permanent container. Everything else attaches to it.</p></div>
+            <div><h3>File</h3><p>The G26 file number and property address identify the file.</p></div>
             <label id="caseTrackingWrap" class="track-toggle"><input id="caseTracking" type="checkbox"><span id="caseTrackingLabel">Not tracking this file</span></label>
           </div>
           <div class="case-details-grid">
@@ -86,29 +99,16 @@
           </div>
         </section>
 
-        <section class="form-section">
+        <section class="form-section people-section">
           <div class="section-toolbar">
-            <div><h3>Searchable Identifiers</h3><p>Add the bits of information you actually get handed — last four, payoff account, loan/reference number, and similar items.</p></div>
-            <button id="addIdentifierButton" type="button" class="button secondary">+ Add Identifier</button>
-          </div>
-          <div id="identifierList" class="identifier-list"></div>
-          <div id="identifierEditor" class="inline-editor identifier-editor hidden">
-            <label><span>Type</span><input id="identifierLabel" placeholder="Account Last Four"></label>
-            <label><span>Value</span><input id="identifierValue" placeholder="4243"></label>
-            <div class="editor-actions"><button id="cancelIdentifier" type="button" class="button secondary">Cancel</button><button id="saveIdentifier" type="button" class="button">Save</button></div>
-          </div>
-        </section>
-
-        <section class="form-section">
-          <div class="section-toolbar">
-            <div><h3>People Connected to This File</h3><p>Keep one contact record per person or company, then log as many interactions with them as needed.</p></div>
+            <div><h3>People Connected to This File</h3><p>Click a person to open their details, interaction history, and add new logs.</p></div>
             <button id="addContactButton" type="button" class="button secondary">+ Add Person / Company</button>
           </div>
           <div id="contactList" class="contact-list"></div>
-          <div id="contactEditor" class="inline-editor hidden">
+          <div id="contactEditor" class="inline-editor hidden" aria-hidden="true">
             <label><span>Name / Company</span><input id="contactName"></label>
             <label><span>Phone</span><input id="contactPhone" type="tel"></label>
-            <label><span>Relationship</span><input id="contactRole" placeholder="Seller, agent, lender, payoff company…"></label>
+            <label><span>Relationship</span><input id="contactRole"></label>
             <div class="editor-actions"><button id="cancelContact" type="button" class="button secondary">Cancel</button><button id="saveContact" type="button" class="button">Save</button></div>
           </div>
         </section>
@@ -120,20 +120,20 @@
           <div id="caseTodoList" class="case-todo-list"></div>
         </section>
 
-        <section class="form-section">
+        <section class="form-section file-notes-section">
           <div class="section-toolbar">
-            <div><h3>File Notes / Events</h3><p>One freeform note area. The date defaults to today, but you can change it before saving or edit it later.</p></div>
+            <div><h3>General File Notes</h3><p>Use this for file-level notes that are not about one specific person.</p></div>
           </div>
           <div class="note-composer">
             <div id="eventEditingBanner" class="editing-banner hidden"></div>
             <label><span>Event Date</span><input id="eventDate" type="date"></label>
-            <label><span>Person / Company</span><select id="eventContact"><option value="">Internal / General File Note</option></select></label>
+            <label class="hidden-person-select"><span>Person / Company</span><select id="eventContact"><option value="">Internal / General File Note</option></select></label>
             <div></div>
-            <label class="note-text"><span>Note</span><textarea id="eventNote" placeholder="Write anything that happened — call, voicemail, paper handed to you, internal update, document received, something you checked, or anything else you do not want to lose."></textarea></label>
+            <label class="note-text"><span>Note</span><textarea id="eventNote" placeholder="Write a general file note, internal update, document received, something you checked, or anything else you do not want to lose."></textarea></label>
             <div class="note-actions"><button id="cancelEventEdit" type="button" class="button secondary hidden">Cancel Edit</button><button id="saveEvent" type="button" class="button">Add Note</button></div>
           </div>
           <div class="section-toolbar" style="margin-top:16px">
-            <div><h3>Running File Record</h3><p>Newest file events first. Old call details stay available underneath migrated notes.</p></div>
+            <div><h3>Running File Record</h3><p>General notes and person interactions remain part of the complete file history.</p></div>
             <strong id="timelineCount" class="result-count">0 entries</strong>
           </div>
           <div id="timeline" class="timeline"></div>
@@ -143,10 +143,45 @@
       <footer class="modal-footer">
         <span class="case-footer-note">Old call/follow-up fields are retained in the underlying records and are never deleted by this workspace.</span>
         <div class="footer-actions">
-          <button id="printCase" type="button" class="button secondary">Print File</button>
+          <button id="printCase" type="button" class="button secondary">Print File Sheet</button>
           <button id="closeCaseFooter" type="button" class="button">Done</button>
         </div>
       </footer>
+    </section>
+  </div>
+
+  <div id="personModal" class="modal-backdrop person-backdrop" role="dialog" aria-modal="true" aria-labelledby="personModalTitle">
+    <section class="modal person-modal">
+      <header class="modal-header">
+        <div><div class="eyebrow person-eyebrow">Person / Company</div><h2 id="personModalTitle">Person Details</h2><p id="personModalSubtitle">Contact information and interaction history.</p></div>
+        <button id="closePersonModal" type="button" class="icon-button" aria-label="Close person details">×</button>
+      </header>
+      <div class="modal-body person-modal-body">
+        <section class="person-detail-card">
+          <div class="section-toolbar"><div><h3>Details</h3><p>Update the contact information when it changes.</p></div></div>
+          <div class="person-details-grid">
+            <label><span>Name / Company</span><input id="personName"></label>
+            <label><span>Relationship</span><input id="personRole" placeholder="Seller, agent, lender, payoff company…"></label>
+            <label><span>Phone</span><input id="personPhone" type="tel"></label>
+          </div>
+          <div class="person-detail-actions"><button id="savePersonDetails" type="button" class="button">Save Details</button></div>
+        </section>
+
+        <section class="person-log-card">
+          <div class="section-toolbar"><div><h3>Add Interaction</h3><p>Log a call, text, voicemail, email, update, or anything else involving this person.</p></div></div>
+          <div class="person-log-grid">
+            <label><span>Date</span><input id="personLogDate" type="date"></label>
+            <label class="person-log-note"><span>Note</span><textarea id="personLogNote" placeholder="What happened with this person?"></textarea></label>
+          </div>
+          <div class="person-detail-actions"><button id="cancelPersonLogEdit" type="button" class="button secondary hidden">Cancel Edit</button><button id="savePersonLog" type="button" class="button">Add Interaction</button></div>
+        </section>
+
+        <section class="person-history-card">
+          <div class="section-toolbar"><div><h3>Interaction History</h3><p>Everything logged for this person on this file.</p></div><strong id="personHistoryCount" class="result-count">0 entries</strong></div>
+          <div id="personHistory" class="person-history"></div>
+        </section>
+      </div>
+      <footer class="modal-footer"><span></span><button id="donePersonModal" type="button" class="button">Done</button></footer>
     </section>
   </div>
 
@@ -166,6 +201,9 @@
       var script=document.createElement("script");
       script.src="case-workspace.js?v=20260904-2";
       script.onload=function(){
+        var streamline=document.createElement("script");
+        streamline.src="case-workspace-streamline.js?v=20260904-1";
+        document.body.appendChild(streamline);
         document.querySelectorAll(".case-stats .stat[data-view]").forEach(function(button){
           button.addEventListener("click",function(){
             var target=document.querySelector('#viewTabs button[data-view="'+button.dataset.view+'"]');
