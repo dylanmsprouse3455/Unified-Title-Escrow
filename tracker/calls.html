@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Calls &amp; Follow-Ups | Unified Title &amp; Escrow</title>
+  <title>Dylan's Case Workspace | Unified Title &amp; Escrow</title>
   <link rel="stylesheet" href="calls.css?v=calls-consolidated-20260828-1">
+  <link rel="stylesheet" href="case-workspace.css?v=20260904-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div id="accessGate" class="access-gate">
     <section class="gate-card">
       <div class="eyebrow">Unified Title &amp; Escrow</div>
-      <h1>Opening Calls &amp; Follow-Ups…</h1>
+      <h1>Opening Dylan's Case Workspace…</h1>
       <p>Checking your existing tracker session.</p>
     </section>
   </div>
@@ -21,132 +22,161 @@
       <div>
         <a class="back-link" href="./">← Dylan's Workspace</a>
         <div class="eyebrow">Personal Office Workspace</div>
-        <h1>Calls &amp; Follow-Ups</h1>
-        <p>One place for calls, open work, completed items, and office handoffs.</p>
+        <h1>Dylan's Case Workspace</h1>
+        <p>Keep the file at the center. Attach people, searchable identifiers, notes, and to-dos as the case changes.</p>
       </div>
       <div class="header-actions">
-        <button id="exportCalls" type="button" class="button secondary">Download Backup</button>
-        <button id="importCalls" type="button" class="button secondary">Import Backup</button>
-        <input id="importCallsFile" type="file" accept="application/json,.json" hidden>
-        <button id="newCall" type="button" class="button gold">+ Add Call</button>
+        <button id="exportWorkspace" type="button" class="button secondary">Download Backup</button>
+        <button id="importWorkspace" type="button" class="button secondary">Import Backup</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+        <button id="newFile" type="button" class="button gold">+ New File</button>
       </div>
     </header>
 
     <section class="storage-note" aria-label="Storage notice">
-      <strong>Saved on this browser.</strong>
-      <span>Download a backup regularly. Printed handoffs do not replace the saved record.</span>
+      <strong>Saved to your account with a browser backup.</strong>
+      <span>Existing call records remain intact. The new workspace is layered on top of them instead of replacing them.</span>
     </section>
 
-    <section class="stats" aria-label="Call follow-up totals">
-      <button class="stat" data-stat-view="work"><strong id="statOpen">0</strong><span>My Open Work</span></button>
-      <button class="stat today" data-stat-filter="today"><strong id="statToday">0</strong><span>Due Today</span></button>
-      <button class="stat overdue" data-stat-filter="overdue"><strong id="statOverdue">0</strong><span>Overdue</span></button>
-      <button class="stat no-date" data-stat-filter="nodate"><strong id="statNoDate">0</strong><span>Needs a Date</span></button>
+    <section class="stats case-stats" aria-label="Case workspace totals">
+      <button class="stat" data-view="tracked"><strong id="statTracked">0</strong><span>Tracked Files</span></button>
+      <button class="stat" data-view="tracked"><strong id="statTodos">0</strong><span>Open To-Dos</span></button>
+      <button class="stat" data-view="all"><strong id="statUpdated">0</strong><span>Updated Today</span></button>
+      <button class="stat" data-view="all"><strong id="statAll">0</strong><span>All Files</span></button>
     </section>
 
     <section class="workspace">
       <div class="toolbar">
         <label class="search-field">
-          <span class="sr-only">Search calls and follow-ups</span>
-          <input id="callSearch" type="search" placeholder="Search caller, phone, file, address, results, or to-do items…">
+          <span class="sr-only">Search files</span>
+          <input id="caseSearch" type="search" placeholder="Search file, address, last four, account/reference number, person, phone, note, or to-do…">
         </label>
-        <nav id="viewTabs" class="tabs" aria-label="Call tracker views">
-          <button type="button" data-view="work" class="active">My Work</button>
-          <button type="button" data-view="calls">Call History</button>
-          <button type="button" data-view="assigned">Assigned Out <span id="assignedCount">0</span></button>
-          <button type="button" data-view="completed">Completed</button>
+        <nav id="viewTabs" class="tabs" aria-label="Case workspace views">
+          <button type="button" data-view="tracked" class="active">Tracked Files</button>
+          <button type="button" data-view="all">All Files</button>
+          <button type="button" data-view="history">Not Tracking</button>
         </nav>
       </div>
       <div class="view-heading">
-        <div><h2 id="viewTitle">My Work</h2><p id="viewDescription">Open follow-ups that you still own.</p></div>
-        <span id="resultCount" class="result-count">0 records</span>
+        <div><h2 id="viewTitle">Tracked Files</h2><p id="viewDescription">The files you currently want kept on your main page.</p></div>
+        <span id="resultCount" class="result-count">0 files</span>
       </div>
       <section id="recordGrid" class="record-grid" aria-live="polite"></section>
       <div id="emptyState" class="empty-state hidden"></div>
     </section>
   </main>
 
-  <div id="callModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <section class="modal">
+  <div id="caseModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
+    <section class="modal case-modal">
       <header class="modal-header">
-        <div><h2 id="modalTitle">Add Call</h2><p id="modalSubtitle">Capture the conversation, then decide what happens next.</p></div>
-        <button id="closeCallModal" type="button" class="icon-button" aria-label="Close call form">×</button>
+        <div><h2 id="caseModalTitle">File Workspace</h2><p id="caseModalSubtitle">People, notes, identifiers, and to-dos.</p></div>
+        <button id="closeCaseModal" type="button" class="icon-button" aria-label="Close file workspace">×</button>
       </header>
+
       <div class="modal-body">
         <section class="form-section">
-          <div class="section-heading"><span>1</span><div><h3>Who and which file?</h3><p>Enter what you know. A caller or file number is required.</p></div></div>
-          <div class="form-grid">
-            <label><span>Caller / Contact</span><input id="formCaller" autocomplete="off" list="contactOptions"></label>
-            <label><span>Phone</span><input id="formPhone" type="tel"></label>
-            <label class="wide"><span>Company / Relationship</span><input id="formCompany" placeholder="Realtor, lender, seller, vendor…"></label>
-            <label><span>File Number</span><input id="formFile" placeholder="G26-0000"></label>
-            <label><span>Property</span><input id="formAddress"></label>
-            <label><span>Direction</span><select id="formDirection"><option>Incoming</option><option>Outgoing</option></select></label>
-            <label><span>Call Outcome</span><select id="formOutcome"><option value="">Choose an outcome…</option><option>Reached and spoke</option><option>Information provided</option><option>Resolved</option><option>Left voicemail</option><option>No answer</option><option>Waiting for response</option></select></label>
+          <div class="section-toolbar">
+            <div><h3>File</h3><p>The file is the permanent container. Everything else attaches to it.</p></div>
+            <label id="caseTrackingWrap" class="track-toggle"><input id="caseTracking" type="checkbox"><span id="caseTrackingLabel">Not tracking this file</span></label>
           </div>
-          <datalist id="contactOptions"></datalist>
-        </section>
-
-        <section class="form-section">
-          <div class="section-heading"><span>2</span><div><h3>What happened?</h3><p>The wording changes automatically for incoming and outgoing calls.</p></div></div>
-          <div class="form-grid one-column">
-            <label><span id="subjectLabel">What were they calling about?</span><input id="formSubject"></label>
-            <label><span id="resultsLabel">What happened on the call?</span><textarea id="formResults"></textarea></label>
-            <label><span id="advisedLabel">What did I tell or promise them?</span><textarea id="formAdvised"></textarea></label>
+          <div class="case-details-grid">
+            <label><span>File Number</span><input id="caseFileNumber" placeholder="G26-0000"></label>
+            <label><span>Property</span><input id="caseAddress"></label>
+            <button id="saveCaseDetails" type="button" class="button secondary">Save File Details</button>
           </div>
         </section>
 
         <section class="form-section">
-          <div class="section-heading"><span>3</span><div><h3>Does anything happen next?</h3><p>Use the checklist as the single source of truth for next actions.</p></div></div>
-          <div class="follow-choice" role="group" aria-label="Follow-up choice">
-            <button id="noFollow" type="button" class="active">No Follow-Up</button>
-            <button id="yesFollow" type="button">Create Follow-Up</button>
+          <div class="section-toolbar">
+            <div><h3>Searchable Identifiers</h3><p>Add the bits of information you actually get handed — last four, payoff account, loan/reference number, and similar items.</p></div>
+            <button id="addIdentifierButton" type="button" class="button secondary">+ Add Identifier</button>
           </div>
-          <div id="followPanel" class="follow-panel hidden">
-            <div class="form-grid">
-              <label><span>Follow-Up Type</span><select id="formFollowType"><option>Callback</option><option>Check-In</option><option>Internal Follow-Up</option><option>Waiting on Client</option><option>Waiting on Third Party</option><option>Document Needed</option><option>Email Needed</option><option>Other</option></select></label>
-              <label><span>Status</span><select id="formStatus"><option>Open</option><option>Waiting</option><option>Completed</option></select></label>
-              <label><span>Due / Check-In Date</span><input id="formDueDate" type="date"></label>
-              <label><span>Owner</span><input id="formOwner" list="ownerOptions" value="Dylan"></label>
-              <label id="waitingOnField" class="wide hidden"><span>Waiting on whom?</span><input id="formWaitingOn"></label>
-            </div>
-            <datalist id="ownerOptions"><option>Dylan</option><option>Lynn</option><option>Cindy</option><option>Amy</option><option>Kim</option></datalist>
-
-            <section class="todo-panel">
-              <div class="todo-heading"><div><span>Next Action</span><h4>Follow-Up To-Do List</h4></div><strong id="todoSummary">No items yet</strong></div>
-              <p>The first open item automatically appears as the card's Next Action.</p>
-              <div class="todo-add"><input id="newTodoText" placeholder="Add the next step…"><button id="addTodo" type="button" class="button">+ Add</button></div>
-              <div id="todoList" class="todo-list"></div>
-              <div id="todoSaveNote" class="todo-save-note">Checklist changes save with this new call.</div>
-            </section>
+          <div id="identifierList" class="identifier-list"></div>
+          <div id="identifierEditor" class="inline-editor identifier-editor hidden">
+            <label><span>Type</span><input id="identifierLabel" placeholder="Account Last Four"></label>
+            <label><span>Value</span><input id="identifierValue" placeholder="4243"></label>
+            <div class="editor-actions"><button id="cancelIdentifier" type="button" class="button secondary">Cancel</button><button id="saveIdentifier" type="button" class="button">Save</button></div>
           </div>
         </section>
 
-        <section id="historySection" class="form-section hidden">
-          <details>
-            <summary>Running Activity <strong id="historyCount">0 entries</strong></summary>
-            <div id="historyList" class="history-list"></div>
-          </details>
+        <section class="form-section">
+          <div class="section-toolbar">
+            <div><h3>People Connected to This File</h3><p>Keep one contact record per person or company, then log as many interactions with them as needed.</p></div>
+            <button id="addContactButton" type="button" class="button secondary">+ Add Person / Company</button>
+          </div>
+          <div id="contactList" class="contact-list"></div>
+          <div id="contactEditor" class="inline-editor hidden">
+            <label><span>Name / Company</span><input id="contactName"></label>
+            <label><span>Phone</span><input id="contactPhone" type="tel"></label>
+            <label><span>Relationship</span><input id="contactRole" placeholder="Seller, agent, lender, payoff company…"></label>
+            <div class="editor-actions"><button id="cancelContact" type="button" class="button secondary">Cancel</button><button id="saveContact" type="button" class="button">Save</button></div>
+          </div>
+        </section>
+
+        <section class="todo-panel case-todos">
+          <div class="todo-heading"><div><span>Next Action</span><h4>To-Do List</h4></div><strong id="todoSummary">0 open</strong></div>
+          <p>The first open item is treated as the file's next action. Existing to-dos are carried forward rather than discarded.</p>
+          <div class="case-todo-add"><input id="newCaseTodo" placeholder="Add the next step…"><button id="addCaseTodo" type="button" class="button">+ Add</button></div>
+          <div id="caseTodoList" class="case-todo-list"></div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-toolbar">
+            <div><h3>File Notes / Events</h3><p>One freeform note area. The date defaults to today, but you can change it before saving or edit it later.</p></div>
+          </div>
+          <div class="note-composer">
+            <div id="eventEditingBanner" class="editing-banner hidden"></div>
+            <label><span>Event Date</span><input id="eventDate" type="date"></label>
+            <label><span>Person / Company</span><select id="eventContact"><option value="">Internal / General File Note</option></select></label>
+            <div></div>
+            <label class="note-text"><span>Note</span><textarea id="eventNote" placeholder="Write anything that happened — call, voicemail, paper handed to you, internal update, document received, something you checked, or anything else you do not want to lose."></textarea></label>
+            <div class="note-actions"><button id="cancelEventEdit" type="button" class="button secondary hidden">Cancel Edit</button><button id="saveEvent" type="button" class="button">Add Note</button></div>
+          </div>
+          <div class="section-toolbar" style="margin-top:16px">
+            <div><h3>Running File Record</h3><p>Newest file events first. Old call details stay available underneath migrated notes.</p></div>
+            <strong id="timelineCount" class="result-count">0 entries</strong>
+          </div>
+          <div id="timeline" class="timeline"></div>
         </section>
       </div>
+
       <footer class="modal-footer">
-        <button id="deleteCall" type="button" class="button danger hidden">Delete Call</button>
+        <span class="case-footer-note">Old call/follow-up fields are retained in the underlying records and are never deleted by this workspace.</span>
         <div class="footer-actions">
-          <span id="unsavedStatus" class="unsaved-status hidden">Unsaved changes</span>
-          <button id="cancelCall" type="button" class="button secondary">Cancel</button>
-          <button id="savePrintCall" type="button" class="button secondary">Save &amp; Print Handoff</button>
-          <button id="saveCall" type="button" class="button">Save Call</button>
+          <button id="printCase" type="button" class="button secondary">Print File</button>
+          <button id="closeCaseFooter" type="button" class="button">Done</button>
         </div>
       </footer>
     </section>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAction" type="button" class="hidden"></button></div>
+
   <script src="calls-cloud-sync.js?v=20260831-1"></script>
   <script>
     Promise.resolve(window.__dylanCallCloudReady).catch(function(){return false;}).finally(function(){
+      try {
+        var backupKey="utei.dylan.callTracker.v1.preCaseWorkspace.20260904";
+        if(!localStorage.getItem(backupKey)){
+          var beforeMigration=localStorage.getItem("utei.dylan.callTracker.v1");
+          if(beforeMigration)localStorage.setItem(backupKey,beforeMigration);
+        }
+      } catch(_backupError) {}
+
       var script=document.createElement("script");
-      script.src="calls.js?v=calls-consolidated-20260828-1";
+      script.src="case-workspace.js?v=20260904-2";
+      script.onload=function(){
+        document.querySelectorAll(".case-stats .stat[data-view]").forEach(function(button){
+          button.addEventListener("click",function(){
+            var target=document.querySelector('#viewTabs button[data-view="'+button.dataset.view+'"]');
+            if(target)target.click();
+          });
+        });
+      };
+      script.onerror=function(){
+        var gate=document.getElementById("accessGate");
+        if(gate){gate.classList.remove("hidden");gate.innerHTML='<section class="gate-card"><div class="eyebrow">Dylan-only workspace</div><h1>Case Workspace could not load</h1><p>Your stored records were not deleted. Refresh the page or return to the tracker and try again.</p><a class="button" href="./">Return to Tracker</a></section>';}
+      };
       document.body.appendChild(script);
     });
   </script>
